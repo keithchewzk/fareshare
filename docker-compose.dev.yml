@@ -4,7 +4,7 @@ services:
   backend:
     build:
       context: ./backend
-    container_name: fare-share-backend
+    container_name: fareshare-backend
     ports:
       - "8000:8000"
     environment:
@@ -14,8 +14,8 @@ services:
       - ./backend/src:/app/src
       - ./backend/.env:/app/.env:ro
     command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
-    networks:
-      - fare-share-network
+    # networks:
+    #   - fareshare-network
 
 #   frontend:
 #     build:
@@ -36,5 +36,5 @@ services:
 #       - report-scribe-network
 
 # networks:
-#   report-scribe-network:
+#   fareshare-network:
 #     driver: bridge

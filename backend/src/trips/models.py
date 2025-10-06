@@ -1,8 +1,7 @@
-from sqlalchemy import DECIMAL, TIMESTAMP, Boolean, Column, ForeignKey, Integer, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, DECIMAL, TIMESTAMP, Boolean, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from src.models.base import Base
-
 
 class Trip(Base):
     __tablename__ = "trips"
@@ -17,5 +16,6 @@ class Trip(Base):
     trip_date = Column(TIMESTAMP(timezone=True), server_default=func.now())
     is_paid = Column(Boolean, default=False, nullable=False)
 
+    # Relationships
     group = relationship("Group", back_populates="trips")
     user = relationship("User", back_populates="trips")

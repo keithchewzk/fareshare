@@ -1,8 +1,11 @@
 from fastapi import APIRouter
+from src.users import router as users_router
 
 # Create router for general endpoints
 router = APIRouter()
 
+# Include domain routers
+router.include_router(users_router)
 
 # Health check endpoint
 @router.get("/health")

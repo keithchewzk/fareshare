@@ -1,6 +1,6 @@
 from src.models.base import Base
-from src.models.user import User
-from src.models.group import Group, GroupMember
-from src.models.trip import Trip
+from src.users.models import User
+from src.groups.models import Group, GroupMember
+from src.trips.models import Trip
 
 __all__ = ["Base", "User", "Group", "GroupMember", "Trip"]

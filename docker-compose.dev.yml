@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: fare-share-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - HOT_RELOAD=1
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/.env:/app/.env:ro
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - fare-share-network
+
+#   frontend:
+#     build:
+#       context: ./frontend
+#     container_name: report-scribe-frontend
+#     ports:
+#       - "3000:5173"
+#     environment:
+#       - HOT_RELOAD=1
+#       - VITE_BACKEND_API_URL=http://localhost:8000
+#     depends_on:
+#       - backend
+#     volumes:
+#       - ./frontend/src:/app/src
+#       - ./frontend/public:/app/public
+#     command: npm run dev -- --host 0.0.0.0
+#     networks:
+#       - report-scribe-network
+
+# networks:
+#   report-scribe-network:
+#     driver: bridge

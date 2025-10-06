@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     host: str = Field(default="0.0.0.0", description="Server host")
     port: int = Field(default=8000, description="Server port")
 
+    # Database Configuration
+    database_url: str = Field(
+        default="postgresql://fareshare_user:fareshare_password@localhost:5432/fareshare",
+        description="Database connection URL",
+    )
+
     # CORS Configuration
     cors_origins: List[str] = Field(
         default=[

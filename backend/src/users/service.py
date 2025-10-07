@@ -1,10 +1,12 @@
-from sqlalchemy.orm import Session
-from fastapi import HTTPException
 import hashlib
 from typing import List
 
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+
 from .models import User
 from .schemas import UserCreate
+
 
 class UserService:
     """Service layer for user business logic"""
@@ -27,15 +29,10 @@ class UserService:
         db_user = User(
             email=user_data.email,
             password_hash=hashed_password,
-            full_name=user_data.full_name
+            full_name=user_data.full_name,
         )
 
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
         return db_user
-
-    @staticmethod
-    def get_users(db: Session) -> List[User]:
-        """Get all users"""
-        return db.query(User).all()

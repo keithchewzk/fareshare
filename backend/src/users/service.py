@@ -1,4 +1,4 @@
-import hashlib
+import bcrypt
 from typing import List
 
 from fastapi import HTTPException
@@ -16,8 +16,16 @@ class UserService:
 
     @staticmethod
     def hash_password(password: str) -> str:
-        """Simple password hashing (for MVP - not production ready)"""
-        return hashlib.sha256(password.encode()).hexdigest()
+        """Hash password using bcrypt for secure storage"""
+        # Generate salt and hash password
+        salt = bcrypt.gensalt()
+        hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+        return hashed.decode('utf-8')
+
+    @staticmethod
+    def verify_password(password: str, hashed_password: str) -> bool:
+        """Verify password against hash"""
+        return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
 
     def create_user(self, user_data: UserCreate) -> User:
         """Create a new user"""

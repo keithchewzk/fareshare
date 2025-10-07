@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from src.users import router as users_router
+from src.users.router import router as users_router
 
 # Create router for general endpoints
 router = APIRouter()

@@ -172,6 +172,13 @@ alembic upgrade head
 - Backend with hot reload in development
 - Volume mounting for development workflow
 
+## Coding Standards
+
+### Import Standards
+- **Always use absolute imports**: Use `from src.users.models import User` instead of `from .models import User`
+- This ensures clarity about the module location and prevents import conflicts
+- Apply this consistently across all Python files in the project
+
 ## Dependencies
 
 ### Core Dependencies

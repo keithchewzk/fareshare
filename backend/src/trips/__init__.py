@@ -1,1 +1,0 @@
-# Trips domain - models only for now

@@ -286,6 +286,204 @@ alembic upgrade head
 7. **Testing**: Add comprehensive test suite
 8. **Deployment**: Prepare for Railway deployment with production environment configuration
 
+## Groups Domain Implementation Plan (Temporary. Remove upon development completion.)
+
+### **Overview**
+The Groups domain will enable users to create and join car-sharing groups. Groups use role-based permissions where creators become owners with administrative privileges, while joiners become members with limited permissions.
+
+### **Database Schema**
+
+#### **Groups Table**
+```sql
+groups (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    invite_code VARCHAR(10) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+)
+```
+
+#### **Group Memberships Table**
+```sql
+group_memberships (
+    id SERIAL PRIMARY KEY,
+    group_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    role VARCHAR(20) NOT NULL CHECK (role IN ('owner', 'member')),
+    joined_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(group_id, user_id)
+)
+```
+
+### **Role-Based Permissions**
+
+#### **Owner Permissions**
+- ✅ View group and members
+- ✅ Kick members from group
+- ✅ Delete entire group
+- ✅ Change group name/description
+- ✅ Generate new invite codes
+
+#### **Member Permissions**
+- ✅ View group and members
+- ✅ Leave group voluntarily
+- ❌ Cannot kick other members
+- ❌ Cannot delete group
+- ❌ Cannot modify group settings
+
+### **Domain Structure**
+```
+src/groups/
+├── models.py          # Group, GroupMembership SQLAlchemy models
+├── schemas.py         # CreateGroup, GroupResponse, MemberResponse schemas
+├── repository.py      # Database operations with role checking
+├── service.py         # Business logic with authorization
+├── router.py          # API endpoints with role validation
+├── dependencies.py    # Group access dependencies
+└── __init__.py
+```
+
+### **API Endpoints**
+
+#### **Group Management**
+- `POST /groups` - Create group (user becomes owner)
+- `GET /groups` - Get user's groups (any role)
+- `GET /groups/{id}` - Get group details (members only)
+- `GET /groups/{id}/members` - Get group members (members only)
+- `DELETE /groups/{id}` - Delete group (owners only)
+
+#### **Membership Management**
+- `POST /groups/{id}/join` - Join via invite code (becomes member)
+- `POST /groups/{id}/leave` - Leave group (members only, owners can't leave)
+- `DELETE /groups/{id}/members/{user_id}` - Kick member (owners only)
+
+### **Key Business Logic**
+
+#### **Group Creation**
+- Generate unique 10-character invite code
+- Creator automatically becomes owner
+- Invite codes are permanent (no expiration)
+
+#### **Authorization Methods**
+```python
+def get_user_membership_in_group(self, group_id: int, user_id: int) -> GroupMembership | None:
+    """Returns membership record or None if not in group"""
+
+def require_group_member(self, group_id: int, user_id: int):
+    """Raises 403 if user not in group"""
+
+def require_group_owner(self, group_id: int, user_id: int):
+    """Raises 403 if user not owner of group"""
+```
+
+#### **Edge Cases to Handle**
+- **Owner self-removal**: Not allowed (must delete group or transfer ownership)
+- **Invalid invite codes**: Return clear error messages
+- **Duplicate membership**: Handle gracefully
+- **Group privacy**: Groups only visible to members
+- **Cascade deletion**: Removing groups deletes all memberships
+
+### **API Flow Examples**
+
+#### **Create Group**
+```http
+POST /groups
+Authorization: Bearer <token>
+{
+    "name": "Family Car Sharing",
+    "description": "Smith family car usage tracking"
+}
+
+Response:
+{
+    "id": 1,
+    "name": "Family Car Sharing",
+    "description": "Smith family car usage tracking",
+    "invite_code": "ABC123XYZ",
+    "role": "owner",
+    "member_count": 1,
+    "created_at": "2024-01-01T10:00:00Z"
+}
+```
+
+#### **Join Group**
+```http
+POST /groups/1/join
+Authorization: Bearer <token>
+{
+    "invite_code": "ABC123XYZ"
+}
+
+Response:
+{
+    "message": "Successfully joined group",
+    "group_name": "Family Car Sharing",
+    "role": "member"
+}
+```
+
+#### **Get User's Groups**
+```http
+GET /groups
+Authorization: Bearer <token>
+
+Response:
+[
+    {
+        "id": 1,
+        "name": "Family Car Sharing",
+        "role": "owner",
+        "member_count": 3
+    },
+    {
+        "id": 2,
+        "name": "Work Carpool",
+        "role": "member",
+        "member_count": 5
+    }
+]
+```
+
+#### **Owner Kicks Member**
+```http
+DELETE /groups/1/members/5
+Authorization: Bearer <token>  # Must be owner
+
+Response:
+{
+    "message": "User removed from group"
+}
+```
+
+### **Implementation Phases**
+
+#### **Phase 1: Database Foundation**
+1. Create Alembic migrations for groups and group_memberships tables
+2. Implement SQLAlchemy models with relationships
+3. Add User model relationships to groups
+
+#### **Phase 2: Core Business Logic**
+1. Repository layer with membership queries
+2. Service layer with role-based authorization
+3. Invite code generation utilities
+
+#### **Phase 3: API Endpoints**
+1. Group CRUD operations
+2. Membership management endpoints
+3. Role-based route protection
+
+#### **Phase 4: Testing & Validation**
+1. Test all endpoints via Swagger UI
+2. Validate role-based permissions
+3. Test edge cases and error scenarios
+
+### **Future Enhancements**
+- Group ownership transfer functionality
+- Group settings and preferences
+- Group activity logs
+- Bulk member invitations
+
 ## Authentication Testing
 
 ### Complete Flow Testing with Swagger UI

@@ -6,16 +6,14 @@ database connections, and JWT token validation.
 """
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
-
-from src.auth.jwt_utils import get_user_id_from_token, JWTTokenError
+from src.auth.jwt_utils import JWTTokenError, get_user_id_from_token
 from src.auth.service import AuthService
 from src.models.base import get_db
 from src.users.models import User
 from src.users.repository import UserRepository
 
-# HTTP Bearer token scheme for FastAPI automatic OpenAPI documentation
 security = HTTPBearer()
 
 
@@ -35,7 +33,7 @@ def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ) -> User:
     """
     Extract and validate JWT token from Authorization header, return current user.

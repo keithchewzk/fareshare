@@ -2,9 +2,9 @@
 
 ## Project Overview
 
-FareShare is a collaborative web application for tracking car usage within shared groups. Currently focusing on implementing user authentication and login functionality as the foundation.
+FareShare is a collaborative web application for tracking car usage within shared groups. The backend provides user authentication and will expand to include group management and trip tracking functionality.
 
-**Current Status**: Early development phase focusing on user management and authentication. Currently implementing login functionality with basic user operations. This is an MVP with **unsecured endpoints** designed for initial development and testing.
+**Current Status**: Core authentication system implemented with JWT-based security. User registration and login functionality complete with production-ready bcrypt password hashing. Ready for groups and trips domain implementation.
 
 ## Technical Architecture
 
@@ -21,21 +21,29 @@ FareShare is a collaborative web application for tracking car usage within share
 backend/
 ├── src/                    # Main application code
 │   ├── main.py            # FastAPI application entry point
-│   ├── settings.py        # Application configuration
+│   ├── settings.py        # Application configuration with JWT settings
 │   ├── router.py          # Main API router
 │   ├── models/            # Database models
 │   │   ├── base.py        # SQLAlchemy base configuration
 │   │   └── __init__.py    # Model imports
+│   ├── auth/              # Authentication domain
+│   │   ├── jwt_utils.py   # JWT token creation and validation
+│   │   ├── schemas.py     # Auth request/response schemas
+│   │   ├── service.py     # Authentication business logic
+│   │   ├── router.py      # Auth API endpoints (/auth/login, /auth/me)
+│   │   ├── dependencies.py # Auth dependency injection & get_current_user
+│   │   └── __init__.py    # Auth module init
 │   └── users/             # User domain
-│       ├── models.py      # User database models
+│       ├── models.py      # User database models (with first_name/last_name)
 │       ├── schemas.py     # Pydantic schemas for validation
 │       ├── repository.py  # User database operations
-│       ├── service.py     # User business logic
+│       ├── service.py     # User business logic with bcrypt
 │       ├── router.py      # User API endpoints
 │       ├── dependencies.py # Dependency injection
 │       └── __init__.py    # User module init
 ├── alembic/               # Database migration tools
-├── requirements.txt       # Python dependencies
+│   └── versions/          # Migration files (users table created)
+├── requirements.txt       # Python dependencies (includes bcrypt, pyjwt)
 └── Dockerfile            # Container configuration
 ```
 
@@ -49,7 +57,8 @@ users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    full_name VARCHAR(100)
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NULL
 )
 ```
 
@@ -60,9 +69,12 @@ Additional tables for groups, trips, and related functionality will be added aft
 
 ### Current Implementation
 
+#### Authentication
+- `POST /auth/login` - User login with JWT token (returns access_token)
+- `GET /auth/me` - Get current user profile (protected endpoint)
+
 #### User Management
-- `POST /users` - Create a new user
-- `GET /users` - Get all users (MVP - no authentication)
+- `POST /users` - Create a new user (public registration)
 
 #### System
 - `GET /` - Root endpoint with API information
@@ -70,14 +82,19 @@ Additional tables for groups, trips, and related functionality will be added aft
 
 ### Planned Implementation
 
-#### Authentication (Next Priority)
-- `POST /auth/login` - User login with JWT token
-- `POST /auth/logout` - User logout
-- `GET /auth/me` - Get current user profile
+#### Group Management (Next Priority)
+- `POST /groups` - Create a new group
+- `GET /groups` - Get user's groups
+- `POST /groups/{id}/join` - Join a group
+
+#### Trip Management
+- `POST /trips` - Log a new trip
+- `GET /trips` - Get user's trips
+- Trip cost calculation endpoints
 
 #### Future Features
-- Group management endpoints
-- Trip logging and management endpoints
+- Payment splitting and tracking
+- Google Maps integration for distance calculation
 
 ## Domain-Driven Design
 
@@ -91,36 +108,39 @@ The codebase follows a domain-driven design approach with clear separation of co
 - **Dependencies**: Dependency injection for services
 - **Base**: Shared database configuration and utilities
 
-Currently implementing the `users` domain with plans to add additional domains (`groups`, `trips`) after authentication is complete. Each domain will be self-contained with its own models, schemas, repository, services, routers, and dependencies.
+Currently implemented: `users` and `auth` domains. Each domain is self-contained with its own models, schemas, repository, services, routers, and dependencies. Ready to add `groups` and `trips` domains following the same architectural pattern.
 
 ## Key Implementation Details
 
 ### Current Features
 
+#### Authentication System (`src/auth/`)
+- **JWT-based authentication**: Production-ready token system with HS256 signing
+- **Login endpoint**: Email/password authentication with JWT token response
+- **Protected endpoints**: `get_current_user()` dependency for route protection
+- **Token validation**: Automatic signature verification and expiration checking
+- **Security headers**: Proper WWW-Authenticate headers for 401 responses
+- **OpenAPI integration**: Automatic "Authorize" button in Swagger UI
+
 #### User Management (`src/users/`)
-- **User Creation**: Email validation, password hashing (SHA256 - MVP only)
+- **User Registration**: Email validation with bcrypt password hashing
 - **Repository Pattern**: Clean separation between business logic and database operations
 - **Dependency Injection**: Service layer with injected repository dependencies
 - **Schema Validation**: Pydantic schemas for request/response validation
 - **Database Integration**: SQLAlchemy ORM for user entities
 
 #### Configuration (`src/settings.py`)
-- Environment-based configuration using Pydantic BaseSettings
-- CORS configuration for frontend integration
-- Database URL configuration
-- Development/production environment support
+- **Environment-based configuration**: Pydantic BaseSettings with .env support
+- **CORS configuration**: Frontend integration ready
+- **Database URL configuration**: PostgreSQL connection settings
+- **JWT configuration**: Secret key, algorithm (HS256), expiration (30 minutes)
+- **Development/production environment support**: Configurable settings
 
 #### Database Setup
-- Alembic integration for database migrations
-- SQLAlchemy 2.0 with declarative base
-- PostgreSQL connection with proper session management
-- Docker Compose setup for local development database
-
-### Next Priority: Authentication System
-- JWT-based user authentication
-- Login/logout functionality
-- Protected endpoints with user authorization
-- Session management
+- **Alembic integration**: Database migrations with users table created
+- **SQLAlchemy 2.0**: Modern ORM with declarative base
+- **PostgreSQL connection**: Proper session management
+- **Docker Compose setup**: Local development database
 
 ### Future Features
 - Group management with invite codes
@@ -130,19 +150,24 @@ Currently implementing the `users` domain with plans to add additional domains (
 
 ## Security Notes
 
-**⚠️ Current MVP Limitations**:
-- No authentication/authorization implemented
-- All endpoints are public
-- Simple SHA256 password hashing (not production-ready)
-- No JWT token system
-- No user session management
+**✅ Current Security Implementation**:
+- **Production-ready bcrypt password hashing**: Secure password storage with salt
+- **JWT-based authentication**: Industry-standard token authentication
+- **Protected endpoints**: Route-level authentication with `get_current_user()` dependency
+- **Token expiration**: 30-minute token lifetime for security
+- **User enumeration protection**: Same error messages for invalid email/password
 
-**Planned Security Improvements**:
-- JWT-based authentication
-- Proper password hashing (bcrypt/scrypt)
-- Authorization middleware
-- User session management
-- Secure API endpoints
+**Security Considerations**:
+- **JWT Secret Key**: Change default secret in production environment
+- **Token expiration**: Currently 30 minutes, adjust based on use case
+- **HTTPS**: Ensure HTTPS in production for token transmission
+- **Logout**: Client-side token deletion for MVP (server-side blacklist not implemented)
+
+**Future Security Enhancements**:
+- Token blacklisting for secure logout
+- Refresh token implementation
+- Rate limiting on authentication endpoints
+- Password reset functionality
 
 ## Development Setup
 
@@ -173,6 +198,9 @@ alembic upgrade head
 - `DATABASE_URL`: PostgreSQL connection string
 - `ENVIRONMENT`: development/production
 - `CORS_ORIGINS`: Allowed frontend origins
+- `JWT_SECRET_KEY`: Secret key for JWT token signing (change in production)
+- `JWT_ALGORITHM`: JWT signing algorithm (default: HS256)
+- `JWT_EXPIRE_MINUTES`: Token expiration time in minutes (default: 30)
 
 ### Docker Configuration
 - PostgreSQL 15 with health checks
@@ -180,6 +208,39 @@ alembic upgrade head
 - Volume mounting for development workflow
 
 ## Coding Standards
+
+### Code Documentation Standards
+- **Minimize inline comments**: Only use inline comments when code logic is complex or ambiguous
+- **Use comprehensive docstrings**: Explain function purpose, parameters, return values, and business logic in docstrings
+- **Prefer self-documenting code**: Write clear, readable code that explains itself
+- **Example**:
+  ```python
+  # BAD: Too many inline comments
+  def create_user(self, user_data: UserCreate) -> User:
+      # Check if user already exists
+      existing_user = self.user_repository.get_by_email(user_data.email)
+      if existing_user:
+          # Raise error if user exists
+          raise HTTPException(status_code=400, detail="Email already registered")
+
+      # Hash the password
+      hashed_password = self.hash_password(user_data.password)
+      # Create and return user
+      return self.user_repository.create(...)
+
+  # GOOD: Clear docstring, minimal inline comments
+  def create_user(self, user_data: UserCreate) -> User:
+      """
+      Create a new user with encrypted password.
+      Validates email uniqueness and uses bcrypt for secure password storage.
+      """
+      existing_user = self.user_repository.get_by_email(user_data.email)
+      if existing_user:
+          raise HTTPException(status_code=400, detail="Email already registered")
+
+      hashed_password = self.hash_password(user_data.password)
+      return self.user_repository.create(...)
+  ```
 
 ### Import Standards
 - **Always use absolute imports**: Use `from src.users.models import User` instead of `from .models import User`
@@ -206,18 +267,33 @@ alembic upgrade head
 - `alembic==1.13.1`: Database migrations
 - `pydantic==2.5.0`: Data validation
 - `uvicorn[standard]==0.24.0`: ASGI server
+- `bcrypt==4.1.2`: Secure password hashing
+- `pyjwt==2.8.0`: JWT token implementation
 
 ### Development Dependencies
 - `python-dotenv==1.0.0`: Environment variable management
 - `httpx==0.25.2`: HTTP client for testing
+- `email-validator==2.1.0`: Email validation support
 
 ## Next Steps
 
-1. **Complete Authentication System**: Implement JWT-based login/logout functionality
-2. **Add Protected Endpoints**: Secure existing and new endpoints with authentication
-3. **Implement Group Management**: Add group creation and management features
-4. **Implement Trip Management**: Add trip logging functionality
-5. **Google Maps Integration**: Add distance calculation API
+1. **Implement Group Management**: Add group creation, joining, and member management
+2. **Implement Trip Management**: Add trip logging with user association
+3. **Add Trip-Group Association**: Connect trips to specific groups
+4. **Implement Cost Calculation**: Calculate trip costs and split among group members
+5. **Google Maps Integration**: Add distance calculation API for accurate trip costs
 6. **Frontend Integration**: Connect with React frontend
 7. **Testing**: Add comprehensive test suite
-8. **Deployment**: Prepare for Railway deployment
+8. **Deployment**: Prepare for Railway deployment with production environment configuration
+
+## Authentication Testing
+
+### Complete Flow Testing with Swagger UI
+
+1. **Start server**: `uvicorn src.main:app --reload`
+2. **Open Swagger UI**: `http://localhost:8000/docs`
+3. **Register user**: `POST /users` with email/password
+4. **Login**: `POST /auth/login` to get JWT token
+5. **Authorize**: Click "Authorize" button, enter `Bearer <token>`
+6. **Test protected endpoint**: `GET /auth/me` to verify authentication works
+7. **Test without auth**: Logout and try protected endpoint (should get 401)

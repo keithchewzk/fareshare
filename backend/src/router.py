@@ -1,20 +1,19 @@
 from fastapi import APIRouter
+from src.auth.router import router as auth_router
 from src.users.router import router as users_router
 
-# Create router for general endpoints
 router = APIRouter()
 
-# Include domain routers
+router.include_router(auth_router)
 router.include_router(users_router)
 
-# Health check endpoint
+
 @router.get("/health")
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "service": "FareShare API"}
 
 
-# Root endpoint
 @router.get("/")
 async def root():
     """Root endpoint with API information"""

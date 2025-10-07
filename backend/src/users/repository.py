@@ -33,3 +33,8 @@ class UserRepository:
     def get_by_email(self, email: str) -> Optional[User]:
         """Get user by email address"""
         return self.db.query(User).filter(User.email == email).first()
+
+    def get_by_id(self, user_id: int) -> Optional[User]:
+        """Get user by ID"""
+        return self.db.query(User).filter(User.id == user_id).first()
+

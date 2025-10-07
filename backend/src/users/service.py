@@ -1,5 +1,4 @@
 import bcrypt
-from typing import List
 
 from fastapi import HTTPException
 
@@ -29,12 +28,10 @@ class UserService:
 
     def create_user(self, user_data: UserCreate) -> User:
         """Create a new user"""
-        # Check if user already exists
         existing_user = self.user_repository.get_by_email(user_data.email)
         if existing_user:
             raise HTTPException(status_code=400, detail="Email already registered")
 
-        # Create new user
         hashed_password = self.hash_password(user_data.password)
         return self.user_repository.create(
             email=user_data.email,
@@ -42,3 +39,4 @@ class UserService:
             first_name=user_data.first_name,
             last_name=user_data.last_name,
         )
+

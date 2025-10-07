@@ -11,19 +11,24 @@ class UserRepository:
         self.db = db
 
     def create(
-        self, email: str, password_hash: str, full_name: Optional[str] = None
+        self,
+        email: str,
+        password_hash: str,
+        first_name: str,
+        last_name: Optional[str] = None,
     ) -> User:
         """Create a new user in the database"""
-        db_user = User(
+        user = User(
             email=email,
             password_hash=password_hash,
-            full_name=full_name,
+            first_name=first_name,
+            last_name=last_name,
         )
 
-        self.db.add(db_user)
+        self.db.add(user)
         self.db.commit()
-        self.db.refresh(db_user)
-        return db_user
+        self.db.refresh(user)
+        return user
 
     def get_by_email(self, email: str) -> Optional[User]:
         """Get user by email address"""

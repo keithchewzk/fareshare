@@ -24,12 +24,16 @@ backend/
 │   ├── settings.py        # Application configuration
 │   ├── router.py          # Main API router
 │   ├── models/            # Database models
-│   │   └── base.py        # SQLAlchemy base configuration
+│   │   ├── base.py        # SQLAlchemy base configuration
+│   │   └── __init__.py    # Model imports
 │   └── users/             # User domain
 │       ├── models.py      # User database models
 │       ├── schemas.py     # Pydantic schemas for validation
+│       ├── repository.py  # User database operations
+│       ├── service.py     # User business logic
 │       ├── router.py      # User API endpoints
-│       └── service.py     # User business logic
+│       ├── dependencies.py # Dependency injection
+│       └── __init__.py    # User module init
 ├── alembic/               # Database migration tools
 ├── requirements.txt       # Python dependencies
 └── Dockerfile            # Container configuration
@@ -81,11 +85,13 @@ The codebase follows a domain-driven design approach with clear separation of co
 
 - **Models**: SQLAlchemy ORM models for database entities
 - **Schemas**: Pydantic models for request/response validation
+- **Repository**: Database operations and data access layer
 - **Services**: Business logic layer
 - **Routers**: API endpoint definitions
+- **Dependencies**: Dependency injection for services
 - **Base**: Shared database configuration and utilities
 
-Currently implementing the `users` domain with plans to add additional domains (`groups`, `trips`) after authentication is complete. Each domain will be self-contained with its own models, schemas, services, and routers.
+Currently implementing the `users` domain with plans to add additional domains (`groups`, `trips`) after authentication is complete. Each domain will be self-contained with its own models, schemas, repository, services, routers, and dependencies.
 
 ## Key Implementation Details
 
@@ -93,7 +99,8 @@ Currently implementing the `users` domain with plans to add additional domains (
 
 #### User Management (`src/users/`)
 - **User Creation**: Email validation, password hashing (SHA256 - MVP only)
-- **User Retrieval**: Get all users endpoint
+- **Repository Pattern**: Clean separation between business logic and database operations
+- **Dependency Injection**: Service layer with injected repository dependencies
 - **Schema Validation**: Pydantic schemas for request/response validation
 - **Database Integration**: SQLAlchemy ORM for user entities
 
@@ -178,6 +185,17 @@ alembic upgrade head
 - **Always use absolute imports**: Use `from src.users.models import User` instead of `from .models import User`
 - This ensures clarity about the module location and prevents import conflicts
 - Apply this consistently across all Python files in the project
+
+### Architecture Standards
+- **Repository Pattern**: Separate database operations (repository) from business logic (service)
+- **Dependency Injection**: Inject dependencies at the service level, not at the router level
+- **Domain Organization**: Each domain (users, groups, trips) should be self-contained with:
+  - `models.py` - Database models
+  - `schemas.py` - Pydantic validation schemas
+  - `repository.py` - Database operations
+  - `service.py` - Business logic
+  - `router.py` - API endpoints
+  - `dependencies.py` - Dependency injection functions
 
 ## Dependencies
 

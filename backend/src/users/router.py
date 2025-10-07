@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends
-
 from src.users.dependencies import get_user_service
 from src.users.schemas import UserCreate, UserResponse
 from src.users.service import UserService
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.post("/", response_model=UserResponse, status_code=201)

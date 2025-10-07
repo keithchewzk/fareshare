@@ -42,16 +42,12 @@ class Settings(BaseSettings):
 
     # JWT Configuration
     jwt_secret_key: str = Field(
-        default="your-secret-key-change-in-production-make-it-long-and-random",
+        default="SomeSuperLongSecretKeyOfAtLeast32CharactersPlease",
         description="Secret key for JWT token signing",
     )
-    jwt_algorithm: str = Field(
-        default="HS256",
-        description="JWT signing algorithm"
-    )
+    jwt_algorithm: str = Field(default="HS256", description="JWT signing algorithm")
     jwt_expire_minutes: int = Field(
-        default=30,
-        description="JWT token expiration time in minutes"
+        default=30, description="JWT token expiration time in minutes"
     )
 
     class Config:

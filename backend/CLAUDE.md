@@ -4,7 +4,7 @@
 
 FareShare is a collaborative web application for tracking car usage within shared groups. The backend provides user authentication and will expand to include group management and trip tracking functionality.
 
-**Current Status**: Core authentication system implemented with JWT-based security. User registration and login functionality complete with production-ready bcrypt password hashing. Ready for groups and trips domain implementation.
+**Current Status**: Core authentication system implemented with JWT-based security. User registration and login functionality complete with production-ready bcrypt password hashing. **Groups domain database foundation completed** - SQLAlchemy models and database tables created. Ready for groups business logic implementation.
 
 ## Technical Architecture
 
@@ -33,16 +33,19 @@ backend/
 │   │   ├── router.py      # Auth API endpoints (/auth/login, /auth/me)
 │   │   ├── dependencies.py # Auth dependency injection & get_current_user
 │   │   └── __init__.py    # Auth module init
-│   └── users/             # User domain
-│       ├── models.py      # User database models (with first_name/last_name)
-│       ├── schemas.py     # Pydantic schemas for validation
-│       ├── repository.py  # User database operations
-│       ├── service.py     # User business logic with bcrypt
-│       ├── router.py      # User API endpoints
-│       ├── dependencies.py # Dependency injection
-│       └── __init__.py    # User module init
+│   ├── users/             # User domain
+│   │   ├── models.py      # User database models (with first_name/last_name)
+│   │   ├── schemas.py     # Pydantic schemas for validation
+│   │   ├── repository.py  # User database operations
+│   │   ├── service.py     # User business logic with bcrypt
+│   │   ├── router.py      # User API endpoints
+│   │   ├── dependencies.py # Dependency injection
+│   │   └── __init__.py    # User module init
+│   └── groups/            # Groups domain (Phase 1 complete)
+│       ├── models.py      # Group and GroupMembership models
+│       └── __init__.py    # Groups module init
 ├── alembic/               # Database migration tools
-│   └── versions/          # Migration files (users table created)
+│   └── versions/          # Migration files (users and groups tables created)
 ├── requirements.txt       # Python dependencies (includes bcrypt, pyjwt)
 └── Dockerfile            # Container configuration
 ```
@@ -62,8 +65,34 @@ users (
 )
 ```
 
+#### Groups Table ✅ **NEW**
+```sql
+groups (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    invite_code VARCHAR(10) UNIQUE NOT NULL,
+    cost_per_distance NUMERIC(10,4) NOT NULL,
+    distance_unit VARCHAR(2) NOT NULL DEFAULT 'km',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    CHECK (distance_unit IN ('km', 'mi'))
+)
+```
+
+#### Group Memberships Table ✅ **NEW**
+```sql
+group_memberships (
+    id SERIAL PRIMARY KEY,
+    group_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    role VARCHAR(20) NOT NULL CHECK (role IN ('owner', 'member')),
+    joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(group_id, user_id)
+)
+```
+
 ### Future Implementation
-Additional tables for groups, trips, and related functionality will be added after authentication is complete.
+Additional tables for trips and related functionality will be added after groups business logic is complete.
 
 ## API Endpoints
 
@@ -108,7 +137,7 @@ The codebase follows a domain-driven design approach with clear separation of co
 - **Dependencies**: Dependency injection for services
 - **Base**: Shared database configuration and utilities
 
-Currently implemented: `users` and `auth` domains. Each domain is self-contained with its own models, schemas, repository, services, routers, and dependencies. Ready to add `groups` and `trips` domains following the same architectural pattern.
+Currently implemented: `users` and `auth` domains (complete), `groups` domain (Phase 1 complete - database foundation). Each domain is self-contained with its own models, schemas, repository, services, routers, and dependencies. Ready to implement groups business logic (Phase 2) and then `trips` domain following the same architectural pattern.
 
 ## Key Implementation Details
 

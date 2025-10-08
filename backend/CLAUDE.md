@@ -4,7 +4,7 @@
 
 FareShare is a collaborative web application for tracking car usage within shared groups. The backend provides user authentication and will expand to include group management and trip tracking functionality.
 
-**Current Status**: Core authentication system implemented with JWT-based security. User registration and login functionality complete with production-ready bcrypt password hashing. **Groups domain database foundation completed** - SQLAlchemy models and database tables created. Ready for groups business logic implementation.
+**Current Status**: Core authentication system implemented with JWT-based security. User registration and login functionality complete with production-ready bcrypt password hashing. **Groups domain Phase 2 completed** - Full group creation functionality implemented with business logic, API endpoints, and invite code generation. Ready for additional group management features (joining, membership management).
 
 ## Technical Architecture
 
@@ -41,8 +41,13 @@ backend/
 │   │   ├── router.py      # User API endpoints
 │   │   ├── dependencies.py # Dependency injection
 │   │   └── __init__.py    # User module init
-│   └── groups/            # Groups domain (Phase 1 complete)
+│   └── groups/            # Groups domain (Phase 2 complete)
 │       ├── models.py      # Group and GroupMembership models
+│       ├── schemas.py     # CreateGroup, GroupResponse schemas
+│       ├── repository.py  # Group database operations
+│       ├── service.py     # Group business logic with invite codes
+│       ├── router.py      # Group API endpoints (/groups)
+│       ├── dependencies.py # Group dependency injection
 │       └── __init__.py    # Groups module init
 ├── alembic/               # Database migration tools
 │   └── versions/          # Migration files (users and groups tables created)
@@ -72,7 +77,7 @@ groups (
     name VARCHAR(100) NOT NULL,
     description TEXT,
     invite_code VARCHAR(10) UNIQUE NOT NULL,
-    cost_per_distance NUMERIC(10,4) NOT NULL,
+    cost_per_distance NUMERIC(10,2) NOT NULL,
     distance_unit VARCHAR(2) NOT NULL DEFAULT 'km',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     CHECK (distance_unit IN ('km', 'mi'))
@@ -111,8 +116,10 @@ Additional tables for trips and related functionality will be added after groups
 
 ### Planned Implementation
 
+#### Group Management ✅ **IMPLEMENTED**
+- `POST /groups` - Create a new group ✅ **COMPLETE**
+
 #### Group Management (Next Priority)
-- `POST /groups` - Create a new group
 - `GET /groups` - Get user's groups
 - `POST /groups/{id}/join` - Join a group
 
@@ -137,7 +144,7 @@ The codebase follows a domain-driven design approach with clear separation of co
 - **Dependencies**: Dependency injection for services
 - **Base**: Shared database configuration and utilities
 
-Currently implemented: `users` and `auth` domains (complete), `groups` domain (Phase 1 complete - database foundation). Each domain is self-contained with its own models, schemas, repository, services, routers, and dependencies. Ready to implement groups business logic (Phase 2) and then `trips` domain following the same architectural pattern.
+Currently implemented: `users` and `auth` domains (complete), `groups` domain (Phase 2 complete - group creation functionality). Each domain is self-contained with its own models, schemas, repository, services, routers, and dependencies. Ready to implement remaining group management features (Phase 3) and then `trips` domain following the same architectural pattern.
 
 ## Key Implementation Details
 
@@ -165,14 +172,23 @@ Currently implemented: `users` and `auth` domains (complete), `groups` domain (P
 - **JWT configuration**: Secret key, algorithm (HS256), expiration (30 minutes)
 - **Development/production environment support**: Configurable settings
 
+#### Groups System (`src/groups/`) ✅ **NEW**
+- **Group Creation**: Complete POST /groups endpoint with authentication
+- **Invite Code Generation**: 10-character codes using capital letters (A-Z excluding O,I)
+- **Decimal Precision**: Cost per distance uses NUMERIC(10,2) for exact financial calculations
+- **Atomic Operations**: Group creation with owner membership in single transaction
+- **Repository Pattern**: Clean separation of database operations and business logic
+- **Pydantic Integration**: Automatic model validation with GroupResponse.model_validate()
+- **Dependency Injection**: Service layer with injected repository dependencies
+
 #### Database Setup
-- **Alembic integration**: Database migrations with users table created
+- **Alembic integration**: Database migrations with users and groups tables created
 - **SQLAlchemy 2.0**: Modern ORM with declarative base
 - **PostgreSQL connection**: Proper session management
 - **Docker Compose setup**: Local development database
 
 ### Future Features
-- Group management with invite codes
+- Additional group management features (joining, member management)
 - Trip logging and tracking
 - Google Maps integration for distance calculation
 - Cost calculation and payment tracking
@@ -306,7 +322,7 @@ alembic upgrade head
 
 ## Next Steps
 
-1. **Implement Group Management**: Add group creation, joining, and member management
+1. **Complete Group Management**: Add group joining and member management endpoints
 2. **Implement Trip Management**: Add trip logging with user association
 3. **Add Trip-Group Association**: Connect trips to specific groups
 4. **Implement Cost Calculation**: Calculate trip costs and split among group members
@@ -487,20 +503,21 @@ Response:
 
 ### **Implementation Phases**
 
-#### **Phase 1: Database Foundation**
-1. Create Alembic migrations for groups and group_memberships tables
-2. Implement SQLAlchemy models with relationships
-3. Add User model relationships to groups
+#### **Phase 1: Database Foundation** ✅ **COMPLETE**
+1. ✅ Create Alembic migrations for groups and group_memberships tables
+2. ✅ Implement SQLAlchemy models with relationships
+3. ✅ Add User model relationships to groups
 
-#### **Phase 2: Core Business Logic**
-1. Repository layer with membership queries
-2. Service layer with role-based authorization
-3. Invite code generation utilities
+#### **Phase 2: Core Business Logic** ✅ **COMPLETE**
+1. ✅ Repository layer with database operations
+2. ✅ Service layer with group creation logic
+3. ✅ Invite code generation utilities (10-char capital letters, no O/I)
+4. ✅ Decimal precision handling for cost_per_distance
 
-#### **Phase 3: API Endpoints**
-1. Group CRUD operations
-2. Membership management endpoints
-3. Role-based route protection
+#### **Phase 3: API Endpoints** 🔄 **IN PROGRESS**
+1. ✅ Group creation endpoint (POST /groups)
+2. ⏳ Membership management endpoints
+3. ⏳ Role-based route protection
 
 #### **Phase 4: Testing & Validation**
 1. Test all endpoints via Swagger UI

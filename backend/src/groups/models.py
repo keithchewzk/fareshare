@@ -26,7 +26,7 @@ class Group(Base):
     name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
     invite_code = Column(String(10), unique=True, nullable=False)
-    cost_per_distance = Column(Numeric(10, 4), nullable=False)
+    cost_per_distance = Column(Numeric(10, 2), nullable=False)
     distance_unit = Column(String(2), nullable=False, default="km")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

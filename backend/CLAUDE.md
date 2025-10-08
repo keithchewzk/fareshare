@@ -75,7 +75,7 @@ users (
 groups (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    description TEXT,
+    description VARCHAR(1000),
     invite_code VARCHAR(10) UNIQUE NOT NULL,
     cost_per_distance NUMERIC(10,2) NOT NULL,
     distance_unit VARCHAR(2) NOT NULL DEFAULT 'km',
@@ -343,9 +343,12 @@ The Groups domain will enable users to create and join car-sharing groups. Group
 groups (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    description TEXT,
+    description VARCHAR(1000),
     invite_code VARCHAR(10) UNIQUE NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
+    cost_per_distance NUMERIC(10,2) NOT NULL,
+    distance_unit VARCHAR(2) NOT NULL DEFAULT 'km',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    CHECK (distance_unit IN ('km', 'mi'))
 )
 ```
 

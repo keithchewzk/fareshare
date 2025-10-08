@@ -10,7 +10,7 @@ class CreateGroup(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=100, description="Group name")
     description: Optional[str] = Field(
-        None, max_length=500, description="Optional group description"
+        None, max_length=1000, description="Optional group description"
     )
     cost_per_distance: Decimal = Field(..., gt=0, description="Cost per distance unit")
     distance_unit: Literal["km", "mi"] = Field(

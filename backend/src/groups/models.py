@@ -6,7 +6,6 @@ from sqlalchemy import (
     Integer,
     Numeric,
     String,
-    Text,
     UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
@@ -24,7 +23,7 @@ class Group(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(100), nullable=False)
-    description = Column(Text, nullable=True)
+    description = Column(String(1000), nullable=True)
     invite_code = Column(String(10), unique=True, nullable=False)
     cost_per_distance = Column(Numeric(10, 2), nullable=False)
     distance_unit = Column(String(2), nullable=False, default="km")

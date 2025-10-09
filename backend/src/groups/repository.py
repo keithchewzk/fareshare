@@ -91,3 +91,35 @@ class GroupRepository:
         self.db.commit()
         self.db.refresh(membership)
         return membership
+
+    def delete_group(self, group_id: int, owner_user_id: int) -> bool:
+        """
+        Delete group only if user is owner.
+        Returns: True if deleted successfully, False if user is not owner.
+        The cascade relationship will automatically delete all memberships.
+        """
+        try:
+            # Check if user is owner of the exisitng group
+            group = (
+                self.db.query(Group)
+                .join(Group.memberships)
+                .filter(
+                    Group.id == group_id,
+                    GroupMembership.user_id == owner_user_id,
+                    GroupMembership.role == "owner",
+                )
+                .first()
+            )
+
+            if not group:
+                return False
+
+            # Delete the group (cascade will handle memberships)
+            self.db.delete(group)
+            self.db.commit()
+
+            return True
+
+        except Exception:
+            self.db.rollback()
+            raise

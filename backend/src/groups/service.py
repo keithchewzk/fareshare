@@ -102,3 +102,25 @@ class GroupService:
 
         self.group_repository.add_user_to_group(user_id, group.id)
         return group
+
+    def delete_group(self, user_id: int, group_id: int) -> None:
+        """
+        Delete a group. Only owners can delete their groups.
+
+        Validates that the group exists and the user is the owner before deletion.
+        All group memberships are automatically deleted via cascade relationship.
+
+        Raises:
+            HTTPException 404: Group not found
+            HTTPException 403: User is not the owner of the group
+        """
+        group = self.group_repository.get_group_by_id(group_id)
+        if not group:
+            raise HTTPException(status_code=404, detail="Group not found")
+
+        is_deleted = self.group_repository.delete_group(group_id, user_id)
+        if not is_deleted:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: Only group owners can delete groups",
+            )

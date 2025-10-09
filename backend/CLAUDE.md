@@ -121,6 +121,7 @@ Additional tables for trips and related functionality will be added after groups
 - `GET /groups` - Get user's groups ✅ **COMPLETE**
 - `GET /groups/{group_id}` - Get group details ✅ **COMPLETE**
 - `POST /groups/join` - Join a group via invite code ✅ **COMPLETE**
+- `DELETE /groups/{group_id}` - Delete a group (owners only) ✅ **COMPLETE**
 
 #### Trip Management
 - `POST /trips` - Log a new trip
@@ -398,7 +399,7 @@ src/groups/
 - `GET /groups` - Get user's groups (any role)
 - `GET /groups/{id}` - Get group details (members only) ✅ **COMPLETE**
 - `GET /groups/{id}/members` - Get group members (members only)
-- `DELETE /groups/{id}` - Delete group (owners only)
+- `DELETE /groups/{id}` - Delete group (owners only) ✅ **COMPLETE**
 
 #### **Membership Management**
 - `POST /groups/{id}/join` - Join via invite code (becomes member)
@@ -521,8 +522,9 @@ Response:
 2. ✅ Get user's groups endpoint (GET /groups)
 3. ✅ Get group details endpoint (GET /groups/{group_id})
 4. ✅ Join group endpoint (POST /groups/join)
-5. ⏳ Additional membership management (leave, kick members)
-5. ⏳ Role-based route protection
+5. ✅ Delete group endpoint (DELETE /groups/{group_id})
+6. ⏳ Additional membership management (leave, kick members)
+7. ⏳ Role-based route protection
 
 #### **Phase 4: Testing & Validation**
 1. Test all endpoints via Swagger UI

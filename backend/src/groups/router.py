@@ -17,6 +17,16 @@ async def get_user_groups(
     return group_service.get_user_groups(current_user.id)
 
 
+@router.get("/{group_id}", response_model=Group)
+async def get_group_details(
+    group_id: int,
+    current_user: User = Depends(get_current_user),
+    group_service: GroupService = Depends(get_group_service),
+):
+    """Get detailed information about a specific group. User must be a member."""
+    return group_service.get_group_details(current_user.id, group_id)
+
+
 @router.post("/", response_model=Group, status_code=201)
 async def create_group(
     group_data: CreateGroup,

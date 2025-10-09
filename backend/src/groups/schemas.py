@@ -20,6 +20,17 @@ class Group(BaseModel):
         from_attributes = True
 
 
+class GroupListItem(BaseModel):
+    """Schema for group item in user's groups list (lightweight)"""
+
+    id: int
+    name: str
+    description: Optional[str]
+
+    class Config:
+        from_attributes = True
+
+
 class CreateGroup(BaseModel):
     """Schema for creating a new group"""
 
@@ -36,4 +47,6 @@ class CreateGroup(BaseModel):
 class JoinGroup(BaseModel):
     """Schema for joining a group via invite code"""
 
-    invite_code: str = Field(..., min_length=10, max_length=10, description="Group invite code")
+    invite_code: str = Field(
+        ..., min_length=10, max_length=10, description="Group invite code"
+    )

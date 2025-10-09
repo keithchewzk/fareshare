@@ -2,7 +2,7 @@ import random
 
 from fastapi import HTTPException
 from src.groups.repository import GroupRepository
-from src.groups.schemas import CreateGroup, Group
+from src.groups.schemas import CreateGroup, Group, GroupListItem
 
 
 class GroupService:
@@ -49,13 +49,13 @@ class GroupService:
 
         return Group.model_validate(group)
 
-    def get_user_groups(self, user_id: int) -> list[Group]:
+    def get_user_groups(self, user_id: int) -> list[GroupListItem]:
         """
         Get all groups that the user is a member of (either owner or member).
-        Returns list of groups.
+        Returns lightweight list of groups with minimal information.
         """
         groups = self.group_repository.get_groups_by_user_id(user_id)
-        return groups
+        return [GroupListItem.model_validate(group) for group in groups]
 
     def join_group(self, user_id: int, invite_code: str) -> Group:
         """

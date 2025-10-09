@@ -119,6 +119,7 @@ Additional tables for trips and related functionality will be added after groups
 #### Group Management ✅ **IMPLEMENTED**
 - `POST /groups` - Create a new group ✅ **COMPLETE**
 - `GET /groups` - Get user's groups ✅ **COMPLETE**
+- `GET /groups/{group_id}` - Get group details ✅ **COMPLETE**
 - `POST /groups/join` - Join a group via invite code ✅ **COMPLETE**
 
 #### Trip Management
@@ -395,7 +396,7 @@ src/groups/
 #### **Group Management**
 - `POST /groups` - Create group (user becomes owner)
 - `GET /groups` - Get user's groups (any role)
-- `GET /groups/{id}` - Get group details (members only)
+- `GET /groups/{id}` - Get group details (members only) ✅ **COMPLETE**
 - `GET /groups/{id}/members` - Get group members (members only)
 - `DELETE /groups/{id}` - Delete group (owners only)
 
@@ -518,8 +519,9 @@ Response:
 #### **Phase 3: API Endpoints** 🔄 **IN PROGRESS**
 1. ✅ Group creation endpoint (POST /groups)
 2. ✅ Get user's groups endpoint (GET /groups)
-3. ✅ Join group endpoint (POST /groups/join)
-4. ⏳ Additional membership management (leave, kick members)
+3. ✅ Get group details endpoint (GET /groups/{group_id})
+4. ✅ Join group endpoint (POST /groups/join)
+5. ⏳ Additional membership management (leave, kick members)
 5. ⏳ Role-based route protection
 
 #### **Phase 4: Testing & Validation**

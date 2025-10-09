@@ -261,7 +261,7 @@ alembic upgrade head
 - **Example**:
   ```python
   # BAD: Too many inline comments
-  def create_user(self, user_data: UserCreate) -> User:
+  def create_user(self, user_data: CreateUser) -> User:
       # Check if user already exists
       existing_user = self.user_repository.get_by_email(user_data.email)
       if existing_user:
@@ -274,7 +274,7 @@ alembic upgrade head
       return self.user_repository.create(...)
 
   # GOOD: Clear docstring, minimal inline comments
-  def create_user(self, user_data: UserCreate) -> User:
+  def create_user(self, user_data: CreateUser) -> User:
       """
       Create a new user with encrypted password.
       Validates email uniqueness and uses bcrypt for secure password storage.

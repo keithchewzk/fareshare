@@ -1,10 +1,8 @@
 import bcrypt
-
 from fastapi import HTTPException
-
 from src.users.models import User
 from src.users.repository import UserRepository
-from src.users.schemas import UserCreate
+from src.users.schemas import CreateUser
 
 
 class UserService:
@@ -18,15 +16,15 @@ class UserService:
         """Hash password using bcrypt for secure storage"""
         # Generate salt and hash password
         salt = bcrypt.gensalt()
-        hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
-        return hashed.decode('utf-8')
+        hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
+        return hashed.decode("utf-8")
 
     @staticmethod
     def verify_password(password: str, hashed_password: str) -> bool:
         """Verify password against hash"""
-        return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
+        return bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
 
-    def create_user(self, user_data: UserCreate) -> User:
+    def create_user(self, user_data: CreateUser) -> User:
         """Create a new user"""
         existing_user = self.user_repository.get_by_email(user_data.email)
         if existing_user:
@@ -39,4 +37,3 @@ class UserService:
             first_name=user_data.first_name,
             last_name=user_data.last_name,
         )
-

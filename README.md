@@ -1,144 +1,106 @@
-# Project Plan: FareShare (MVP v0.1)
+# FareShare
 
-**Version:** 0.1 (MVP)
-**Date:** 06 October 2025
-**Author:** Project Manager AI
+**Collaborative car usage tracking made simple**
 
-This document outlines the project plan for the Minimum Viable Product (MVP) of **FareShare**, a collaborative web application to track car usage. The primary goal of this MVP is to validate the core functionality of logging trips within a shared group.
+FareShare is a web application that helps groups of people fairly track and split car-related expenses. Whether you're sharing a family car, carpooling with colleagues, or managing a shared vehicle with roommates, FareShare makes it easy to log trips and keep track of who owes what.
 
-**IMPORTANT NOTE:** This MVP version features **unsecured endpoints**. It is designed for initial development and testing in a trusted environment only. Security implementation is the top priority for the next iteration.
+## 🎯 Project Vision
 
-## 1. MVP Vision & Scope
+Make car sharing transparent and fair by automatically tracking trip costs and splitting expenses among group members. No more awkward conversations about gas money or forgotten receipts – just simple, automated expense tracking.
 
-The FareShare MVP will allow users to create an account, form groups, and log car trips. The system will calculate costs based on a pre-set rate. All data is public within the application during this MVP phase.
+## 👥 Who Is This For?
 
-### Core Concepts
+- **Families** sharing household vehicles
+- **Roommates** with shared cars
+- **Colleagues** carpooling to work
+- **Friends** sharing road trip costs
+- **Small businesses** tracking company vehicle usage
 
--   **User:** A person with an account, identified by an email.
--   **Group:** A shared space created by a user. It contains members and a trip log.
--   **Trip:** A record of a single journey logged by a member of a Group.
+## ✨ What You Can Do
 
-### MVP User Stories
+### Create & Join Groups
+- **Create a group** for your shared car (e.g., "Family Honda", "Office Carpool")
+- **Get a unique invite code** to share with others
+- **Join existing groups** using invite codes from friends or family
 
--   **As a User, I want to...**
-    -   ...create an account with my email and a password.
-    -   ...create a new "Group" (e.g., "Family Car").
-    -   ...receive a unique, shareable invite code for my Group.
-    -   ...join an existing Group using an invite code.
-    -   ...view a list of all Groups I am a member of.
-    -   ...select a Group and view its dashboard, which includes all trips from all members.
-    -   ...log a new trip within a specific Group.
-    -   ...mark my own trips as "Paid."
+### Track Your Trips
+- **Log trips easily** with start and end addresses
+- **Automatic cost calculation** based on distance and group rates
+- **View all group trips** in one convenient dashboard
+- **Mark trips as paid** to keep track of settlements
 
-## 2. System Design & Architecture (MVP)
+### Stay Organized
+- **See all your groups** in one place
+- **Track trip history** for each group
+- **Monitor payment status** for fair cost sharing
 
-The architecture is a standard decoupled frontend and backend. For the MVP, the security layer between them is omitted.
+## 🚀 Current Status
 
-### Technology Stack
+FareShare is in **MVP development** with core features being built and tested. The focus is on validating the essential trip logging and group management functionality.
 
-| Component | Technology |
-| :--- | :--- |
-| **Frontend** | React + Vite |
-| **Backend** | Python + FastAPI |
-| **Database** | PostgreSQL |
-| **External API** | Google Maps Platform (Directions API) |
-| **DevOps** | Docker, Docker Compose |
-| **Deployment** | Railway |
+**What's Working:**
+- User registration and authentication
+- Group creation with invite codes
+- Secure trip logging within groups
 
-### Database Schema
+**Coming Soon:**
+- Group joining via invite codes
+- Trip cost calculation and splitting
+- Payment tracking and notifications
 
-The schema supports user identification but does not yet enforce data access rules.
+## 🛠 Getting Started
 
-#### `users` table
-| Column Name | Data Type | Notes |
-| :--- | :--- | :--- |
-| `id` | `SERIAL PRIMARY KEY` | |
-| `email` | `VARCHAR(255) UNIQUE NOT NULL` | |
-| `password_hash` | `VARCHAR(255) NOT NULL` | For future authentication. |
-| `full_name` | `VARCHAR(100)` | |
+### For Users
+1. **Sign up** with your email and create a password
+2. **Create your first group** (e.g., "Family Car", "Work Carpool")
+3. **Share the invite code** with group members
+4. **Start logging trips** and let FareShare handle the math!
 
-#### `groups` table
-| Column Name | Data Type | Notes |
-| :--- | :--- | :--- |
-| `id` | `SERIAL PRIMARY KEY` | |
-| `name` | `VARCHAR(100) NOT NULL` | |
-| `creator_id` | `INTEGER` | Foreign Key to `users.id`. |
-| `cost_per_km` | `DECIMAL(10, 4) NOT NULL` | Set via environment variable for MVP. |
-| `invite_code` | `VARCHAR(10) UNIQUE` | |
+### Example Use Cases
 
-#### `group_members` table
-| Column Name | Data Type | Notes |
-| :--- | :--- | :--- |
-| `user_id` | `INTEGER` | Foreign Key to `users.id` |
-| `group_id` | `INTEGER` | Foreign Key to `groups.id` |
-| **Constraint** | `PRIMARY KEY (user_id, group_id)` | |
+**Family Scenario:**
+- Mom creates "Family Honda" group
+- Shares invite code with Dad and teenage kids
+- Everyone logs their trips (grocery runs, soccer practice, etc.)
+- Monthly review shows who drove how much and fair cost splitting
 
-#### `trips` table
-| Column Name | Data Type | Notes |
-| :--- | :--- | :--- |
-| `id` | `SERIAL PRIMARY KEY` | |
-| `group_id` | `INTEGER` | Foreign Key to `groups.id`. |
-| `user_id` | `INTEGER` | Foreign Key to `users.id`. |
-| `start_address` | `TEXT NOT NULL` | |
-| `end_address` | `TEXT NOT NULL` | |
-| `distance_km` | `DECIMAL(10, 2) NOT NULL` | |
-| `cost_usd` | `DECIMAL(10, 2) NOT NULL` | |
-| `trip_date` | `TIMESTAMP WITH TIME ZONE` | Default: `NOW()` |
-| `is_paid` | `BOOLEAN` | Default: `FALSE` |
+**Roommate Scenario:**
+- Create "Apartment Car" group for shared vehicle
+- Track trips to work, errands, weekend activities
+- Automatically calculate each person's share of gas and maintenance costs
 
-### API Endpoints (MVP - Unsecured)
+**Carpool Scenario:**
+- Set up "Office Commute" group
+- Track daily commutes and occasional detours
+- Fair splitting of gas costs based on actual usage
 
-All endpoints are public and do not require authentication tokens. The frontend will be responsible for passing the correct `user_id` and `group_id` as needed.
+## 🔄 Development Roadmap
 
--   **User Management:**
-    -   `POST /users`: Creates a new user.
-    -   `GET /users`: Retrieves all users.
+### Phase 1: Core Features ✅
+- User registration and secure authentication
+- Group creation with unique invite codes
+- Basic trip logging infrastructure
 
--   **Group Management:**
-    -   `POST /groups`: Creates a new Group.
-    -   `GET /groups`: Returns a list of all Groups.
-    -   `POST /groups/join`: Adds a user to a group based on an `invite_code`.
+### Phase 2: Group Management 🔄
+- Join groups using invite codes
+- Member management and permissions
+- Group dashboards and trip history
 
--   **Trip Management:**
-    -   `POST /groups/{group_id}/trips`: Creates a new trip for a given group.
-    -   `GET /groups/{group_id}/trips`: Gets all trips for a specific group.
-    -   `PATCH /trips/{trip_id}/settle`: Marks a single trip as paid.
+### Phase 3: Smart Calculations 📋
+- Automatic distance calculation via Google Maps
+- Dynamic cost splitting based on group settings
+- Payment tracking and settlement features
 
-## 3. Development & Deployment Plan
+### Phase 4: Enhanced Experience 📋
+- Mobile-responsive design
+- Trip categories and tags
+- Export and reporting features
+- Email notifications for group activities
 
-### Development Roadmap
+## 🤝 Contributing
 
-1.  **Setup & Backend Foundation (Days 1-2):**
-    -   Initialize Git repo and Docker setup.
-    -   Define all `SQLAlchemy` database models.
-    -   Implement all backend API endpoints as described above. All endpoints will be public.
-    -   The `cost_per_km` rate will be a hardcoded environment variable (`COST_PER_KM`) on the backend.
+FareShare is in active development. The technical implementation details and development setup can be found in `/backend/CLAUDE.md` for developers interested in contributing.
 
-2.  **Frontend Development (Days 3-6):**
-    -   Build the UI for user registration, creating/joining groups, and logging trips.
-    -   The frontend will manage the "logged-in" user's ID in its state (e.g., after a user "logs in" by selecting their name from a list of all users).
-    -   Implement the core trip logging form, which calls the Google Maps API via the backend.
-    -   Build the dashboard to display all trips for a selected Group.
+## 📧 Questions or Feedback?
 
-3.  **Integration & Deployment (Day 7):**
-    -   Perform end-to-end testing of the complete, unsecured user flow.
-    -   Deploy the frontend, backend, and database to Railway.
-    -   Configure production environment variables (`DATABASE_URL`, `GOOGLE_MAPS_API_KEY`, `COST_PER_KM`).
-
-## 4. Post-MVP Roadmap: Critical Next Steps
-
-This MVP provides a functional skeleton but lacks essential security. The following items are the highest priority for the next development cycle (v0.2).
-
-1.  **Implement JWT Authentication:**
-    -   Create a `/auth/login` endpoint that returns a JWT token.
-    -   Secure all data-mutating and data-accessing endpoints, requiring a valid JWT.
-    -   Implement a security dependency (`get_current_user`) in FastAPI to validate tokens and identify the user making the request.
-    -   Update the frontend to store the JWT and send it in the `Authorization` header for all relevant API calls.
-
-2.  **Enforce Permissions:**
-    -   Once authentication is in place, add permission logic to the backend.
-    -   **Example:** A user should only be able to mark their *own* trips as paid.
-    -   **Example:** A user must be a member of a Group to view its trips.
-
-3.  **Implement Email Verification:**
-    -   Add a process to verify a user's email address upon registration to prevent account squatting and ensure notifications are sent to the correct person.
+This project is designed to solve real problems around fair car sharing. If you have suggestions, use cases, or feedback about the user experience, we'd love to hear from you!

@@ -43,7 +43,7 @@ backend/
 │   │   └── __init__.py    # User module init
 │   └── groups/            # Groups domain (Phase 2 complete)
 │       ├── models.py      # Group and GroupMembership models
-│       ├── schemas.py     # CreateGroup, GroupResponse schemas
+│       ├── schemas.py     # CreateGroup, Group schemas
 │       ├── repository.py  # Group database operations
 │       ├── service.py     # Group business logic with invite codes
 │       ├── router.py      # Group API endpoints (/groups)
@@ -118,9 +118,9 @@ Additional tables for trips and related functionality will be added after groups
 
 #### Group Management ✅ **IMPLEMENTED**
 - `POST /groups` - Create a new group ✅ **COMPLETE**
+- `GET /groups` - Get user's groups ✅ **COMPLETE**
 
 #### Group Management (Next Priority)
-- `GET /groups` - Get user's groups
 - `POST /groups/{id}/join` - Join a group
 
 #### Trip Management
@@ -178,7 +178,7 @@ Currently implemented: `users` and `auth` domains (complete), `groups` domain (P
 - **Decimal Precision**: Cost per distance uses NUMERIC(10,2) for exact financial calculations
 - **Atomic Operations**: Group creation with owner membership in single transaction
 - **Repository Pattern**: Clean separation of database operations and business logic
-- **Pydantic Integration**: Automatic model validation with GroupResponse.model_validate()
+- **Pydantic Integration**: Automatic model validation with Group.model_validate()
 - **Dependency Injection**: Service layer with injected repository dependencies
 
 #### Database Setup
@@ -384,7 +384,7 @@ group_memberships (
 ```
 src/groups/
 ├── models.py          # Group, GroupMembership SQLAlchemy models
-├── schemas.py         # CreateGroup, GroupResponse, MemberResponse schemas
+├── schemas.py         # CreateGroup, Group, MemberResponse schemas
 ├── repository.py      # Database operations with role checking
 ├── service.py         # Business logic with authorization
 ├── router.py          # API endpoints with role validation
@@ -519,8 +519,9 @@ Response:
 
 #### **Phase 3: API Endpoints** 🔄 **IN PROGRESS**
 1. ✅ Group creation endpoint (POST /groups)
-2. ⏳ Membership management endpoints
-3. ⏳ Role-based route protection
+2. ✅ Get user's groups endpoint (GET /groups)
+3. ⏳ Membership management endpoints (join, leave, kick)
+4. ⏳ Role-based route protection
 
 #### **Phase 4: Testing & Validation**
 1. Test all endpoints via Swagger UI

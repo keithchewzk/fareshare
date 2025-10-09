@@ -11,6 +11,18 @@ class GroupRepository:
     def __init__(self, db: Session):
         self.db = db
 
+    def get_groups_by_user_id(self, user_id: int) -> list[Group]:
+        """
+        Get all groups that a user is in.
+        Uses the relationship to avoid explicit joins.
+        """
+        return (
+            self.db.query(Group)
+            .join(Group.memberships)
+            .filter(GroupMembership.user_id == user_id)
+            .all()
+        )
+
     def create_group(
         self,
         name: str,

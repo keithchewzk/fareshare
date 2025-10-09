@@ -2,7 +2,7 @@ import random
 
 from fastapi import HTTPException
 from src.groups.repository import GroupRepository
-from src.groups.schemas import CreateGroup, GroupResponse
+from src.groups.schemas import CreateGroup, Group
 
 
 class GroupService:
@@ -30,7 +30,7 @@ class GroupService:
             detail="Failed to generate unique invite code after multiple attempts",
         )
 
-    def create_group(self, user_id: int, group_data: CreateGroup) -> GroupResponse:
+    def create_group(self, user_id: int, group_data: CreateGroup) -> Group:
         """
         Create a new group with the user as owner.
         Generates unique invite code and atomically creates group with owner membership.
@@ -47,4 +47,12 @@ class GroupService:
             owner_user_id=user_id,
         )
 
-        return GroupResponse.model_validate(group)
+        return Group.model_validate(group)
+
+    def get_user_groups(self, user_id: int) -> list[Group]:
+        """
+        Get all groups that the user is a member of (either owner or member).
+        Returns list of groups.
+        """
+        groups = self.group_repository.get_groups_by_user_id(user_id)
+        return groups

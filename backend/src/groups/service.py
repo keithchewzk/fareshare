@@ -56,3 +56,24 @@ class GroupService:
         """
         groups = self.group_repository.get_groups_by_user_id(user_id)
         return groups
+
+    def join_group(self, user_id: int, invite_code: str) -> Group:
+        """
+        Add a user to a group using an invite code.
+
+        Finds the group by invite code, validates user isn't already a member,
+        then adds the user as a 'member' role to the group.
+
+        Raises:
+            HTTPException 404: Invalid invite code
+            HTTPException 400: User already in group
+        """
+        group = self.group_repository.get_group_by_invite_code(invite_code)
+        if not group:
+            raise HTTPException(status_code=404, detail="Invalid invite code")
+
+        if self.group_repository.is_user_in_group(user_id, group.id):
+            raise HTTPException(status_code=400, detail="User is already a member of this group")
+
+        self.group_repository.add_user_to_group(user_id, group.id)
+        return group

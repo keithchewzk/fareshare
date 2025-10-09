@@ -64,3 +64,28 @@ class GroupRepository:
         """Check if invite code is unique across all groups"""
         existing = self.db.query(Group).filter(Group.invite_code == invite_code).first()
         return existing is None
+
+    def get_group_by_invite_code(self, invite_code: str) -> Optional[Group]:
+        """Find a group by its invite code"""
+        return self.db.query(Group).filter(Group.invite_code == invite_code).first()
+
+    def is_user_in_group(self, user_id: int, group_id: int) -> bool:
+        """Check if a user is already a member of a group"""
+        existing = (
+            self.db.query(GroupMembership)
+            .filter(GroupMembership.user_id == user_id, GroupMembership.group_id == group_id)
+            .first()
+        )
+        return existing is not None
+
+    def add_user_to_group(self, user_id: int, group_id: int) -> GroupMembership:
+        """Add a user as a member to a group"""
+        membership = GroupMembership(
+            user_id=user_id,
+            group_id=group_id,
+            role="member"
+        )
+        self.db.add(membership)
+        self.db.commit()
+        self.db.refresh(membership)
+        return membership

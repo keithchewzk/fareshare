@@ -31,3 +31,9 @@ class CreateGroup(BaseModel):
     distance_unit: Literal["km", "mi"] = Field(
         default="km", description="Distance unit (km or mi)"
     )
+
+
+class JoinGroup(BaseModel):
+    """Schema for joining a group via invite code"""
+
+    invite_code: str = Field(..., min_length=10, max_length=10, description="Group invite code")

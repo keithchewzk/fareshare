@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from src.auth.dependencies import get_current_user
 from src.groups.dependencies import get_group_service
-from src.groups.schemas import CreateGroup, Group
+from src.groups.schemas import CreateGroup, Group, JoinGroup
 from src.groups.service import GroupService
 from src.users.models import User
 
@@ -25,3 +25,13 @@ async def create_group(
 ):
     """Create a new group. The creator automatically becomes the owner."""
     return group_service.create_group(current_user.id, group_data)
+
+
+@router.post("/join", response_model=Group)
+async def join_group(
+    join_data: JoinGroup,
+    current_user: User = Depends(get_current_user),
+    group_service: GroupService = Depends(get_group_service),
+):
+    """Join a group using an invite code. User becomes a member of the group."""
+    return group_service.join_group(current_user.id, join_data.invite_code)

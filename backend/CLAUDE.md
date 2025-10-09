@@ -119,9 +119,7 @@ Additional tables for trips and related functionality will be added after groups
 #### Group Management ✅ **IMPLEMENTED**
 - `POST /groups` - Create a new group ✅ **COMPLETE**
 - `GET /groups` - Get user's groups ✅ **COMPLETE**
-
-#### Group Management (Next Priority)
-- `POST /groups/{id}/join` - Join a group
+- `POST /groups/join` - Join a group via invite code ✅ **COMPLETE**
 
 #### Trip Management
 - `POST /trips` - Log a new trip
@@ -520,8 +518,9 @@ Response:
 #### **Phase 3: API Endpoints** 🔄 **IN PROGRESS**
 1. ✅ Group creation endpoint (POST /groups)
 2. ✅ Get user's groups endpoint (GET /groups)
-3. ⏳ Membership management endpoints (join, leave, kick)
-4. ⏳ Role-based route protection
+3. ✅ Join group endpoint (POST /groups/join)
+4. ⏳ Additional membership management (leave, kick members)
+5. ⏳ Role-based route protection
 
 #### **Phase 4: Testing & Validation**
 1. Test all endpoints via Swagger UI

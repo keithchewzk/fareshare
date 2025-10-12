@@ -92,6 +92,35 @@ class GroupRepository:
         self.db.refresh(membership)
         return membership
 
+    def get_user_membership(self, user_id: int, group_id: int) -> Optional[GroupMembership]:
+        """Get user's membership record for a specific group"""
+        return (
+            self.db.query(GroupMembership)
+            .filter(
+                GroupMembership.user_id == user_id,
+                GroupMembership.group_id == group_id,
+            )
+            .first()
+        )
+
+    def remove_user_from_group(self, user_id: int, group_id: int) -> bool:
+        """
+        Remove a user from a group by deleting their membership record.
+        Returns: True if removed successfully, False if user was not in group.
+        """
+        try:
+            membership = self.get_user_membership(user_id, group_id)
+            if not membership:
+                return False
+
+            self.db.delete(membership)
+            self.db.commit()
+            return True
+
+        except Exception:
+            self.db.rollback()
+            raise
+
     def delete_group(self, group_id: int, owner_user_id: int) -> bool:
         """
         Delete group only if user is owner.

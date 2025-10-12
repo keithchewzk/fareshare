@@ -103,6 +103,41 @@ class GroupService:
         self.group_repository.add_user_to_group(user_id, group.id)
         return group
 
+    def leave_group(self, user_id: int, group_id: int) -> None:
+        """
+        Allow a user to leave a group voluntarily.
+
+        Validates that the group exists, user is a member, and user is not the owner.
+        Group owners cannot leave their groups - they must delete the group or transfer ownership.
+
+        Raises:
+            HTTPException 404: Group not found
+            HTTPException 403: User not a member, or user is owner (cannot leave)
+        """
+        group = self.group_repository.get_group_by_id(group_id)
+        if not group:
+            raise HTTPException(status_code=404, detail="Group not found")
+
+        membership = self.group_repository.get_user_membership(user_id, group_id)
+        if not membership:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: You are not a member of this group",
+            )
+
+        if membership.role == "owner":
+            raise HTTPException(
+                status_code=403,
+                detail="Group owners cannot leave the group. Delete the group or transfer ownership first.",
+            )
+
+        success = self.group_repository.remove_user_from_group(user_id, group_id)
+        if not success:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to leave group. Please try again.",
+            )
+
     def delete_group(self, user_id: int, group_id: int) -> None:
         """
         Delete a group. Only owners can delete their groups.

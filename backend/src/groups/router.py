@@ -47,6 +47,16 @@ async def join_group(
     return group_service.join_group(current_user.id, join_data.invite_code)
 
 
+@router.post("/{group_id}/leave", status_code=204)
+async def leave_group(
+    group_id: int,
+    current_user: User = Depends(get_current_user),
+    group_service: GroupService = Depends(get_group_service),
+):
+    """Leave a group voluntarily. Only members can leave - owners must delete the group."""
+    group_service.leave_group(current_user.id, group_id)
+
+
 @router.delete("/{group_id}", status_code=204)
 async def delete_group(
     group_id: int,

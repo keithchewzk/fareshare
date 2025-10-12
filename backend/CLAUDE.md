@@ -121,6 +121,7 @@ Additional tables for trips and related functionality will be added after groups
 - `GET /groups` - Get user's groups ✅ **COMPLETE**
 - `GET /groups/{group_id}` - Get group details ✅ **COMPLETE**
 - `POST /groups/join` - Join a group via invite code ✅ **COMPLETE**
+- `POST /groups/{group_id}/leave` - Leave a group (members only) ✅ **COMPLETE**
 - `DELETE /groups/{group_id}` - Delete a group (owners only) ✅ **COMPLETE**
 
 #### Trip Management
@@ -375,7 +376,7 @@ group_memberships (
 
 #### **Member Permissions**
 - ✅ View group and members
-- ✅ Leave group voluntarily
+- ✅ Leave group voluntarily ✅ **IMPLEMENTED**
 - ❌ Cannot kick other members
 - ❌ Cannot delete group
 - ❌ Cannot modify group settings
@@ -402,8 +403,8 @@ src/groups/
 - `DELETE /groups/{id}` - Delete group (owners only) ✅ **COMPLETE**
 
 #### **Membership Management**
-- `POST /groups/{id}/join` - Join via invite code (becomes member)
-- `POST /groups/{id}/leave` - Leave group (members only, owners can't leave)
+- `POST /groups/{id}/join` - Join via invite code (becomes member) ✅ **COMPLETE**
+- `POST /groups/{id}/leave` - Leave group (members only, owners can't leave) ✅ **COMPLETE**
 - `DELETE /groups/{id}/members/{user_id}` - Kick member (owners only)
 
 ### **Key Business Logic**
@@ -493,6 +494,14 @@ Response:
 ]
 ```
 
+#### **Leave Group** ✅ **NEW**
+```http
+POST /groups/1/leave
+Authorization: Bearer <token>  # Must be member (not owner)
+
+Response: 204 No Content
+```
+
 #### **Owner Kicks Member**
 ```http
 DELETE /groups/1/members/5
@@ -522,9 +531,10 @@ Response:
 2. ✅ Get user's groups endpoint (GET /groups)
 3. ✅ Get group details endpoint (GET /groups/{group_id})
 4. ✅ Join group endpoint (POST /groups/join)
-5. ✅ Delete group endpoint (DELETE /groups/{group_id})
-6. ⏳ Additional membership management (leave, kick members)
-7. ⏳ Role-based route protection
+5. ✅ Leave group endpoint (POST /groups/{group_id}/leave)
+6. ✅ Delete group endpoint (DELETE /groups/{group_id})
+7. ⏳ Additional membership management (kick members)
+8. ⏳ Role-based route protection
 
 #### **Phase 4: Testing & Validation**
 1. Test all endpoints via Swagger UI

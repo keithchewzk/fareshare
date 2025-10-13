@@ -36,27 +36,27 @@ services:
       postgres:
         condition: service_healthy
 
-#   frontend:
-#     build:
-#       context: ./frontend
-#     container_name: report-scribe-frontend
-#     ports:
-#       - "3000:5173"
-#     environment:
-#       - HOT_RELOAD=1
-#       - VITE_BACKEND_API_URL=http://localhost:8000
-#     depends_on:
-#       - backend
-#     volumes:
-#       - ./frontend/src:/app/src
-#       - ./frontend/public:/app/public
-#     command: npm run dev -- --host 0.0.0.0
-#     networks:
-#       - report-scribe-network
+  frontend:
+    build:
+      context: ./frontend
+    container_name: fareshare-frontend
+    ports:
+      - "3000:5173"
+    environment:
+      - HOT_RELOAD=1
+      - VITE_BACKEND_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    command: npm run dev -- --host 0.0.0.0
+    networks:
+      - fareshare-network
 
-# networks:
-#   fareshare-network:
-#     driver: bridge
+networks:
+  fareshare-network:
+    driver: bridge
 
 volumes:
   postgres_data:

@@ -93,7 +93,23 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
         </div>
       </section>
 
-      {/* Rest of content will go here */}
+      {/* CTA Section */}
+      <section className="container mx-auto px-4 py-20 text-center">
+        <h2 className="mb-4">Ready to Make Car Sharing Fair?</h2>
+        <p className="text-muted-foreground mb-8 text-lg">
+          Join FareShare today and never have awkward conversations about gas money again
+        </p>
+        <Button size="lg" onClick={onGetStarted} className="px-8">
+          Create Your Account
+        </Button>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t py-8">
+        <div className="container mx-auto px-4 text-center text-muted-foreground">
+          <p>© 2025 FareShare. Making car sharing transparent and fair.</p>
+        </div>
+      </footer>
     </div>
   );
 }

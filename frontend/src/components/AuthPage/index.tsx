@@ -21,12 +21,36 @@ export function AuthPage({ onLogin, onBack }: AuthPageProps) {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Function left empty for now
+    // Mock login for now - TODO: Replace with real authentication
+    if (loginEmail && loginPassword) {
+      const mockUser = {
+        id: 'user_' + Date.now(),
+        email: loginEmail,
+        name: loginEmail.split('@')[0] // Use email username as name
+      };
+      onLogin(mockUser);
+    } else {
+      setError('Please fill in all fields');
+    }
   };
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    // Function left empty for now
+    // Mock signup for now - TODO: Replace with real authentication
+    if (signupName && signupEmail && signupPassword) {
+      if (signupPassword.length < 6) {
+        setError('Password must be at least 6 characters');
+        return;
+      }
+      const mockUser = {
+        id: 'user_' + Date.now(),
+        email: signupEmail,
+        name: signupName
+      };
+      onLogin(mockUser);
+    } else {
+      setError('Please fill in all fields');
+    }
   };
 
   return (

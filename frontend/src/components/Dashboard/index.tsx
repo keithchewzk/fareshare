@@ -39,6 +39,15 @@ export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
     setGroups(userGroups);
   };
 
+  const getGroupStats = (groupId: string) => {
+    const trips = JSON.parse(localStorage.getItem('fareshare_trips') || '[]');
+    const groupTrips = trips.filter((t: any) => t.groupId === groupId);
+    return {
+      totalTrips: groupTrips.length,
+      unpaidTrips: groupTrips.filter((t: any) => !t.paid).length,
+    };
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -93,26 +102,41 @@ export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
             </p>
           </div>
         ) : (
-          /* Groups Grid - TODO: Implement when there are groups */
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {groups.map((group) => (
-              <Card key={group.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onViewGroup(group.id)}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="size-5" />
-                    {group.name}
-                  </CardTitle>
-                  <CardDescription>
-                    {group.members.length} member{group.members.length !== 1 ? 's' : ''}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Created {new Date(group.createdAt).toLocaleDateString()}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {groups.map((group) => {
+              const stats = getGroupStats(group.id);
+              return (
+                <Card
+                  key={group.id}
+                  className="cursor-pointer hover:border-primary transition-colors"
+                  onClick={() => onViewGroup(group.id)}
+                >
+                  <CardHeader>
+                    <CardTitle className="flex items-start justify-between">
+                      <span>{group.name}</span>
+                      <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Car className="size-5" />
+                      </div>
+                    </CardTitle>
+                    <CardDescription>
+                      {group.members.length} member{group.members.length !== 1 ? 's' : ''}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Total Trips</span>
+                      <span>{stats.totalTrips}</span>
+                    </div>
+                    {stats.unpaidTrips > 0 && (
+                      <div className="flex justify-between text-sm mt-2">
+                        <span className="text-muted-foreground">Pending</span>
+                        <span className="text-destructive">{stats.unpaidTrips} unpaid</span>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
       </main>

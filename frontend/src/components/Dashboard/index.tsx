@@ -39,23 +39,32 @@ export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Content will go here */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Welcome back, {user.name}!</h1>
-          <p className="text-muted-foreground">Manage your car sharing groups and track expenses.</p>
+      {/* Header */}
+      <header className="border-b sticky top-0 bg-background z-10">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Car className="size-6" />
+            <span className="text-xl">FareShare</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-muted-foreground">
+              {user.name}
+            </span>
+            <Button variant="ghost" size="icon" onClick={onLogout}>
+              <LogOut className="size-4" />
+            </Button>
+          </div>
         </div>
+      </header>
 
+      {/* Main content will go here */}
+      <div className="container mx-auto px-4 py-8">
         <div className="text-center py-12">
           <Car className="size-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-xl font-semibold mb-2">Dashboard Coming Soon</h2>
+          <h2 className="text-xl font-semibold mb-2">Dashboard Content Coming Soon</h2>
           <p className="text-muted-foreground mb-4">
             Groups, trip tracking, and expense management will be available here.
           </p>
-          <Button onClick={onLogout} variant="outline">
-            <LogOut className="size-4 mr-2" />
-            Logout
-          </Button>
         </div>
       </div>
     </div>

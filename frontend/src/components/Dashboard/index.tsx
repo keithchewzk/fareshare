@@ -3,6 +3,7 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Plus, Users, Car, LogOut, UserPlus } from 'lucide-react';
 import { CreateGroupDialog } from './CreateGroupDialog';
+import { JoinGroupDialog } from './JoinGroupDialog';
 
 interface User {
   id: string;
@@ -65,6 +66,31 @@ export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
 
     setGroups([...groups, newGroup]);
     setShowCreateDialog(false);
+  };
+
+  const handleJoinGroup = (inviteCode: string): { success: boolean; error?: string } => {
+    const allGroups = JSON.parse(localStorage.getItem('fareshare_groups') || '[]');
+    const targetGroup = allGroups.find((g: Group) => g.inviteCode === inviteCode);
+
+    if (!targetGroup) {
+      return { success: false, error: 'Invalid invite code. Please check and try again.' };
+    }
+
+    if (targetGroup.members.includes(user.id)) {
+      return { success: false, error: 'You are already a member of this group.' };
+    }
+
+    // Add user to the group
+    targetGroup.members.push(user.id);
+
+    // Update localStorage
+    localStorage.setItem('fareshare_groups', JSON.stringify(allGroups));
+
+    // Update local state
+    setGroups([...groups, targetGroup]);
+    setShowJoinDialog(false);
+
+    return { success: true };
   };
 
   return (
@@ -164,6 +190,12 @@ export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
         onCreateGroup={handleCreateGroup}
+      />
+
+      <JoinGroupDialog
+        open={showJoinDialog}
+        onOpenChange={setShowJoinDialog}
+        onJoinGroup={handleJoinGroup}
       />
     </div>
   );

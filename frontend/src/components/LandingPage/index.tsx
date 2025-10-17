@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from '../ui/button';
-import { Car, Users, Receipt } from 'lucide-react';
+import { Car, Users, Receipt, CheckCircle } from 'lucide-react';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -65,6 +65,30 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             <p className="text-muted-foreground">
               View trip history and monitor payment status for fair cost sharing
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Use Cases Section */}
+      <section className="bg-muted py-16">
+        <div className="container mx-auto px-4">
+          <h2 className="text-center mb-12">Who Is This For?</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {[
+              { title: 'Families', desc: 'Share household vehicles fairly' },
+              { title: 'Roommates', desc: 'Track shared car usage and costs' },
+              { title: 'Colleagues', desc: 'Split carpooling expenses easily' },
+              { title: 'Friends', desc: 'Manage road trip cost sharing' },
+              { title: 'Small Businesses', desc: 'Track company vehicle usage' },
+            ].map((useCase, i) => (
+              <div key={i} className="flex gap-3 items-start">
+                <CheckCircle className="size-5 text-primary mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4>{useCase.title}</h4>
+                  <p className="text-muted-foreground text-sm">{useCase.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

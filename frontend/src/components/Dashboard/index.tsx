@@ -88,19 +88,9 @@ export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
               <Users className="size-12 text-muted-foreground" />
             </div>
             <h2 className="text-xl font-semibold mb-2">No Groups Yet</h2>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            <p className="text-muted-foreground max-w-md mx-auto">
               Create your first group to start tracking shared car expenses, or join an existing group with an invite code.
             </p>
-            <div className="flex gap-3 justify-center">
-              <Button onClick={() => setShowCreateDialog(true)}>
-                <Plus className="size-4 mr-2" />
-                Create Group
-              </Button>
-              <Button variant="outline" onClick={() => setShowJoinDialog(true)}>
-                <UserPlus className="size-4 mr-2" />
-                Join Group
-              </Button>
-            </div>
           </div>
         ) : (
           /* Groups Grid - TODO: Implement when there are groups */

@@ -26,6 +26,8 @@ interface DashboardProps {
 
 export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
   const [groups, setGroups] = useState<Group[]>([]);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showJoinDialog, setShowJoinDialog] = useState(false);
 
   useEffect(() => {
     loadGroups();
@@ -66,14 +68,63 @@ export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
           </p>
         </div>
 
-        {/* Action buttons and groups will go here */}
-        <div className="text-center py-12">
-          <Car className="size-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-xl font-semibold mb-2">Action Buttons & Groups Coming Soon</h2>
-          <p className="text-muted-foreground mb-4">
-            Create group, join group, and groups list will be available here.
-          </p>
+        {/* Action Buttons */}
+        <div className="flex gap-3 mb-8">
+          <Button onClick={() => setShowCreateDialog(true)}>
+            <Plus className="size-4 mr-2" />
+            Create Group
+          </Button>
+          <Button variant="outline" onClick={() => setShowJoinDialog(true)}>
+            <UserPlus className="size-4 mr-2" />
+            Join Group
+          </Button>
         </div>
+
+        {/* Groups Grid */}
+        {groups.length === 0 ? (
+          /* Empty State */
+          <div className="text-center py-16">
+            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
+              <Users className="size-12 text-muted-foreground" />
+            </div>
+            <h2 className="text-xl font-semibold mb-2">No Groups Yet</h2>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              Create your first group to start tracking shared car expenses, or join an existing group with an invite code.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button onClick={() => setShowCreateDialog(true)}>
+                <Plus className="size-4 mr-2" />
+                Create Group
+              </Button>
+              <Button variant="outline" onClick={() => setShowJoinDialog(true)}>
+                <UserPlus className="size-4 mr-2" />
+                Join Group
+              </Button>
+            </div>
+          </div>
+        ) : (
+          /* Groups Grid - TODO: Implement when there are groups */
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {groups.map((group) => (
+              <Card key={group.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onViewGroup(group.id)}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="size-5" />
+                    {group.name}
+                  </CardTitle>
+                  <CardDescription>
+                    {group.members.length} member{group.members.length !== 1 ? 's' : ''}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Created {new Date(group.createdAt).toLocaleDateString()}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );

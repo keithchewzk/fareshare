@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Plus, Users, Car, LogOut, UserPlus } from 'lucide-react';
+import { CreateGroupDialog } from './CreateGroupDialog';
 
 interface User {
   id: string;
@@ -46,6 +47,24 @@ export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
       totalTrips: groupTrips.length,
       unpaidTrips: groupTrips.filter((t: any) => !t.paid).length,
     };
+  };
+
+  const handleCreateGroup = (name: string) => {
+    const newGroup: Group = {
+      id: 'group_' + Date.now(),
+      name,
+      inviteCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
+      createdBy: user.id,
+      members: [user.id],
+      createdAt: Date.now(),
+    };
+
+    const allGroups = JSON.parse(localStorage.getItem('fareshare_groups') || '[]');
+    const updatedGroups = [...allGroups, newGroup];
+    localStorage.setItem('fareshare_groups', JSON.stringify(updatedGroups));
+
+    setGroups([...groups, newGroup]);
+    setShowCreateDialog(false);
   };
 
   return (
@@ -140,6 +159,12 @@ export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
           </div>
         )}
       </main>
+
+      <CreateGroupDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onCreateGroup={handleCreateGroup}
+      />
     </div>
   );
 }

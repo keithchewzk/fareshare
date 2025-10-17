@@ -57,16 +57,24 @@ export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
         </div>
       </header>
 
-      {/* Main content will go here */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center py-12">
-          <Car className="size-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-xl font-semibold mb-2">Dashboard Content Coming Soon</h2>
-          <p className="text-muted-foreground mb-4">
-            Groups, trip tracking, and expense management will be available here.
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold mb-2">Your Groups</h1>
+          <p className="text-muted-foreground">
+            Manage your shared vehicles and track expenses
           </p>
         </div>
-      </div>
+
+        {/* Action buttons and groups will go here */}
+        <div className="text-center py-12">
+          <Car className="size-16 mx-auto mb-4 text-muted-foreground" />
+          <h2 className="text-xl font-semibold mb-2">Action Buttons & Groups Coming Soon</h2>
+          <p className="text-muted-foreground mb-4">
+            Create group, join group, and groups list will be available here.
+          </p>
+        </div>
+      </main>
     </div>
   );
 }

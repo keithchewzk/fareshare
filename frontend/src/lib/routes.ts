@@ -8,6 +8,10 @@ export const API_ROUTES = {
   users: {
     create: '/users',
   },
+  auth: {
+    login: '/auth/login',
+    me: '/auth/me',
+  },
 } as const;
 
 /**

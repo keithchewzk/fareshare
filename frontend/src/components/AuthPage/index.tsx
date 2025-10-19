@@ -22,18 +22,41 @@ export function AuthPage({ onLogin, onBack }: AuthPageProps) {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login for now - TODO: Replace with real authentication
-    if (loginEmail && loginPassword) {
-      const mockUser = {
-        id: 'user_' + Date.now(),
-        email: loginEmail,
-        name: loginEmail.split('@')[0] // Use email username as name
-      };
-      onLogin(mockUser);
-    } else {
+    setError('');
+
+    // Client-side validation
+    if (!loginEmail || !loginPassword) {
       setError('Please fill in all fields');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Call the backend API to login
+      const { user, token } = await userService.login({
+        email: loginEmail,
+        password: loginPassword,
+      });
+
+      // Store token in localStorage for future requests
+      localStorage.setItem('fareshare_token', token);
+
+      // Create user object in the format expected by the parent
+      const userForParent = {
+        id: user.id.toString(),
+        email: user.email,
+        name: `${user.first_name} ${user.last_name || ''}`.trim(),
+      };
+
+      // Call parent's onLogin callback to set user and navigate to dashboard
+      onLogin(userForParent);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Login failed');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -135,8 +158,8 @@ export function AuthPage({ onLogin, onBack }: AuthPageProps) {
                   {error && (
                     <p className="text-destructive text-sm">{error}</p>
                   )}
-                  <Button type="submit" className="w-full">
-                    Log In
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? 'Logging In...' : 'Log In'}
                   </Button>
                 </form>
               </CardContent>

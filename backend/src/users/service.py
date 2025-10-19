@@ -1,5 +1,6 @@
 import bcrypt
-from fastapi import HTTPException
+from fastapi import HTTPException, status
+from src.users.jwt_utils import create_access_token
 from src.users.models import User
 from src.users.repository import UserRepository
 from src.users.schemas import CreateUser
@@ -37,3 +38,41 @@ class UserService:
             first_name=user_data.first_name,
             last_name=user_data.last_name,
         )
+
+    def login(self, email: str, password: str) -> dict:
+        """
+        Authenticate user and return JWT token.
+
+        Validates email exists, verifies password with bcrypt, and generates
+        JWT token on success. Returns same error message for both invalid
+        email and password to prevent user enumeration attacks.
+
+        Args:
+            email: User's email address
+            password: User's password
+
+        Returns:
+            Dictionary with JWT token and user info
+
+        Raises:
+            HTTPException: If credentials are invalid
+        """
+        user = self.user_repository.get_by_email(email)
+
+        if not user or not self.verify_password(password, user.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password"
+            )
+
+        access_token = create_access_token(
+            user_id=user.id,
+            email=user.email
+        )
+
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user_id": user.id,
+            "email": user.email
+        }

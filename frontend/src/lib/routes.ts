@@ -6,11 +6,9 @@ const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:8
 
 export const API_ROUTES = {
   users: {
-    create: '/users',
-  },
-  auth: {
-    login: '/auth/login',
-    me: '/auth/me',
+    create: '/users',  // PUT /users - Create account
+    login: '/users',   // POST /users - Login
+    me: '/users/me',   // GET /users/me - Get profile
   },
 } as const;
 

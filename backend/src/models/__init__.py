@@ -1,5 +1,2 @@
-from src.models.base import Base
-from src.users.models import User
-from src.groups.models import Group, GroupMembership
-
-__all__ = ["Base", "User", "Group", "GroupMembership"]
+# Empty init file to avoid circular imports
+# Import models directly from specific modules when needed

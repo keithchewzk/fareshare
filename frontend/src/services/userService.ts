@@ -41,7 +41,7 @@ class UserService {
    */
   async register(userData: CreateUserRequest): Promise<CreateUserResponse> {
     const response = await fetch(getApiUrl(API_ROUTES.users.create), {
-      method: 'POST',
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -62,7 +62,7 @@ class UserService {
    */
   async login(credentials: LoginRequest): Promise<{ user: CreateUserResponse; token: string }> {
     // Step 1: Authenticate and get token
-    const loginResponse = await fetch(getApiUrl(API_ROUTES.auth.login), {
+    const loginResponse = await fetch(getApiUrl(API_ROUTES.users.login), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ class UserService {
     const { access_token } = await loginResponse.json() as LoginResponse;
 
     // Step 2: Get user profile using the token
-    const profileResponse = await fetch(getApiUrl(API_ROUTES.auth.me), {
+    const profileResponse = await fetch(getApiUrl(API_ROUTES.users.me), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
-from src.auth.dependencies import get_current_user
 from src.groups.dependencies import get_group_service
+from src.users.dependencies import get_current_user
 from src.groups.schemas import CreateGroup, Group, GroupListItem, JoinGroup
 from src.groups.service import GroupService
 from src.users.models import User

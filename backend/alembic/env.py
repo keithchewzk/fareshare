@@ -12,7 +12,7 @@ import os
 # Add the src directory to Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from src.models import Base
+from src.models.base import Base
 from src.settings import settings
 
 # this is the Alembic Config object, which provides

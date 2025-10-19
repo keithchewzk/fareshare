@@ -1,3 +1,2 @@
-from src.groups.models import Group, GroupMembership
-
-__all__ = ["Group", "GroupMembership"]
+# Empty init file to avoid circular imports
+# Import models directly from src.groups.models when needed

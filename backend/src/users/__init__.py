@@ -1,3 +1,2 @@
-from .router import router
-
-__all__ = ["router"]
+# Empty init file to avoid circular imports
+# Import components directly from specific modules when needed

@@ -5,6 +5,7 @@ import { Label } from '../ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { ArrowLeft, Car } from 'lucide-react';
+import { userService } from '../../services/userService';
 
 interface AuthPageProps {
   onLogin: (user: { id: string; email: string; name: string }) => void;
@@ -14,10 +15,12 @@ interface AuthPageProps {
 export function AuthPage({ onLogin, onBack }: AuthPageProps) {
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
-  const [signupName, setSignupName] = useState('');
+  const [signupFirstName, setSignupFirstName] = useState('');
+  const [signupLastName, setSignupLastName] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,22 +37,45 @@ export function AuthPage({ onLogin, onBack }: AuthPageProps) {
     }
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock signup for now - TODO: Replace with real authentication
-    if (signupName && signupEmail && signupPassword) {
-      if (signupPassword.length < 6) {
-        setError('Password must be at least 6 characters');
-        return;
-      }
-      const mockUser = {
-        id: 'user_' + Date.now(),
+    setError('');
+
+    // Client-side validation
+    if (!signupFirstName || !signupEmail || !signupPassword) {
+      setError('Please fill in first name, email, and password');
+      return;
+    }
+
+    if (signupPassword.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Call the backend API to register the user
+      const newUser = await userService.register({
         email: signupEmail,
-        name: signupName
+        password: signupPassword,
+        first_name: signupFirstName,
+        last_name: signupLastName || undefined,
+      });
+
+      // Create user object in the format expected by the parent
+      const user = {
+        id: newUser.id.toString(),
+        email: newUser.email,
+        name: `${newUser.first_name} ${newUser.last_name || ''}`.trim(),
       };
-      onLogin(mockUser);
-    } else {
-      setError('Please fill in all fields');
+
+      // Call parent's onLogin callback to set user and navigate to dashboard
+      onLogin(user);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Registration failed');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -128,13 +154,24 @@ export function AuthPage({ onLogin, onBack }: AuthPageProps) {
               <CardContent>
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
+                    <Label htmlFor="signup-first-name">First Name *</Label>
                     <Input
-                      id="signup-name"
+                      id="signup-first-name"
                       type="text"
-                      placeholder="John Doe"
-                      value={signupName}
-                      onChange={(e) => setSignupName(e.target.value)}
+                      placeholder="John"
+                      value={signupFirstName}
+                      onChange={(e) => setSignupFirstName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-last-name">Last Name</Label>
+                    <Input
+                      id="signup-last-name"
+                      type="text"
+                      placeholder="Doe"
+                      value={signupLastName}
+                      onChange={(e) => setSignupLastName(e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
@@ -163,8 +200,8 @@ export function AuthPage({ onLogin, onBack }: AuthPageProps) {
                   {error && (
                     <p className="text-destructive text-sm">{error}</p>
                   )}
-                  <Button type="submit" className="w-full">
-                    Create Account
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? 'Creating Account...' : 'Create Account'}
                   </Button>
                 </form>
               </CardContent>

@@ -12,7 +12,7 @@ FareShare is a collaborative web application for tracking car usage within share
 - **Icons:** Lucide React
 - **Development:** ESLint for code quality
 - **Utilities:** clsx, tailwind-merge, class-variance-authority
-- **Navigation:** React Router DOM for client-side routing
+- **Navigation:** React Router DOM 7.9.4 for client-side routing
 - **Additional Dependencies:** @radix-ui/react-slot, @radix-ui/react-tabs, @radix-ui/react-label, @radix-ui/react-dialog
 
 ## Code Organization
@@ -41,6 +41,7 @@ src/
 │       └── JoinGroupDialog.tsx       # Group joining dialog with invite codes
 ├── lib/
 │   └── utils.ts                     # Utility functions (cn helper)
+├── main.tsx                         # Application entry point with React root
 ├── App.tsx                           # Main app with React Router setup
 ├── App.css                           # Global app styles
 └── index.css                         # Tailwind CSS imports and custom styles
@@ -117,6 +118,9 @@ interface Group {
   - `postcss.config.js` - PostCSS with Tailwind + Autoprefixer
   - `tailwind.config.js` - Tailwind configuration with shadcn/ui theme
   - `tsconfig.json` + `tsconfig.node.json` - TypeScript configuration
+  - `eslint.config.js` - Modern flat ESLint configuration with React hooks
+  - `vite.config.js` - Vite build configuration with React plugin
+  - `vite-env.d.ts` - TypeScript declarations for Vite environment
   - `components.json` - shadcn/ui CLI configuration
 
 #### 2. UI Component Library
@@ -167,7 +171,13 @@ interface Group {
   - Group membership validation
   - Form validation and reset
 
-#### 7. Data Persistence
+#### 7. Application Entry Point
+- **Main Entry:** `src/main.tsx` - React 19 application bootstrapping
+  - Strict mode enabled for development
+  - Root element validation and error handling
+  - Modern createRoot API usage
+
+#### 8. Data Persistence
 - **localStorage Integration:** Groups stored in `fareshare_groups`
 - **Mock Trip Data:** Support for future trip statistics
 - **User Sessions:** Basic user state management

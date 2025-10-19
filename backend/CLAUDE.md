@@ -25,22 +25,16 @@ backend/
 │   ├── router.py          # Main API router
 │   ├── models/            # Database models
 │   │   ├── base.py        # SQLAlchemy base configuration
-│   │   └── __init__.py    # Model imports
-│   ├── auth/              # Authentication domain
-│   │   ├── jwt_utils.py   # JWT token creation and validation
-│   │   ├── schemas.py     # Auth request/response schemas
-│   │   ├── service.py     # Authentication business logic
-│   │   ├── router.py      # Auth API endpoints (/auth/login, /auth/me)
-│   │   ├── dependencies.py # Auth dependency injection & get_current_user
-│   │   └── __init__.py    # Auth module init
-│   ├── users/             # User domain
+│   │   └── __init__.py    # Empty init file (avoid circular imports)
+│   ├── users/             # User domain (CONSOLIDATED - includes auth)
 │   │   ├── models.py      # User database models (with first_name/last_name)
-│   │   ├── schemas.py     # Pydantic schemas for validation
+│   │   ├── schemas.py     # User & auth schemas (CreateUser, LoginRequest, etc.)
 │   │   ├── repository.py  # User database operations
-│   │   ├── service.py     # User business logic with bcrypt
-│   │   ├── router.py      # User API endpoints
-│   │   ├── dependencies.py # Dependency injection
-│   │   └── __init__.py    # User module init
+│   │   ├── service.py     # User business logic with bcrypt + JWT authentication
+│   │   ├── router.py      # User API endpoints (PUT /users, POST /users, GET /users/me)
+│   │   ├── dependencies.py # Dependency injection + get_current_user
+│   │   ├── jwt_utils.py   # JWT token creation and validation
+│   │   └── __init__.py    # Empty init file (avoid circular imports)
 │   └── groups/            # Groups domain (Phase 2 complete)
 │       ├── models.py      # Group and GroupMembership models
 │       ├── schemas.py     # CreateGroup, Group schemas
@@ -48,7 +42,7 @@ backend/
 │       ├── service.py     # Group business logic with invite codes
 │       ├── router.py      # Group API endpoints (/groups)
 │       ├── dependencies.py # Group dependency injection
-│       └── __init__.py    # Groups module init
+│       └── __init__.py    # Empty init file (avoid circular imports)
 ├── alembic/               # Database migration tools
 │   └── versions/          # Migration files (users and groups tables created)
 ├── requirements.txt       # Python dependencies (includes bcrypt, pyjwt)
@@ -101,14 +95,12 @@ Additional tables for trips and related functionality will be added after groups
 
 ## API Endpoints
 
-### Current Implementation
+### Current Implementation ✅ **CONSOLIDATED ENDPOINTS**
 
-#### Authentication
-- `POST /auth/login` - User login with JWT token (returns access_token)
-- `GET /auth/me` - Get current user profile (protected endpoint)
-
-#### User Management
-- `POST /users` - Create a new user (public registration)
+#### User Management (Includes Authentication)
+- `PUT /users` - Create a new user account (public registration)
+- `POST /users` - User login with JWT token (returns access_token)
+- `GET /users/me` - Get current user profile (protected endpoint)
 
 #### System
 - `GET /` - Root endpoint with API information
@@ -143,28 +135,30 @@ The codebase follows a domain-driven design approach with clear separation of co
 - **Services**: Business logic layer
 - **Routers**: API endpoint definitions
 - **Dependencies**: Dependency injection for services
+- **JWT Utils**: Token creation and validation utilities
 - **Base**: Shared database configuration and utilities
 
-Currently implemented: `users` and `auth` domains (complete), `groups` domain (Phase 2 complete - group creation functionality). Each domain is self-contained with its own models, schemas, repository, services, routers, and dependencies. Ready to implement remaining group management features (Phase 3) and then `trips` domain following the same architectural pattern.
+Currently implemented: **`users` domain (CONSOLIDATED - includes authentication)** and `groups` domain (Phase 2 complete - group creation functionality). Each domain is self-contained with its own models, schemas, repository, services, routers, dependencies, and utilities. The **auth domain has been eliminated** - all authentication functionality consolidated into the users domain. Ready to implement remaining group management features and then `trips` domain following the same architectural pattern.
 
 ## Key Implementation Details
 
 ### Current Features
 
-#### Authentication System (`src/auth/`)
-- **JWT-based authentication**: Production-ready token system with HS256 signing
-- **Login endpoint**: Email/password authentication with JWT token response
-- **Protected endpoints**: `get_current_user()` dependency for route protection
-- **Token validation**: Automatic signature verification and expiration checking
-- **Security headers**: Proper WWW-Authenticate headers for 401 responses
-- **OpenAPI integration**: Automatic "Authorize" button in Swagger UI
-
-#### User Management (`src/users/`)
-- **User Registration**: Email validation with bcrypt password hashing
+#### User Management System (`src/users/`) ✅ **CONSOLIDATED**
+- **User Registration**: `PUT /users` - Email validation with bcrypt password hashing
+- **User Authentication**: `POST /users` - JWT-based login with production-ready token system
+- **User Profile**: `GET /users/me` - Protected endpoint for user profile access
+- **JWT Token Management**: Create, validate, and extract user data from tokens
+- **Protected Endpoints**: `get_current_user()` dependency for route protection
 - **Repository Pattern**: Clean separation between business logic and database operations
 - **Dependency Injection**: Service layer with injected repository dependencies
-- **Schema Validation**: Pydantic schemas for request/response validation
-- **Database Integration**: SQLAlchemy ORM for user entities
+- **Schema Validation**: Pydantic schemas for all user and auth operations
+- **Security Features**:
+  - bcrypt password hashing
+  - JWT token validation with expiration
+  - Proper WWW-Authenticate headers for 401 responses
+  - User enumeration protection
+- **OpenAPI Integration**: Automatic "Authorize" button in Swagger UI
 
 #### Configuration (`src/settings.py`)
 - **Environment-based configuration**: Pydantic BaseSettings with .env support
@@ -553,8 +547,8 @@ Response:
 
 1. **Start server**: `uvicorn src.main:app --reload`
 2. **Open Swagger UI**: `http://localhost:8000/docs`
-3. **Register user**: `POST /users` with email/password
-4. **Login**: `POST /auth/login` to get JWT token
+3. **Register user**: `PUT /users` with email/password/first_name
+4. **Login**: `POST /users` to get JWT token
 5. **Authorize**: Click "Authorize" button, enter `Bearer <token>`
-6. **Test protected endpoint**: `GET /auth/me` to verify authentication works
+6. **Test protected endpoint**: `GET /users/me` to verify authentication works
 7. **Test without auth**: Logout and try protected endpoint (should get 401)

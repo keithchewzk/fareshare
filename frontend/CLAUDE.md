@@ -187,9 +187,9 @@ interface Group {
   - `lib/routes.ts` - Centralized API endpoint configuration
   - `services/userService.ts` - User registration and authentication business logic
   - Environment-based configuration with `VITE_BACKEND_API_URL`
-- **Authentication Flow:**
-  - User Registration: POST /users → Create account in PostgreSQL database
-  - User Login: POST /auth/login → JWT token + GET /auth/me → User profile
+- **Authentication Flow:** ✅ **UPDATED ENDPOINTS**
+  - User Registration: PUT /users → Create account in PostgreSQL database
+  - User Login: POST /users → JWT token + GET /users/me → User profile
   - Token Management: localStorage persistence with key `fareshare_token`
 - **Error Handling:** Comprehensive API error handling with user-friendly messages
 - **Loading States:** Visual feedback during API operations
@@ -226,4 +226,5 @@ interface Group {
 - **Router & Services Architecture** - Clean separation of API routes and business logic
 - **Environment Configuration** - Vite environment variables for API URL configuration
 - **JWT Authentication** - Industry-standard token-based authentication
+- **Consolidated API Endpoints** - All user operations under `/users` (PUT /users, POST /users, GET /users/me)
 - **Hybrid Approach** - Real authentication with mock group data (transitional)

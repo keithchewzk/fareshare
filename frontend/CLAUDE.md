@@ -40,7 +40,10 @@ src/
 │       ├── CreateGroupDialog.tsx     # Group creation dialog
 │       └── JoinGroupDialog.tsx       # Group joining dialog with invite codes
 ├── lib/
-│   └── utils.ts                     # Utility functions (cn helper)
+│   ├── utils.ts                     # Utility functions (cn helper)
+│   └── routes.ts                    # API routes configuration
+├── services/
+│   └── userService.ts               # User registration and authentication API calls
 ├── main.tsx                         # Application entry point with React root
 ├── App.tsx                           # Main app with React Router setup
 ├── App.css                           # Global app styles
@@ -144,11 +147,13 @@ interface Group {
 - **Responsive Design** - Mobile-first approach
 - **Conversion Funnel** - Awareness → Interest → Consideration → Action
 
-#### 4. Authentication System (Complete)
+#### 4. Authentication System (Complete - Real Backend Integration)
 - **AuthPage Component:** `src/components/AuthPage/index.tsx`
   - Tabbed interface (Login/Signup)
-  - Form validation and error handling
-  - Mock authentication system
+  - Real API integration for registration and login
+  - Separate first name/last name fields (first name required)
+  - JWT token management and localStorage persistence
+  - Loading states and comprehensive error handling
   - React Router integration
 
 #### 5. Dashboard System (Complete)
@@ -177,28 +182,48 @@ interface Group {
   - Root element validation and error handling
   - Modern createRoot API usage
 
-#### 8. Data Persistence
-- **localStorage Integration:** Groups stored in `fareshare_groups`
+#### 8. Backend Integration (New)
+- **API Client Architecture:** Router & Services pattern
+  - `lib/routes.ts` - Centralized API endpoint configuration
+  - `services/userService.ts` - User registration and authentication business logic
+  - Environment-based configuration with `VITE_BACKEND_API_URL`
+- **Authentication Flow:**
+  - User Registration: POST /users → Create account in PostgreSQL database
+  - User Login: POST /auth/login → JWT token + GET /auth/me → User profile
+  - Token Management: localStorage persistence with key `fareshare_token`
+- **Error Handling:** Comprehensive API error handling with user-friendly messages
+- **Loading States:** Visual feedback during API operations
+
+#### 9. Data Persistence
+- **localStorage Integration:**
+  - Groups stored in `fareshare_groups` (mock data)
+  - JWT tokens stored in `fareshare_token` (real authentication)
+- **Backend Persistence:** User accounts stored in PostgreSQL via FastAPI
 - **Mock Trip Data:** Support for future trip statistics
-- **User Sessions:** Basic user state management
 
 ### ✅ Application Flow
 1. **Landing Page** - User discovers FareShare
-2. **Authentication** - User signs up or logs in
-3. **Dashboard** - User views their groups
-4. **Group Creation** - User creates new shared vehicle group
-5. **Group Joining** - User joins existing groups via invite codes
-6. **Group Management** - User views group statistics and members
+2. **Authentication** - Real backend integration:
+   - **Registration:** User creates account → Stored in PostgreSQL database
+   - **Login:** User authenticates → JWT token + user profile → Dashboard
+3. **Dashboard** - User views their groups (mock data)
+4. **Group Creation** - User creates new shared vehicle group (mock functionality)
+5. **Group Joining** - User joins existing groups via invite codes (mock functionality)
+6. **Group Management** - User views group statistics and members (mock functionality)
 
 ### 📋 Ready for Enhancement
-- Trip tracking and expense management
-- Group detail pages and member management
-- Real authentication system integration
-- Advanced group features (roles, permissions)
-- Mobile app considerations
+- **Group Management Integration:** Connect frontend group functionality to backend API
+- **Trip tracking and expense management:** Full trip logging with backend integration
+- **Group detail pages and member management:** Enhanced group features
+- **Advanced group features:** Roles, permissions, and member administration
+- **Token refresh and session management:** Enhanced authentication security
+- **Mobile app considerations:** Responsive design improvements
 
 ### Technical Decisions
 - **Tailwind CSS 3.x** - Chosen over 4.x for stability with shadcn/ui
 - **Manual component installation** - Used due to CLI network issues
 - **Index File Pattern** - Consistent component organization
-- **Mock data approach** - localStorage for development and testing
+- **Router & Services Architecture** - Clean separation of API routes and business logic
+- **Environment Configuration** - Vite environment variables for API URL configuration
+- **JWT Authentication** - Industry-standard token-based authentication
+- **Hybrid Approach** - Real authentication with mock group data (transitional)

@@ -4,7 +4,7 @@
 
 FareShare is a collaborative web application for tracking car usage within shared groups. The backend provides user authentication and will expand to include group management and trip tracking functionality.
 
-**Current Status**: Core authentication system implemented with JWT-based security. User registration and login functionality complete with production-ready bcrypt password hashing. **Groups domain Phase 2 completed** - Full group creation functionality implemented with business logic, API endpoints, and invite code generation. Ready for additional group management features (joining, membership management).
+**Current Status**: Core authentication system implemented with JWT-based security. User registration and login functionality complete with production-ready bcrypt password hashing. **Groups domain Phase 2 completed** - Full group creation functionality implemented with business logic, API endpoints, and invite code generation. **Trips domain models implemented** - Trip table created with simplified MVP approach where trip creator is responsible for costs (no cost splitting).
 
 ## Technical Architecture
 
@@ -35,16 +35,19 @@ backend/
 │   │   ├── dependencies.py # Dependency injection + get_current_user
 │   │   ├── jwt_utils.py   # JWT token creation and validation
 │   │   └── __init__.py    # Empty init file (avoid circular imports)
-│   └── groups/            # Groups domain (Phase 2 complete)
-│       ├── models.py      # Group and GroupMembership models
-│       ├── schemas.py     # CreateGroup, Group schemas
-│       ├── repository.py  # Group database operations
-│       ├── service.py     # Group business logic with invite codes
-│       ├── router.py      # Group API endpoints (/groups)
-│       ├── dependencies.py # Group dependency injection
+│   ├── groups/            # Groups domain (Phase 2 complete)
+│   │   ├── models.py      # Group and GroupMembership models
+│   │   ├── schemas.py     # CreateGroup, Group schemas
+│   │   ├── repository.py  # Group database operations
+│   │   ├── service.py     # Group business logic with invite codes
+│   │   ├── router.py      # Group API endpoints (/groups)
+│   │   ├── dependencies.py # Group dependency injection
+│   │   └── __init__.py    # Empty init file (avoid circular imports)
+│   └── trips/             # Trips domain (Models implemented)
+│       ├── models.py      # Trip model with creator-pays approach
 │       └── __init__.py    # Empty init file (avoid circular imports)
 ├── alembic/               # Database migration tools
-│   └── versions/          # Migration files (users and groups tables created)
+│   └── versions/          # Migration files (users, groups, and trips tables created)
 ├── requirements.txt       # Python dependencies (includes bcrypt, pyjwt)
 └── Dockerfile            # Container configuration
 ```
@@ -90,8 +93,24 @@ group_memberships (
 )
 ```
 
+#### Trips Table ✅ **NEW**
+```sql
+trips (
+    id SERIAL PRIMARY KEY,
+    group_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,
+    created_by INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    description VARCHAR(1000),
+    stops JSONB NOT NULL,
+    total_distance NUMERIC(10,2) NOT NULL,
+    distance_unit VARCHAR(2) NOT NULL DEFAULT 'km',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    CHECK (distance_unit IN ('km', 'mi'))
+)
+```
+
 ### Future Implementation
-Additional tables for trips and related functionality will be added after groups business logic is complete.
+Additional tables for cost tracking and payment history may be added when cost splitting features are implemented.
 
 ## API Endpoints
 
@@ -116,9 +135,12 @@ Additional tables for trips and related functionality will be added after groups
 - `POST /groups/{group_id}/leave` - Leave a group (members only) ✅ **COMPLETE**
 - `DELETE /groups/{group_id}` - Delete a group (owners only) ✅ **COMPLETE**
 
-#### Trip Management
+#### Trip Management ⏳ **PLANNED**
 - `POST /trips` - Log a new trip
 - `GET /trips` - Get user's trips
+- `GET /trips/{trip_id}` - Get trip details
+- `PUT /trips/{trip_id}` - Update trip (creator only)
+- `DELETE /trips/{trip_id}` - Delete trip (creator only)
 - Trip cost calculation endpoints
 
 #### Future Features
@@ -138,7 +160,7 @@ The codebase follows a domain-driven design approach with clear separation of co
 - **JWT Utils**: Token creation and validation utilities
 - **Base**: Shared database configuration and utilities
 
-Currently implemented: **`users` domain (CONSOLIDATED - includes authentication)** and `groups` domain (Phase 2 complete - group creation functionality). Each domain is self-contained with its own models, schemas, repository, services, routers, dependencies, and utilities. The **auth domain has been eliminated** - all authentication functionality consolidated into the users domain. Ready to implement remaining group management features and then `trips` domain following the same architectural pattern.
+Currently implemented: **`users` domain (CONSOLIDATED - includes authentication)**, `groups` domain (Phase 2 complete - group creation functionality), and **`trips` domain models (MVP approach)**. Each domain is self-contained with its own models, schemas, repository, services, routers, dependencies, and utilities. The **auth domain has been eliminated** - all authentication functionality consolidated into the users domain. The trips domain uses a simplified MVP approach where the trip creator is responsible for all costs (no cost splitting). Ready to implement trips business logic and API endpoints.
 
 ## Key Implementation Details
 
@@ -315,12 +337,20 @@ alembic upgrade head
 - `httpx==0.25.2`: HTTP client for testing
 - `email-validator==2.1.0`: Email validation support
 
+#### Trips System (`src/trips/`) ✅ **NEW - MVP MODELS**
+- **Trip Model**: Database model with creator-pays approach (no cost splitting)
+- **Group Integration**: Trips belong to groups and inherit distance units
+- **JSONB Route Storage**: Flexible storage for trip stops using PostgreSQL JSONB
+- **Creator Responsibility**: The user who logs the trip is responsible for paying
+- **Cost Calculation**: Simple formula: `trip.total_distance * trip.group.cost_per_distance`
+- **Database Migration**: Trip table created with proper foreign key relationships
+
 ## Next Steps
 
-1. **Complete Group Management**: Add group joining and member management endpoints
-2. **Implement Trip Management**: Add trip logging with user association
-3. **Add Trip-Group Association**: Connect trips to specific groups
-4. **Implement Cost Calculation**: Calculate trip costs and split among group members
+1. **Implement Trip Business Logic**: Add trip schemas, repository, and service layers
+2. **Create Trip API Endpoints**: Implement CRUD operations for trips
+3. **Add Trip Validation**: Ensure users can only create trips in groups they belong to
+4. **Implement Cost Calculation**: Add trip cost calculation endpoints
 5. **Google Maps Integration**: Add distance calculation API for accurate trip costs
 6. **Frontend Integration**: Connect with React frontend
 7. **Testing**: Add comprehensive test suite

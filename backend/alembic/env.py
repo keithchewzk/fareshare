@@ -15,6 +15,11 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 from src.models.base import Base
 from src.settings import settings
 
+# Import all models so Alembic can detect them
+from src.users.models import User
+from src.groups.models import Group, GroupMembership
+from src.trips.models import Trip
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

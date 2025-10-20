@@ -38,6 +38,7 @@ class Group(Base):
     memberships = relationship(
         "GroupMembership", back_populates="group", cascade="all, delete-orphan"
     )
+    trips = relationship("Trip", back_populates="group", cascade="all, delete-orphan")
 
 
 class GroupMembership(Base):

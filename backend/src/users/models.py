@@ -15,3 +15,6 @@ class User(Base):
     group_memberships = relationship(
         "GroupMembership", back_populates="user", cascade="all, delete-orphan"
     )
+    trips = relationship(
+        "Trip", back_populates="creator", cascade="all, delete-orphan"
+    )

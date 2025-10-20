@@ -345,16 +345,85 @@ alembic upgrade head
 - **Cost Calculation**: Simple formula: `trip.total_distance * trip.group.cost_per_distance`
 - **Database Migration**: Trip table created with proper foreign key relationships
 
+## Trips Domain Implementation Plan (In Progress)
+
+### **PUT /trips Endpoint Implementation Plan**
+
+#### **Endpoint Design**
+- **Method**: `PUT /trips`
+- **Purpose**: Create a new trip with backend-calculated distance using Google Maps API
+- **Authentication**: Required (JWT token)
+- **Authorization**: User must be a member of the target group
+
+#### **Request Schema**
+```python
+class CreateTrip(BaseModel):
+    group_id: int
+    name: str  # e.g., "Weekend Beach Trip"
+    description: Optional[str] = None
+    stops: List[Dict[str, Any]]  # Route waypoints for Google Maps
+    # NO total_distance - calculated by backend using Google Maps
+    # NO distance_unit - inherited from group settings
+```
+
+#### **Stops Data Structure**
+```python
+# Example stops format with addresses:
+stops = [
+    {"address": "123 Main St, City", "type": "start"},
+    {"address": "456 Oak Ave, City", "type": "waypoint"},
+    {"address": "789 Beach Rd, City", "type": "end"}
+]
+# Or with coordinates:
+stops = [
+    {"lat": 40.7128, "lng": -74.0060, "address": "NYC", "type": "start"},
+    {"lat": 40.6892, "lng": -74.0445, "address": "Statue of Liberty", "type": "end"}
+]
+```
+
+#### **Business Logic Flow**
+1. **Authentication**: Verify JWT token → get current user
+2. **Authorization**: Check user is member of the specified group
+3. **Validation**:
+   - Group exists and user has access
+   - Stops data has valid structure (at least 2 stops)
+   - Start and end points are defined
+4. **Google Maps Integration**:
+   - Call Google Maps Distance Matrix API or Directions API
+   - Calculate total distance for the route
+   - Handle API errors gracefully
+5. **Distance Unit**: Use group's distance_unit setting
+6. **Cost Calculation**: `calculated_distance * group.cost_per_distance`
+7. **Database**: Create trip with calculated values
+8. **Response**: Return created trip with calculated distance and cost
+
+#### **Implementation Tasks**
+1. **Google Maps Integration**: Create `trips/google_maps.py` utility
+2. **Environment Config**: Add `GOOGLE_MAPS_API_KEY` to settings
+3. **Schemas**: Create `CreateTrip` and `Trip` schemas in `trips/schemas.py`
+4. **Repository**: Create `TripRepository` in `trips/repository.py`
+5. **Service**: Create `TripService` with distance calculation logic in `trips/service.py`
+6. **Dependencies**: Create group membership validation in `trips/dependencies.py`
+7. **Router**: Create `PUT /trips` endpoint in `trips/router.py`
+8. **Main App**: Register trips router in main application
+
+#### **Error Handling Requirements**
+- Google Maps API failures (rate limits, invalid addresses)
+- Invalid stops data (missing start/end, malformed addresses)
+- Network timeouts with Maps API
+- Fallback behavior when Maps API is unavailable
+
+#### **New Dependencies Required**
+- `googlemaps` Python library or `httpx` for direct API calls
+- `GOOGLE_MAPS_API_KEY` environment variable
+
 ## Next Steps
 
-1. **Implement Trip Business Logic**: Add trip schemas, repository, and service layers
-2. **Create Trip API Endpoints**: Implement CRUD operations for trips
-3. **Add Trip Validation**: Ensure users can only create trips in groups they belong to
-4. **Implement Cost Calculation**: Add trip cost calculation endpoints
-5. **Google Maps Integration**: Add distance calculation API for accurate trip costs
-6. **Frontend Integration**: Connect with React frontend
-7. **Testing**: Add comprehensive test suite
-8. **Deployment**: Prepare for Railway deployment with production environment configuration
+1. **Complete PUT /trips Implementation**: Execute the implementation plan above
+2. **Add Additional Trip Endpoints**: GET /trips, GET /trips/{id}, etc.
+3. **Frontend Integration**: Connect trip creation with React frontend
+4. **Testing**: Add comprehensive test suite for trips functionality
+5. **Deployment**: Prepare for Railway deployment with production environment configuration
 
 ## Groups Domain Implementation Plan (Temporary. Remove upon development completion.)
 

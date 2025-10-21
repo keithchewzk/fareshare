@@ -52,47 +52,15 @@ export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
     };
   };
 
-  const handleCreateGroup = (name: string) => {
-    const newGroup: Group = {
-      id: 'group_' + Date.now(),
-      name,
-      inviteCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
-      createdBy: user.id,
-      members: [user.id],
-      createdAt: Date.now(),
-    };
-
-    const allGroups = JSON.parse(localStorage.getItem('fareshare_groups') || '[]');
-    const updatedGroups = [...allGroups, newGroup];
-    localStorage.setItem('fareshare_groups', JSON.stringify(updatedGroups));
-
-    setGroups([...groups, newGroup]);
-    setShowCreateDialog(false);
+  const handleCreateGroup = () => {
+    // Refresh the groups list after creation
+    loadGroups();
   };
 
   const handleJoinGroup = (inviteCode: string): { success: boolean; error?: string } => {
-    const allGroups = JSON.parse(localStorage.getItem('fareshare_groups') || '[]');
-    const targetGroup = allGroups.find((g: Group) => g.inviteCode === inviteCode);
-
-    if (!targetGroup) {
-      return { success: false, error: 'Invalid invite code. Please check and try again.' };
-    }
-
-    if (targetGroup.members.includes(user.id)) {
-      return { success: false, error: 'You are already a member of this group.' };
-    }
-
-    // Add user to the group
-    targetGroup.members.push(user.id);
-
-    // Update localStorage
-    localStorage.setItem('fareshare_groups', JSON.stringify(allGroups));
-
-    // Update local state
-    setGroups([...groups, targetGroup]);
-    setShowJoinDialog(false);
-
-    return { success: true };
+    // TODO: Implement join group with backend API
+    console.log('Join group not yet implemented with backend API:', inviteCode);
+    return { success: false, error: 'Join group functionality coming soon' };
   };
 
   return (

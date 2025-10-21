@@ -12,6 +12,7 @@ export const API_ROUTES = {
   },
   groups: {
     list: '/groups',   // GET /groups - Get user's groups
+    create: '/groups', // POST /groups - Create new group
   },
 } as const;
 

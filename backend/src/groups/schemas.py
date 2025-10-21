@@ -10,7 +10,7 @@ class Group(BaseModel):
 
     id: int
     name: str
-    description: str
+    description: Optional[str]
     invite_code: str
     cost_per_distance: Decimal
     distance_unit: Literal["km", "mi"]

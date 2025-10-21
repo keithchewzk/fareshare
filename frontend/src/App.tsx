@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import "./App.css";
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import { LandingPage } from './components/LandingPage';
 import { AuthPage } from './components/AuthPage';
 import { Dashboard } from './components/Dashboard';
+import { GroupDetails } from './components/GroupDetails';
 
 interface User {
   id: string;
@@ -34,8 +35,24 @@ const AppContent: React.FC = () => {
   };
 
   const handleViewGroup = (groupId: string) => {
-    // TODO: Navigate to group detail page when implemented
-    console.log('View group:', groupId);
+    navigate(`/groups/${groupId}`);
+  };
+
+  const handleBackToDashboard = () => {
+    navigate('/dashboard');
+  };
+
+  const GroupDetailsWrapper = () => {
+    const { groupId } = useParams<{ groupId: string }>();
+    if (!user || !groupId) return null;
+
+    return (
+      <GroupDetails
+        user={user}
+        groupId={groupId}
+        onBack={handleBackToDashboard}
+      />
+    );
   };
 
   return (
@@ -44,16 +61,19 @@ const AppContent: React.FC = () => {
         <Route path="/" element={<LandingPage onGetStarted={handleGetStarted} />} />
         <Route path="/auth" element={<AuthPage onLogin={handleLogin} onBack={handleBack} />} />
         {user && (
-          <Route
-            path="/dashboard"
-            element={
-              <Dashboard
-                user={user}
-                onLogout={handleLogout}
-                onViewGroup={handleViewGroup}
-              />
-            }
-          />
+          <>
+            <Route
+              path="/dashboard"
+              element={
+                <Dashboard
+                  user={user}
+                  onLogout={handleLogout}
+                  onViewGroup={handleViewGroup}
+                />
+              }
+            />
+            <Route path="/groups/:groupId" element={<GroupDetailsWrapper />} />
+          </>
         )}
       </Routes>
     </div>

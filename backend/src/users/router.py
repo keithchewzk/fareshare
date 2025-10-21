@@ -7,7 +7,7 @@ from src.users.service import UserService
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-@router.put("/", response_model=User, status_code=201)
+@router.post("/", response_model=User, status_code=201)
 async def create_user(
     user_data: CreateUser, user_service: UserService = Depends(get_user_service)
 ):
@@ -15,7 +15,7 @@ async def create_user(
     return user_service.create_user(user_data)
 
 
-@router.post("/", response_model=LoginResponse, status_code=200)
+@router.post("/login", response_model=LoginResponse, status_code=200)
 async def login_user(
     login_data: LoginRequest, user_service: UserService = Depends(get_user_service)
 ):

@@ -41,7 +41,7 @@ class UserService {
    */
   async register(userData: CreateUserRequest): Promise<CreateUserResponse> {
     const response = await fetch(getApiUrl(API_ROUTES.users.create), {
-      method: 'PUT',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },

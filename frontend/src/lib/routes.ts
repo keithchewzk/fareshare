@@ -10,6 +10,9 @@ export const API_ROUTES = {
     login: '/users',   // POST /users - Login
     me: '/users/me',   // GET /users/me - Get profile
   },
+  groups: {
+    list: '/groups',   // GET /groups - Get user's groups
+  },
 } as const;
 
 /**

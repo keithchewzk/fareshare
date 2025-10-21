@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Plus, Users, Car, LogOut, UserPlus } from 'lucide-react';
 import { CreateGroupDialog } from './CreateGroupDialog';
 import { JoinGroupDialog } from './JoinGroupDialog';
+import { groupService, Group } from '../../services/groupService';
 
 interface User {
   id: string;
@@ -11,23 +12,16 @@ interface User {
   name: string;
 }
 
-interface Group {
-  id: string;
-  name: string;
-  inviteCode: string;
-  createdBy: string;
-  members: string[];
-  createdAt: number;
-}
 
 interface DashboardProps {
   user: User;
   onLogout: () => void;
-  onViewGroup: (groupId: string) => void;
+  onViewGroup: (groupId: number) => void;
 }
 
 export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
   const [groups, setGroups] = useState<Group[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showJoinDialog, setShowJoinDialog] = useState(false);
 
@@ -35,13 +29,21 @@ export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
     loadGroups();
   }, [user.id]);
 
-  const loadGroups = () => {
-    const allGroups = JSON.parse(localStorage.getItem('fareshare_groups') || '[]');
-    const userGroups = allGroups.filter((g: Group) => g.members.includes(user.id));
-    setGroups(userGroups);
+  const loadGroups = async () => {
+    try {
+      setLoading(true);
+      const userGroups = await groupService.getGroups();
+      setGroups(userGroups);
+    } catch (error) {
+      console.error('Failed to load groups:', error);
+      // Keep empty groups array on error
+      setGroups([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getGroupStats = (groupId: string) => {
+  const getGroupStats = (groupId: number) => {
     const trips = JSON.parse(localStorage.getItem('fareshare_trips') || '[]');
     const groupTrips = trips.filter((t: any) => t.groupId === groupId);
     return {
@@ -135,7 +137,11 @@ export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
         </div>
 
         {/* Groups Grid */}
-        {groups.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-16">
+            <p className="text-muted-foreground">Loading groups...</p>
+          </div>
+        ) : groups.length === 0 ? (
           /* Empty State */
           <div className="text-center py-16">
             <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
@@ -164,7 +170,7 @@ export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
                       </div>
                     </CardTitle>
                     <CardDescription>
-                      {group.members.length} member{group.members.length !== 1 ? 's' : ''}
+                      {group.description || 'No description'}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>

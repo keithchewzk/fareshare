@@ -2,7 +2,7 @@ import random
 
 from fastapi import HTTPException
 from src.groups.repository import GroupRepository
-from src.groups.schemas import CreateGroup, Group, GroupListItem
+from src.groups.schemas import CreateGroup, Group, GroupListItem, Membership
 
 
 class GroupService:
@@ -159,3 +159,26 @@ class GroupService:
                 status_code=403,
                 detail="Access denied: Only group owners can delete groups",
             )
+
+    def get_user_membership(self, user_id: int, group_id: int) -> Membership:
+        """
+        Get user's membership information for a specific group.
+
+        Returns the user's role (owner/member) and when they joined.
+
+        Raises:
+            HTTPException 404: Group not found
+            HTTPException 403: User not a member of the group
+        """
+        group = self.group_repository.get_group_by_id(group_id)
+        if not group:
+            raise HTTPException(status_code=404, detail="Group not found")
+
+        membership = self.group_repository.get_user_membership(user_id, group_id)
+        if not membership:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: You are not a member of this group",
+            )
+
+        return Membership.model_validate(membership)

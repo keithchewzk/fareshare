@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from src.groups.dependencies import get_group_service
 from src.users.dependencies import get_current_user
-from src.groups.schemas import CreateGroup, Group, GroupListItem, JoinGroup
+from src.groups.schemas import CreateGroup, Group, GroupListItem, JoinGroup, Membership
 from src.groups.service import GroupService
 from src.users.models import User
 
@@ -55,6 +55,16 @@ async def leave_group(
 ):
     """Leave a group voluntarily. Only members can leave - owners must delete the group."""
     group_service.leave_group(current_user.id, group_id)
+
+
+@router.get("/{group_id}/membership", response_model=Membership)
+async def get_user_membership(
+    group_id: int,
+    current_user: User = Depends(get_current_user),
+    group_service: GroupService = Depends(get_group_service),
+):
+    """Get the current user's membership information for a specific group."""
+    return group_service.get_user_membership(current_user.id, group_id)
 
 
 @router.delete("/{group_id}", status_code=204)

@@ -22,6 +22,11 @@ export interface JoinGroupRequest {
   invite_code: string;
 }
 
+export interface Membership {
+  role: 'owner' | 'member';
+  joined_at: string;
+}
+
 class GroupService {
   /**
    * Get user's groups
@@ -154,6 +159,59 @@ class GroupService {
     }
 
     return response.json();
+  }
+
+  /**
+   * Get user's membership information for a group
+   */
+  async getUserMembership(groupId: string): Promise<Membership> {
+    const token = localStorage.getItem('fareshare_token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(getApiUrl(`${API_ROUTES.groups.membership}/${groupId}/membership`), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.detail || 'Failed to get membership information';
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Leave a group (members only)
+   */
+  async leaveGroup(groupId: string): Promise<void> {
+    const token = localStorage.getItem('fareshare_token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(getApiUrl(`${API_ROUTES.groups.leave}/${groupId}/leave`), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.detail || 'Failed to leave group';
+      throw new Error(errorMessage);
+    }
+
+    // POST requests typically return no content (204)
+    return;
   }
 }
 

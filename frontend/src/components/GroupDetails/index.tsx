@@ -3,7 +3,7 @@ import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { ArrowLeft, Plus, Users, MapPin, MoreVertical, Trash2, LogOut, Copy, Check } from 'lucide-react';
 import { AddTripDialog } from './AddTripDialog';
-import { groupService, Group as BackendGroup } from '../../services/groupService';
+import { groupService, Group as BackendGroup, Membership } from '../../services/groupService';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,13 +55,13 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [showAddTrip, setShowAddTrip] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [membership, setMembership] = useState<Membership | null>(null);
 
-  // TODO: Determine ownership from backend API when available
-  // For now, assume user is owner since backend doesn't provide this info
-  const isOwner = true;
+  const isOwner = membership?.role === 'owner';
 
   useEffect(() => {
     loadGroupData();
@@ -72,9 +72,14 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
       setLoading(true);
       setError(null);
 
-      // Fetch group data from backend API
-      const fetchedGroup = await groupService.getGroup(groupId);
+      // Fetch group data and user membership in parallel
+      const [fetchedGroup, userMembership] = await Promise.all([
+        groupService.getGroup(groupId),
+        groupService.getUserMembership(groupId)
+      ]);
+
       setGroup(fetchedGroup);
+      setMembership(userMembership);
 
       // Still load trips from localStorage for now (until trips API is implemented)
       const allTrips = JSON.parse(localStorage.getItem('fareshare_trips') || '[]');
@@ -166,8 +171,24 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
   };
 
   const handleLeaveGroup = () => {
-    // TODO: Implement leave group functionality
-    console.log('Leave group functionality coming soon');
+    setShowLeaveConfirm(true);
+  };
+
+  const handleConfirmLeave = async () => {
+    try {
+      await groupService.leaveGroup(groupId);
+      setShowLeaveConfirm(false);
+      // Navigate back to dashboard after successful leave
+      onBack();
+    } catch (error) {
+      console.error('Failed to leave group:', error);
+      // TODO: Show error message to user
+      setShowLeaveConfirm(false);
+    }
+  };
+
+  const handleCancelLeave = () => {
+    setShowLeaveConfirm(false);
   };
 
   if (loading) {
@@ -344,6 +365,33 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
             </Button>
             <Button variant="destructive" onClick={handleConfirmDelete}>
               Yes, I'm Sure
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Leave Group Confirmation Dialog */}
+      <Dialog open={showLeaveConfirm} onOpenChange={setShowLeaveConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Leave Group</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to leave this group?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <p>• You will no longer have access to group information</p>
+              <p>• You will need a new invite code to rejoin</p>
+              <p>• Your trip history in this group will remain</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCancelLeave}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmLeave}>
+              Leave Group
             </Button>
           </DialogFooter>
         </DialogContent>

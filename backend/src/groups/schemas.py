@@ -50,3 +50,13 @@ class JoinGroup(BaseModel):
     invite_code: str = Field(
         ..., min_length=10, max_length=10, description="Group invite code"
     )
+
+
+class Membership(BaseModel):
+    """Schema for user's membership in a group"""
+
+    role: Literal["owner", "member"]
+    joined_at: datetime
+
+    class Config:
+        from_attributes = True

@@ -1,9 +1,23 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
-import { ArrowLeft, Plus, Users, MapPin } from 'lucide-react';
+import { ArrowLeft, Plus, Users, MapPin, MoreVertical, Trash2, LogOut } from 'lucide-react';
 import { AddTripDialog } from './AddTripDialog';
 import { groupService, Group as BackendGroup } from '../../services/groupService';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../ui/dialog';
 
 interface User {
   id: string;
@@ -40,8 +54,13 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
   const [group, setGroup] = useState<BackendGroup | null>(null);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [showAddTrip, setShowAddTrip] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // TODO: Determine ownership from backend API when available
+  // For now, assume user is owner since backend doesn't provide this info
+  const isOwner = true;
 
   useEffect(() => {
     loadGroupData();
@@ -116,6 +135,25 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
     setShowAddTrip(false);
   };
 
+  const handleDeleteGroup = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = () => {
+    // TODO: Implement actual delete group API call
+    console.log('Delete group confirmed - API call coming soon');
+    setShowDeleteConfirm(false);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+  };
+
+  const handleLeaveGroup = () => {
+    // TODO: Implement leave group functionality
+    console.log('Leave group functionality coming soon');
+  };
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
@@ -175,10 +213,32 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
                 </Button> */}
               </div>
             </div>
-            <Button onClick={() => setShowAddTrip(true)}>
-              <Plus className="size-4 mr-2" />
-              Add Trip
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button onClick={() => setShowAddTrip(true)}>
+                <Plus className="size-4 mr-2" />
+                Add Trip
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {isOwner ? (
+                    <DropdownMenuItem onClick={handleDeleteGroup} className="text-destructive">
+                      <Trash2 className="size-4 mr-2" />
+                      Delete Group
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem onClick={handleLeaveGroup}>
+                      <LogOut className="size-4 mr-2" />
+                      Leave Group
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
       </header>
@@ -246,6 +306,33 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
         onOpenChange={setShowAddTrip}
         onAddTrip={handleAddTrip}
       />
+
+      {/* Delete Group Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Group</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this group? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <p>• All trip information will be permanently lost</p>
+              <p>• All members of the group will be automatically removed</p>
+              <p>• This action cannot be reversed</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCancelDelete}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>
+              Yes, I'm Sure
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

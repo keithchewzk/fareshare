@@ -139,10 +139,17 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
     setShowDeleteConfirm(true);
   };
 
-  const handleConfirmDelete = () => {
-    // TODO: Implement actual delete group API call
-    console.log('Delete group confirmed - API call coming soon');
-    setShowDeleteConfirm(false);
+  const handleConfirmDelete = async () => {
+    try {
+      await groupService.deleteGroup(groupId);
+      setShowDeleteConfirm(false);
+      // Navigate back to dashboard after successful deletion
+      onBack();
+    } catch (error) {
+      console.error('Failed to delete group:', error);
+      // TODO: Show error message to user
+      setShowDeleteConfirm(false);
+    }
   };
 
   const handleCancelDelete = () => {

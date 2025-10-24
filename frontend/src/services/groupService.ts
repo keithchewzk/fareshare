@@ -96,6 +96,33 @@ class GroupService {
 
     return response.json();
   }
+
+  /**
+   * Delete a group (owners only)
+   */
+  async deleteGroup(groupId: string): Promise<void> {
+    const token = localStorage.getItem('fareshare_token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(getApiUrl(`${API_ROUTES.groups.delete}/${groupId}`), {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.detail || 'Failed to delete group';
+      throw new Error(errorMessage);
+    }
+
+    // DELETE requests typically return no content (204)
+    return;
+  }
 }
 
 export const groupService = new GroupService();

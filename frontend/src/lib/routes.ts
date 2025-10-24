@@ -14,6 +14,7 @@ export const API_ROUTES = {
     list: '/groups',   // GET /groups - Get user's groups
     create: '/groups', // POST /groups - Create new group
     detail: '/groups', // GET /groups/:id - Get single group
+    delete: '/groups', // DELETE /groups/:id - Delete group
   },
 } as const;
 

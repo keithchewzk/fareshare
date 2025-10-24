@@ -18,6 +18,10 @@ export interface CreateGroupRequest {
   distance_unit: 'km' | 'mi';
 }
 
+export interface JoinGroupRequest {
+  invite_code: string;
+}
+
 class GroupService {
   /**
    * Get user's groups
@@ -123,6 +127,33 @@ class GroupService {
 
     // DELETE requests typically return no content (204)
     return;
+  }
+
+  /**
+   * Join a group using an invite code
+   */
+  async joinGroup(joinData: JoinGroupRequest): Promise<Group> {
+    const token = localStorage.getItem('fareshare_token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(getApiUrl(API_ROUTES.groups.join), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(joinData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.detail || 'Failed to join group';
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
   }
 }
 

@@ -15,6 +15,7 @@ export const API_ROUTES = {
     create: '/groups', // POST /groups - Create new group
     detail: '/groups', // GET /groups/:id - Get single group
     delete: '/groups', // DELETE /groups/:id - Delete group
+    join: '/groups/join', // POST /groups/join - Join group via invite code
   },
 } as const;
 

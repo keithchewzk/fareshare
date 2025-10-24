@@ -57,10 +57,17 @@ export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
     loadGroups();
   };
 
-  const handleJoinGroup = (inviteCode: string): { success: boolean; error?: string } => {
-    // TODO: Implement join group with backend API
-    console.log('Join group not yet implemented with backend API:', inviteCode);
-    return { success: false, error: 'Join group functionality coming soon' };
+  const handleJoinGroup = async (inviteCode: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      await groupService.joinGroup({ invite_code: inviteCode });
+      // Refresh the groups list after successful join
+      await loadGroups();
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to join group:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to join group';
+      return { success: false, error: errorMessage };
+    }
   };
 
   return (

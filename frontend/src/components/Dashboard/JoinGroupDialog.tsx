@@ -14,14 +14,15 @@ import {
 interface JoinGroupDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onJoinGroup: (inviteCode: string) => { success: boolean; error?: string };
+  onJoinGroup: (inviteCode: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 export function JoinGroupDialog({ open, onOpenChange, onJoinGroup }: JoinGroupDialogProps) {
   const [inviteCode, setInviteCode] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -30,12 +31,25 @@ export function JoinGroupDialog({ open, onOpenChange, onJoinGroup }: JoinGroupDi
       return;
     }
 
-    const result = onJoinGroup(inviteCode.trim());
+    if (inviteCode.trim().length !== 10) {
+      setError('Invite code must be exactly 10 characters');
+      return;
+    }
 
-    if (!result.success && result.error) {
-      setError(result.error);
-    } else {
-      setInviteCode('');
+    setLoading(true);
+    try {
+      const result = await onJoinGroup(inviteCode.trim());
+
+      if (!result.success && result.error) {
+        setError(result.error);
+      } else {
+        setInviteCode('');
+        onOpenChange(false);
+      }
+    } catch (error) {
+      setError('An unexpected error occurred');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,14 +76,14 @@ export function JoinGroupDialog({ open, onOpenChange, onJoinGroup }: JoinGroupDi
               <Label htmlFor="invite-code">Invite Code</Label>
               <Input
                 id="invite-code"
-                placeholder="e.g., ABC123"
+                placeholder="e.g., ABCDEFGHJK"
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                 autoFocus
-                maxLength={6}
+                maxLength={10}
               />
               <p className="text-xs text-muted-foreground">
-                6-character code provided by the group creator
+                10-character code provided by the group creator
               </p>
             </div>
             {error && (
@@ -80,8 +94,8 @@ export function JoinGroupDialog({ open, onOpenChange, onJoinGroup }: JoinGroupDi
             <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!inviteCode.trim()}>
-              Join Group
+            <Button type="submit" disabled={!inviteCode.trim() || loading}>
+              {loading ? 'Joining...' : 'Join Group'}
             </Button>
           </DialogFooter>
         </form>

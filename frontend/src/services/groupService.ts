@@ -8,6 +8,7 @@ export interface Group {
   id: number;
   name: string;
   description?: string;
+  invite_code: string;
 }
 
 export interface CreateGroupRequest {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
-import { ArrowLeft, Plus, Users, MapPin, MoreVertical, Trash2, LogOut } from 'lucide-react';
+import { ArrowLeft, Plus, Users, MapPin, MoreVertical, Trash2, LogOut, Copy, Check } from 'lucide-react';
 import { AddTripDialog } from './AddTripDialog';
 import { groupService, Group as BackendGroup } from '../../services/groupService';
 import {
@@ -55,6 +55,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [showAddTrip, setShowAddTrip] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -156,6 +157,14 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
     setShowDeleteConfirm(false);
   };
 
+  const copyInviteCode = () => {
+    if (group) {
+      navigator.clipboard.writeText(group.invite_code);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    }
+  };
+
   const handleLeaveGroup = () => {
     // TODO: Implement leave group functionality
     console.log('Leave group functionality coming soon');
@@ -204,20 +213,19 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
                   <Users className="size-4" />
                   1 member {/* TODO: Get member count from backend */}
                 </div>
-                {/* TODO: Implement invite codes when backend supports them */}
-                {/* <Button
+                <Button
                   variant="ghost"
                   size="sm"
                   onClick={copyInviteCode}
                   className="h-auto p-0 hover:bg-transparent"
                 >
-                  <span className="mr-2">Code: {group.inviteCode}</span>
+                  <span className="mr-2">Code: {group.invite_code}</span>
                   {copiedCode ? (
                     <Check className="size-4 text-green-600" />
                   ) : (
                     <Copy className="size-4" />
                   )}
-                </Button> */}
+                </Button>
               </div>
             </div>
             <div className="flex items-center gap-2">

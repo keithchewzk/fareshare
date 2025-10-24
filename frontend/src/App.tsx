@@ -34,7 +34,7 @@ const AppContent: React.FC = () => {
     navigate('/');
   };
 
-  const handleViewGroup = (groupId: string) => {
+  const handleViewGroup = (groupId: number) => {
     navigate(`/groups/${groupId}`);
   };
 

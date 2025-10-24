@@ -70,6 +70,32 @@ class GroupService {
 
     return response.json();
   }
+
+  /**
+   * Get a single group by ID
+   */
+  async getGroup(groupId: string): Promise<Group> {
+    const token = localStorage.getItem('fareshare_token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(getApiUrl(`${API_ROUTES.groups.detail}/${groupId}`), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.detail || 'Failed to fetch group';
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  }
 }
 
 export const groupService = new GroupService();

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
-import { ArrowLeft, Plus, Copy, Check, Users, MapPin } from 'lucide-react';
+import { ArrowLeft, Plus, Users, MapPin } from 'lucide-react';
 import { AddTripDialog } from './AddTripDialog';
+import { groupService, Group as BackendGroup } from '../../services/groupService';
 
 interface User {
   id: string;
@@ -36,34 +37,39 @@ interface GroupDetailsProps {
 }
 
 export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
-  const [group, setGroup] = useState<Group | null>(null);
+  const [group, setGroup] = useState<BackendGroup | null>(null);
   const [trips, setTrips] = useState<Trip[]>([]);
-  const [copiedCode, setCopiedCode] = useState(false);
   const [showAddTrip, setShowAddTrip] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadGroupData();
   }, [groupId]);
 
-  const loadGroupData = () => {
-    const allGroups = JSON.parse(localStorage.getItem('fareshare_groups') || '[]');
-    const foundGroup = allGroups.find((g: Group) => g.id === groupId);
-    setGroup(foundGroup);
+  const loadGroupData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    const allTrips = JSON.parse(localStorage.getItem('fareshare_trips') || '[]');
-    const groupTrips = allTrips.filter((t: Trip) => t.groupId === groupId);
-    // Sort by date, newest first
-    groupTrips.sort((a: Trip, b: Trip) => b.date - a.date);
-    setTrips(groupTrips);
-  };
+      // Fetch group data from backend API
+      const fetchedGroup = await groupService.getGroup(groupId);
+      setGroup(fetchedGroup);
 
-  const copyInviteCode = () => {
-    if (group) {
-      navigator.clipboard.writeText(group.inviteCode);
-      setCopiedCode(true);
-      setTimeout(() => setCopiedCode(false), 2000);
+      // Still load trips from localStorage for now (until trips API is implemented)
+      const allTrips = JSON.parse(localStorage.getItem('fareshare_trips') || '[]');
+      const groupTrips = allTrips.filter((t: Trip) => t.groupId === parseInt(groupId));
+      // Sort by date, newest first
+      groupTrips.sort((a: Trip, b: Trip) => b.date - a.date);
+      setTrips(groupTrips);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load group data');
+      console.error('Failed to load group:', err);
+    } finally {
+      setLoading(false);
     }
   };
+
 
   const getUserName = (userId: string) => {
     if (userId === user.id) return 'You';
@@ -110,8 +116,30 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
     setShowAddTrip(false);
   };
 
-  if (!group) {
+  if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-destructive mb-4">{error}</p>
+          <Button onClick={onBack}>Back to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!group) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="mb-4">Group not found</p>
+          <Button onClick={onBack}>Back to Dashboard</Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -129,9 +157,10 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Users className="size-4" />
-                  {group.members.length} member{group.members.length !== 1 ? 's' : ''}
+                  1 member {/* TODO: Get member count from backend */}
                 </div>
-                <Button
+                {/* TODO: Implement invite codes when backend supports them */}
+                {/* <Button
                   variant="ghost"
                   size="sm"
                   onClick={copyInviteCode}
@@ -143,7 +172,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
                   ) : (
                     <Copy className="size-4" />
                   )}
-                </Button>
+                </Button> */}
               </div>
             </div>
             <Button onClick={() => setShowAddTrip(true)}>

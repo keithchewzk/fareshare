@@ -50,6 +50,14 @@ class Settings(BaseSettings):
         default=30, description="JWT token expiration time in minutes"
     )
 
+    google_maps_api_key: str = Field(
+        description="Google Maps API Key",
+    )
+    google_maps_region_code: str = Field(
+        default="SG",
+        description="Google Maps region code for address formatting and bias (ISO 3166-1 alpha-2)",
+    )
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
@@ -58,3 +66,7 @@ class Settings(BaseSettings):
 
 # Create a global settings instance
 settings = Settings()
+
+
+def get_settings():
+    return settings

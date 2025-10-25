@@ -5,7 +5,7 @@ Maps service - Business logic layer
 from typing import Any, Dict, List, Optional
 
 from src.maps.google_client import GoogleMapsClient
-from src.maps.schemas import AddressAutocompleteResponse, AddressSuggestion
+from src.maps.schemas import AddressAutocompleteResponse, AddressSuggestion, Location
 
 
 class MapsService:
@@ -46,72 +46,42 @@ class MapsService:
         self, google_response: Dict[str, Any]
     ) -> List[AddressSuggestion]:
         """
-        Transform Google Places API v1 response to our AddressSuggestion format
+        Transform Google Places Text Search API v1 response to our AddressSuggestion format
 
         Args:
-            google_response: Raw response from Google Places API v1
+            google_response: Raw response from Google Places Text Search API v1
 
         Returns:
             List of AddressSuggestion objects
         """
         suggestions = []
 
-        # Get suggestions array from Google response
-        google_suggestions = google_response.get("suggestions", [])
+        # Get places array from Google response
+        google_places = google_response.get("places", [])
 
-        for suggestion in google_suggestions:
-            # Only process placePredictions (ignore queryPredictions)
-            place_prediction = suggestion.get("placePrediction")
-            if not place_prediction:
-                continue
+        for place in google_places:
+            # Extract place ID from id field
+            place_id = place.get("id", "")
 
-            # Extract place ID
-            place_id = place_prediction.get("placeId", "")
+            # Extract display name
+            display_name = place.get("displayName", {})
+            display_name_text = display_name.get("text", "")
 
-            # Extract text information
-            text_info = place_prediction.get("text", {})
-            full_text = text_info.get("text", "")
+            # Extract location coordinates
+            location_data = place.get("location", {})
+            latitude = location_data.get("latitude", 0.0)
+            longitude = location_data.get("longitude", 0.0)
 
-            # For Google Places API v1, we need to parse main_text and secondary_text
-            # from the full address text since they're not separate fields
-            main_text, secondary_text = self._parse_address_parts(full_text)
+            # Create Location object
+            location = Location(latitude=latitude, longitude=longitude)
 
             # Create our AddressSuggestion object
             address_suggestion = AddressSuggestion(
-                place_id=place_id,
-                description=full_text,
-                main_text=main_text,
-                secondary_text=secondary_text,
+                id=place_id,
+                display_name=display_name_text,
+                location=location,
             )
 
             suggestions.append(address_suggestion)
 
         return suggestions
-
-    def _parse_address_parts(self, full_address: str) -> tuple[str, str]:
-        """
-        Parse full address into main text and secondary text parts
-
-        Args:
-            full_address: Full formatted address string
-
-        Returns:
-            Tuple of (main_text, secondary_text)
-        """
-        if not full_address:
-            return "", ""
-
-        # Split address by commas to separate main part from city/state/country
-        parts = [part.strip() for part in full_address.split(",")]
-
-        if len(parts) <= 1:
-            # No comma separation, return full text as main
-            return full_address, ""
-
-        # First part is typically the main address (street number + name)
-        main_text = parts[0]
-
-        # Remaining parts are secondary (city, state, country)
-        secondary_text = ", ".join(parts[1:])
-
-        return main_text, secondary_text

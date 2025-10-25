@@ -70,7 +70,7 @@ export function AddressInput({
 
   // Handle suggestion selection
   const handleSuggestionSelect = (suggestion: AddressSuggestion) => {
-    onChange(suggestion.description);
+    onChange(suggestion.display_name);
     setSuggestions([]);
     setShowSuggestions(false);
     setSelectedIndex(-1);
@@ -156,7 +156,7 @@ export function AddressInput({
         >
           {suggestions.map((suggestion, index) => (
             <div
-              key={suggestion.place_id}
+              key={suggestion.id}
               className={`px-3 py-2 cursor-pointer border-b last:border-b-0 hover:bg-gray-50 ${
                 index === selectedIndex ? 'bg-blue-50 border-blue-200' : ''
               }`}
@@ -164,13 +164,8 @@ export function AddressInput({
               onMouseEnter={() => setSelectedIndex(index)}
             >
               <div className="text-sm font-medium text-gray-900">
-                {suggestion.main_text}
+                {suggestion.display_name}
               </div>
-              {suggestion.secondary_text && (
-                <div className="text-xs text-gray-500">
-                  {suggestion.secondary_text}
-                </div>
-              )}
             </div>
           ))}
         </Card>

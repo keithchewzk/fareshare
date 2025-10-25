@@ -29,40 +29,34 @@ class GoogleMapsClient:
         self, query: str, session_token: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Get address autocomplete suggestions from Google Places API v1
+        Get address suggestions from Google Places Text Search API v1
 
         Args:
-            query: Partial address to search for
+            query: Address text to search for
             session_token: Optional session token for billing optimization
 
         Returns:
-            Raw response from Google Places Autocomplete API v1
+            Raw response from Google Places Text Search API v1
 
         Raises:
             HTTPException: If API call fails
         """
-        url = f"{self.base_url}/places:autocomplete"
+        url = f"{self.base_url}/places:searchText"
 
-        # Request body for Places API v1
+        # Request body for Places Text Search API v1
         request_body = {
-            "input": query,
-            "includedPrimaryTypes": [
-                "street_address",
-                "premise",
-                "subpremise",
-            ],  # Restrict to addresses
-            "includedRegionCodes": [self.region_code],  # Restrict to specific country
-            "regionCode": self.region_code,  # Format addresses for this region
+            "textQuery": query,
+            "regionCode": self.region_code,  # Bias results to this region
         }
 
         if session_token:
             request_body["sessionToken"] = session_token
 
-        # Headers for Places API v1
+        # Headers for Places API v1 - only request id, location and displayName
         headers = {
             "Content-Type": "application/json",
             "X-Goog-Api-Key": self.api_key,
-            "X-Goog-FieldMask": "suggestions.placePrediction.place,suggestions.placePrediction.placeId,suggestions.placePrediction.text",
+            "X-Goog-FieldMask": "places.id,places.location,places.displayName",
         }
 
         try:

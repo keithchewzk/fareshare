@@ -7,15 +7,23 @@ from typing import List
 from pydantic import BaseModel
 
 
-class AddressSuggestion(BaseModel):
+class Location(BaseModel):
     """
-    Single address suggestion from Google Places Autocomplete API
+    Geographic location with latitude and longitude coordinates
     """
 
-    place_id: str
-    description: str  # Full formatted address
-    main_text: str  # Primary address part
-    secondary_text: str  # Secondary info (city, state)
+    latitude: float
+    longitude: float
+
+
+class AddressSuggestion(BaseModel):
+    """
+    Single address suggestion from Google Places Text Search API
+    """
+
+    id: str
+    display_name: str  # Full formatted address from Google Places
+    location: Location  # Geographic coordinates
 
 
 class AddressAutocompleteResponse(BaseModel):

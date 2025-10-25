@@ -31,7 +31,6 @@ class AddressSuggestions(BaseModel):
     """
 
     suggestions: List[AddressSuggestion]
-    status: str
 
 
 class CalculateDistance(BaseModel):
@@ -53,5 +52,3 @@ class DistanceCalculation(BaseModel):
     """
 
     total_distance: float  # Total distance in kilometers
-    distance_unit: str = "km"  # Distance unit
-    status: str

@@ -40,7 +40,7 @@ class MapsService:
         # Transform Google response to our schema format
         suggestions = self._transform_google_suggestions(google_response)
 
-        return AddressSuggestions(suggestions=suggestions, status="OK")
+        return AddressSuggestions(suggestions=suggestions)
 
     def _transform_google_suggestions(
         self, google_response: Dict[str, Any]
@@ -94,14 +94,10 @@ class MapsService:
 
             total_distance = self._calculate_total_distance_from_matrix(google_response)
 
-            return DistanceCalculation(
-                total_distance=total_distance, distance_unit="km", status="OK"
-            )
+            return DistanceCalculation(total_distance=total_distance)
 
         except Exception as e:
-            return DistanceCalculation(
-                total_distance=0.0, distance_unit="km", status=f"error: {str(e)}"
-            )
+            return DistanceCalculation(total_distance=0.0)
 
     def _calculate_total_distance_from_matrix(
         self, google_response: List[Dict[str, Any]]
@@ -129,9 +125,17 @@ class MapsService:
 
         for element in google_response:
             condition = element.get("condition")
-            distance_meters = element.get("distanceMeters", 0)
+            distance_meters = element.get("distanceMeters")
 
-            if condition == "ROUTE_EXISTS":
-                total_distance_meters += distance_meters
+            if distance_meters is None:
+                raise ValueError(
+                    f"Missing distance meters in response: {distance_meters}"
+                )
+            if condition is not None and condition != "ROUTE_EXISTS":
+                raise ValueError(
+                    f"Route calculation failed with condition: {condition}"
+                )
+
+            total_distance_meters += float(distance_meters)
 
         return total_distance_meters / 1000.0

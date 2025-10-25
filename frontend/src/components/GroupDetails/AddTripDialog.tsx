@@ -3,6 +3,7 @@ import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import { AddressInput } from '../ui/address-input';
 import { Calculator } from 'lucide-react';
+import { mapsService } from '../../services/mapsService';
 import {
   Dialog,
   DialogContent,
@@ -22,22 +23,46 @@ interface AddTripDialogProps {
 export function AddTripDialog({ open, onOpenChange, costPerDistance, distanceUnit }: AddTripDialogProps) {
   const [startAddress, setStartAddress] = useState('');
   const [endAddress, setEndAddress] = useState('');
+  const [startPlaceId, setStartPlaceId] = useState<string | null>(null);
+  const [endPlaceId, setEndPlaceId] = useState<string | null>(null);
+  const [distance, setDistance] = useState<number | null>(null);
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [calculationError, setCalculationError] = useState<string | null>(null);
 
-  // TODO: Will be implemented when backend is ready
-  // const [distance, setDistance] = useState<number | null>(null);
-  // const handleCalculateDistance = async () => { ... };
-  // const handleSubmit = (e: React.FormEvent) => { ... };
+  const handleCalculateDistance = async () => {
+    if (!startPlaceId || !endPlaceId) {
+      setCalculationError('Please select addresses from the dropdown suggestions');
+      return;
+    }
+
+    setIsCalculating(true);
+    setCalculationError(null);
+
+    try {
+      const calculatedDistance = await mapsService.calculateDistance([startPlaceId, endPlaceId]);
+      setDistance(calculatedDistance);
+    } catch (error) {
+      console.error('Distance calculation failed:', error);
+      setCalculationError(error instanceof Error ? error.message : 'Failed to calculate distance');
+    } finally {
+      setIsCalculating(false);
+    }
+  };
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       setStartAddress('');
       setEndAddress('');
+      setStartPlaceId(null);
+      setEndPlaceId(null);
+      setDistance(null);
+      setCalculationError(null);
+      setIsCalculating(false);
     }
     onOpenChange(open);
   };
 
-  // TODO: Will be used when backend is implemented
-  // const calculatedCost = distance !== null ? distance * costPerDistance : 0;
+  const calculatedCost = distance !== null && costPerDistance ? distance * costPerDistance : null;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -64,6 +89,7 @@ export function AddTripDialog({ open, onOpenChange, costPerDistance, distanceUni
                 placeholder="e.g., 123 Main St, Singapore"
                 value={startAddress}
                 onChange={setStartAddress}
+                onPlaceIdChange={setStartPlaceId}
                 autoFocus
               />
             </div>
@@ -75,41 +101,69 @@ export function AddTripDialog({ open, onOpenChange, costPerDistance, distanceUni
                 placeholder="e.g., 456 Oak Ave, Singapore"
                 value={endAddress}
                 onChange={setEndAddress}
+                onPlaceIdChange={setEndPlaceId}
               />
             </div>
 
-            {/* Calculate Distance Button - Non-functional for now */}
+            {/* Calculate Distance Button */}
             <Button
               type="button"
               variant="outline"
               className="w-full"
-              disabled={true}
+              onClick={handleCalculateDistance}
+              disabled={!startPlaceId || !endPlaceId || isCalculating}
             >
               <Calculator className="size-4 mr-2" />
-              Calculate Distance (Coming Soon)
+              {isCalculating ? 'Calculating...' : 'Calculate Cost'}
             </Button>
 
-            {/* Distance Display - Static for now */}
+            {/* Error Display */}
+            {calculationError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-800">{calculationError}</p>
+              </div>
+            )}
+
+            {/* Distance Display */}
             <div className="space-y-2">
               <Label>Distance</Label>
               <div className="bg-muted p-3 rounded-lg">
-                <p className="text-sm text-muted-foreground">Will be calculated automatically</p>
+                {distance !== null ? (
+                  <p className="text-sm font-medium">
+                    {distance.toFixed(2)} km
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Select addresses and click "Calculate Distance"
+                  </p>
+                )}
               </div>
             </div>
 
-            {/* Total Cost Display - Static for now */}
+            {/* Total Cost Display */}
             <div className="bg-primary/10 p-4 rounded-lg">
               <p className="text-sm text-muted-foreground mb-1">Total Trip Cost</p>
-              <p className="text-sm text-muted-foreground">Will be calculated after distance</p>
+              {calculatedCost !== null ? (
+                <p className="text-2xl font-bold text-primary">
+                  ${calculatedCost.toFixed(2)}
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Will be calculated after distance
+                </p>
+              )}
             </div>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Cancel
             </Button>
-            {/* Add Trip Button - Non-functional for now */}
-            <Button type="button" disabled={true}>
-              Add Trip (Coming Soon)
+            {/* Add Trip Button */}
+            <Button
+              type="button"
+              disabled={distance === null || calculatedCost === null}
+            >
+              Add Trip
             </Button>
           </DialogFooter>
         </form>

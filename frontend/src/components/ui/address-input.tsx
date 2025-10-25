@@ -8,6 +8,7 @@ interface AddressInputProps {
   placeholder?: string;
   value: string;
   onChange: (value: string) => void;
+  onPlaceIdChange?: (placeId: string | null) => void;
   autoFocus?: boolean;
   disabled?: boolean;
 }
@@ -17,6 +18,7 @@ export function AddressInput({
   placeholder,
   value,
   onChange,
+  onPlaceIdChange,
   autoFocus,
   disabled
 }: AddressInputProps) {
@@ -57,6 +59,9 @@ export function AddressInput({
     const newValue = e.target.value;
     onChange(newValue);
 
+    // Clear place ID when user types manually (not selecting from suggestions)
+    onPlaceIdChange?.(null);
+
     // Clear previous debounce timer
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -71,6 +76,7 @@ export function AddressInput({
   // Handle suggestion selection
   const handleSuggestionSelect = (suggestion: AddressSuggestion) => {
     onChange(suggestion.display_name);
+    onPlaceIdChange?.(suggestion.place_id);
     setSuggestions([]);
     setShowSuggestions(false);
     setSelectedIndex(-1);

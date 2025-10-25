@@ -302,7 +302,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
                         <span>{trip.cost > 0 ? `$${trip.cost.toFixed(2)}` : 'Pending'}</span>
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {trip.distance > 0 ? `${trip.distance.toFixed(1)} mi` : 'Calculating...'}
+                        {trip.distance > 0 ? `${trip.distance.toFixed(1)} km` : 'Calculating...'}
                       </div>
                     </div>
                   </div>
@@ -317,7 +317,6 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
         open={showAddTrip}
         onOpenChange={setShowAddTrip}
         costPerDistance={group?.cost_per_distance || 0}
-        distanceUnit={group?.distance_unit || 'km'}
       />
 
       {/* Delete Group Confirmation Dialog */}

@@ -30,13 +30,6 @@ class Trip(Base):
     description = Column(String(1000), nullable=True)
     stops = Column(JSONB, nullable=False)
     total_distance = Column(Numeric(10, 2), nullable=False)
-    distance_unit = Column(String(2), nullable=False, default="km")
-
-    __table_args__ = (
-        CheckConstraint(
-            "distance_unit IN ('km', 'mi')", name="check_distance_unit_valid"
-        ),
-    )
 
     group = relationship("Group", back_populates="trips")
     creator = relationship("User", back_populates="trips")

@@ -55,7 +55,6 @@ class GroupService:
             description=group_data.description,
             invite_code=invite_code,
             cost_per_distance=group_data.cost_per_distance,
-            distance_unit=group_data.distance_unit,
             owner_user_id=user_id,
         )
 

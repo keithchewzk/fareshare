@@ -33,7 +33,6 @@ class GroupRepository:
         description: Optional[str],
         invite_code: str,
         cost_per_distance: Decimal,
-        distance_unit: str,
         owner_user_id: int,
     ) -> Group:
         """
@@ -46,7 +45,6 @@ class GroupRepository:
                 description=description,
                 invite_code=invite_code,
                 cost_per_distance=cost_per_distance,
-                distance_unit=distance_unit,
             )
 
             membership = GroupMembership(

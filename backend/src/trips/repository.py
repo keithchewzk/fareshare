@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
@@ -21,13 +21,13 @@ class TripRepository:
         description: str,
         stops: List[Dict[str, Any]],
         total_distance: Decimal,
-    ) -> Tuple[Trip, str]:
+    ) -> Trip:
         """
         Create a new trip in the database.
         Atomically retrieves group and creates trip.
 
         Returns:
-            Tuple of (created_trip, distance_unit)
+            Created trip
         """
         # Get group and validate it exists (atomic with trip creation)
         group = self.db.query(Group).filter(Group.id == group_id).first()
@@ -36,7 +36,7 @@ class TripRepository:
                 status_code=status.HTTP_404_NOT_FOUND, detail="Group not found"
             )
 
-        # Create trip with group's distance unit
+        # Create trip (distance is always in km)
         trip = Trip(
             group_id=group_id,
             created_by=created_by,
@@ -44,7 +44,6 @@ class TripRepository:
             description=description,
             stops=stops,
             total_distance=total_distance,
-            distance_unit=group.distance_unit,
         )
 
         self.db.add(trip)

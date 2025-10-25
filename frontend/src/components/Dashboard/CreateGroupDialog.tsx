@@ -22,7 +22,6 @@ export function CreateGroupDialog({ open, onOpenChange, onCreateGroup }: CreateG
   const [groupName, setGroupName] = useState('');
   const [description, setDescription] = useState('');
   const [costPerDistance, setCostPerDistance] = useState('0.50');
-  const [distanceUnit, setDistanceUnit] = useState<'km' | 'mi'>('km');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -38,7 +37,6 @@ export function CreateGroupDialog({ open, onOpenChange, onCreateGroup }: CreateG
         name: groupName.trim(),
         description: description.trim() || undefined,
         cost_per_distance: parseFloat(costPerDistance),
-        distance_unit: distanceUnit,
       };
 
       await groupService.createGroup(groupData);
@@ -47,7 +45,6 @@ export function CreateGroupDialog({ open, onOpenChange, onCreateGroup }: CreateG
       setGroupName('');
       setDescription('');
       setCostPerDistance('0.50');
-      setDistanceUnit('km');
 
       // Close dialog and refresh groups
       onOpenChange(false);
@@ -90,26 +87,16 @@ export function CreateGroupDialog({ open, onOpenChange, onCreateGroup }: CreateG
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="cost-per-distance">Cost per Distance</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="cost-per-distance"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.50"
-                  value={costPerDistance}
-                  onChange={(e) => setCostPerDistance(e.target.value)}
-                />
-                <select
-                  value={distanceUnit}
-                  onChange={(e) => setDistanceUnit(e.target.value as 'km' | 'mi')}
-                  className="px-3 py-2 border border-input bg-background rounded-md"
-                >
-                  <option value="km">per km</option>
-                  <option value="mi">per mile</option>
-                </select>
-              </div>
+              <Label htmlFor="cost-per-distance">Cost per km</Label>
+              <Input
+                id="cost-per-distance"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="0.50"
+                value={costPerDistance}
+                onChange={(e) => setCostPerDistance(e.target.value)}
+              />
             </div>
             {error && (
               <div className="text-sm text-destructive">{error}</div>

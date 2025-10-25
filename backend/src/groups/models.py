@@ -26,14 +26,7 @@ class Group(Base):
     description = Column(String(1000), nullable=True)
     invite_code = Column(String(10), unique=True, nullable=False)
     cost_per_distance = Column(Numeric(10, 2), nullable=False)
-    distance_unit = Column(String(2), nullable=False, default="km")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    __table_args__ = (
-        CheckConstraint(
-            "distance_unit IN ('km', 'mi')", name="check_distance_unit_valid"
-        ),
-    )
 
     memberships = relationship(
         "GroupMembership", back_populates="group", cascade="all, delete-orphan"

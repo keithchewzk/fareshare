@@ -10,7 +10,6 @@ export interface Group {
   description?: string;
   invite_code: string;
   cost_per_distance: number;
-  distance_unit: 'km' | 'mi';
   created_at: string;
 }
 
@@ -18,7 +17,6 @@ export interface CreateGroupRequest {
   name: string;
   description?: string;
   cost_per_distance: number;
-  distance_unit: 'km' | 'mi';
 }
 
 export interface JoinGroupRequest {

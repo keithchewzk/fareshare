@@ -18,10 +18,9 @@ interface AddTripDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   costPerDistance?: number;
-  distanceUnit?: 'km' | 'mi';
 }
 
-export function AddTripDialog({ open, onOpenChange, costPerDistance, distanceUnit }: AddTripDialogProps) {
+export function AddTripDialog({ open, onOpenChange, costPerDistance }: AddTripDialogProps) {
   const [tripName, setTripName] = useState('');
   const [description, setDescription] = useState('');
   const [startAddress, setStartAddress] = useState('');
@@ -83,7 +82,7 @@ export function AddTripDialog({ open, onOpenChange, costPerDistance, distanceUni
             {/* Cost per distance info */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <p className="text-sm text-blue-800">
-                Cost per {distanceUnit || 'km'} for this group: <span className="font-medium">${Number(costPerDistance || 0).toFixed(2)}</span>
+                Cost per km for this group: <span className="font-medium">${Number(costPerDistance || 0).toFixed(2)}</span>
               </p>
             </div>
 
@@ -162,7 +161,7 @@ export function AddTripDialog({ open, onOpenChange, costPerDistance, distanceUni
                   </p>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    Select addresses and click "Calculate Distance"
+                    Select addresses and click "Calculate Cost"
                   </p>
                 )}
               </div>

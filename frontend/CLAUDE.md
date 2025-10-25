@@ -13,7 +13,7 @@ FareShare is a collaborative web application for tracking car usage within share
 - **Development:** ESLint for code quality
 - **Utilities:** clsx, tailwind-merge, class-variance-authority
 - **Navigation:** React Router DOM 7.9.4 for client-side routing
-- **Additional Dependencies:** @radix-ui/react-slot, @radix-ui/react-tabs, @radix-ui/react-label, @radix-ui/react-dialog
+- **Additional Dependencies:** @radix-ui/react-slot, @radix-ui/react-tabs, @radix-ui/react-label, @radix-ui/react-dialog, @radix-ui/react-dropdown-menu
 
 ## Code Organization
 
@@ -30,20 +30,25 @@ src/
 │   │   ├── label.tsx                 # Form label component
 │   │   ├── card.tsx                  # Card components (Card, CardHeader, etc.)
 │   │   ├── tabs.tsx                  # Tabs navigation components
-│   │   └── dialog.tsx                # Modal dialog components
+│   │   ├── dialog.tsx                # Modal dialog components
+│   │   └── dropdown-menu.tsx         # Dropdown menu components
 │   ├── LandingPage/                  # Landing page with complete 6-section layout
 │   │   └── index.tsx                 # Hero, Features, Use Cases, CTA, Footer
 │   ├── AuthPage/                     # Authentication system
 │   │   └── index.tsx                 # Login/Signup tabs with mock auth
-│   └── Dashboard/                    # Main dashboard (Index File Pattern)
-│       ├── index.tsx                 # Dashboard with groups grid & empty state
-│       ├── CreateGroupDialog.tsx     # Group creation dialog
-│       └── JoinGroupDialog.tsx       # Group joining dialog with invite codes
+│   ├── Dashboard/                    # Main dashboard (Index File Pattern)
+│   │   ├── index.tsx                 # Dashboard with groups grid & empty state
+│   │   ├── CreateGroupDialog.tsx     # Group creation dialog
+│   │   └── JoinGroupDialog.tsx       # Group joining dialog with invite codes
+│   └── GroupDetails/                 # Group detail pages (NEW)
+│       ├── index.tsx                 # Group detail page with trip management
+│       └── AddTripDialog.tsx         # Trip creation form (static prototype)
 ├── lib/
 │   ├── utils.ts                     # Utility functions (cn helper)
 │   └── routes.ts                    # API routes configuration
 ├── services/
-│   └── userService.ts               # User registration and authentication API calls
+│   ├── userService.ts               # User registration and authentication API calls
+│   └── groupService.ts              # Group management API calls (NEW)
 ├── main.tsx                         # Application entry point with React root
 ├── App.tsx                           # Main app with React Router setup
 ├── App.css                           # Global app styles
@@ -86,11 +91,12 @@ import { JoinGroupDialog } from "./JoinGroupDialog";
   - `/` - Landing page with conversion funnel
   - `/auth` - Authentication page (Login/Signup tabs)
   - `/dashboard` - Protected dashboard (requires authentication)
+  - `/groups/:groupId` - Group detail page with trip management (protected)
 
 ### State Management
 - **Local State** - useState for component-level state
-- **localStorage Persistence** - Groups and trips data stored locally
-- **Mock Authentication** - Development-ready auth system
+- **localStorage Persistence** - Trip data stored locally (groups use backend)
+- **Backend State Management** - Groups and memberships managed via API calls
 
 ### Data Models
 ```typescript
@@ -101,12 +107,30 @@ interface User {
 }
 
 interface Group {
-  id: string;
+  id: number;
   name: string;
-  inviteCode: string;
-  createdBy: string;
-  members: string[];
-  createdAt: number;
+  description?: string;
+  invite_code: string;
+  cost_per_distance: number;
+  distance_unit: 'km' | 'mi';
+  created_at: string;
+}
+
+interface Membership {
+  role: 'owner' | 'member';
+  joined_at: string;
+}
+
+interface Trip {
+  id: string;
+  groupId: string;
+  userId: string;
+  startAddress: string;
+  endAddress: string;
+  distance: number;
+  cost: number;
+  date: number;
+  paid: boolean;
 }
 ```
 
@@ -164,60 +188,92 @@ interface Group {
   - Empty state for new users
   - Responsive layout (mobile/tablet/desktop)
 
-#### 6. Group Management (Complete)
+#### 6. Group Management (Complete - Real Backend Integration)
 - **CreateGroupDialog:** `src/components/Dashboard/CreateGroupDialog.tsx`
-  - Group name input with validation
-  - Auto-generated invite codes
-  - localStorage persistence
-  - Form reset on success
+  - Group name, description, cost settings
+  - Real backend API integration
+  - Cost per distance configuration (km/mi)
+  - Form validation and error handling
 - **JoinGroupDialog:** `src/components/Dashboard/JoinGroupDialog.tsx`
-  - Invite code input (6-character, uppercase)
-  - Error handling for invalid/duplicate codes
-  - Group membership validation
+  - Invite code input with backend validation
+  - Real-time error handling for invalid codes
+  - Successful group joining with backend persistence
   - Form validation and reset
 
-#### 7. Application Entry Point
+#### 7. Group Details & Trip Management (Complete)
+- **GroupDetails:** `src/components/GroupDetails/index.tsx`
+  - Complete group detail page with role-based permissions
+  - Real backend integration for group data loading
+  - Trip history display with mock localStorage data
+  - Owner vs Member role distinction with different actions
+  - Group management actions: Delete (owners), Leave (members)
+  - Invite code display with copy-to-clipboard functionality
+  - Loading states and comprehensive error handling
+- **AddTripDialog:** `src/components/GroupDetails/AddTripDialog.tsx`
+  - Static trip creation form (UI prototype)
+  - Start/End address input fields
+  - Cost calculation display (non-functional)
+  - Distance calculation placeholder
+  - Prepared for backend Google Maps integration
+
+#### 8. Application Entry Point
 - **Main Entry:** `src/main.tsx` - React 19 application bootstrapping
   - Strict mode enabled for development
   - Root element validation and error handling
   - Modern createRoot API usage
 
-#### 8. Backend Integration (New)
+#### 9. Backend Integration (Complete)
 - **API Client Architecture:** Router & Services pattern
   - `lib/routes.ts` - Centralized API endpoint configuration
   - `services/userService.ts` - User registration and authentication business logic
+  - `services/groupService.ts` - Complete group management API integration
   - Environment-based configuration with `VITE_BACKEND_API_URL`
-- **Authentication Flow:** ✅ **UPDATED ENDPOINTS**
+- **Authentication Flow:** ✅ **COMPLETE**
   - User Registration: PUT /users → Create account in PostgreSQL database
   - User Login: POST /users → JWT token + GET /users/me → User profile
   - Token Management: localStorage persistence with key `fareshare_token`
+- **Group Management Flow:** ✅ **COMPLETE**
+  - Group Creation: POST /groups → Create group with backend API
+  - Group Listing: GET /groups → Load user's groups from backend
+  - Group Details: GET /groups/{id} → Load specific group data
+  - Group Joining: POST /groups/join → Join via invite code
+  - Group Actions: DELETE /groups/{id}, POST /groups/{id}/leave
+  - Membership Roles: GET /groups/{id}/membership → Owner vs Member permissions
 - **Error Handling:** Comprehensive API error handling with user-friendly messages
 - **Loading States:** Visual feedback during API operations
 
-#### 9. Data Persistence
+#### 10. Data Persistence
 - **localStorage Integration:**
-  - Groups stored in `fareshare_groups` (mock data)
   - JWT tokens stored in `fareshare_token` (real authentication)
-- **Backend Persistence:** User accounts stored in PostgreSQL via FastAPI
-- **Mock Trip Data:** Support for future trip statistics
+  - Trip data stored in `fareshare_trips` (mock data for UI)
+- **Backend Persistence:**
+  - User accounts stored in PostgreSQL via FastAPI
+  - Groups and memberships stored in PostgreSQL via FastAPI
+  - Role-based permissions managed by backend
 
 ### ✅ Application Flow
 1. **Landing Page** - User discovers FareShare
 2. **Authentication** - Real backend integration:
    - **Registration:** User creates account → Stored in PostgreSQL database
    - **Login:** User authenticates → JWT token + user profile → Dashboard
-3. **Dashboard** - User views their groups (mock data)
-4. **Group Creation** - User creates new shared vehicle group (mock functionality)
-5. **Group Joining** - User joins existing groups via invite codes (mock functionality)
-6. **Group Management** - User views group statistics and members (mock functionality)
+3. **Dashboard** - User views their groups (real backend data)
+4. **Group Creation** - User creates new shared vehicle group (real backend functionality)
+5. **Group Joining** - User joins existing groups via invite codes (real backend functionality)
+6. **Group Management** - User views group details with role-based permissions (real backend functionality)
+7. **Group Details** - User navigates to detailed group view:
+   - **Trip History:** View all trips for the group (mock localStorage data)
+   - **Group Actions:** Delete group (owners) or leave group (members)
+   - **Invite Code:** Copy group invite code to clipboard
+8. **Trip Management** - UI prototype for trip creation (static form, prepared for backend)
 
 ### 📋 Ready for Enhancement
-- **Group Management Integration:** Connect frontend group functionality to backend API
-- **Trip tracking and expense management:** Full trip logging with backend integration
-- **Group detail pages and member management:** Enhanced group features
-- **Advanced group features:** Roles, permissions, and member administration
+- **Trip Backend Integration:** Connect AddTripDialog to backend Maps API and trip creation
+- **Google Maps Integration:** Real address autocomplete and distance calculation
+- **Advanced trip features:** Trip editing, deletion, and payment status tracking
+- **Member management:** View group members, manage member permissions
 - **Token refresh and session management:** Enhanced authentication security
 - **Mobile app considerations:** Responsive design improvements
+- **Real-time updates:** WebSocket integration for live group updates
 
 ### Technical Decisions
 - **Tailwind CSS 3.x** - Chosen over 4.x for stability with shadcn/ui

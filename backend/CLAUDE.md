@@ -43,6 +43,13 @@ backend/
 │   │   ├── router.py      # Group API endpoints (/groups)
 │   │   ├── dependencies.py # Group dependency injection
 │   │   └── __init__.py    # Empty init file (avoid circular imports)
+│   ├── maps/              # Maps domain (Google Maps integration - COMPLETE)
+│   │   ├── schemas.py     # Address autocomplete request/response schemas
+│   │   ├── google_client.py # Google Places API v1 client wrapper
+│   │   ├── service.py     # Maps business logic with data transformation
+│   │   ├── router.py      # Maps API endpoints (/maps/autocomplete)
+│   │   ├── dependencies.py # Maps dependency injection
+│   │   └── __init__.py    # Empty init file (avoid circular imports)
 │   └── trips/             # Trips domain (Models implemented)
 │       ├── models.py      # Trip model with creator-pays approach
 │       └── __init__.py    # Empty init file (avoid circular imports)
@@ -125,6 +132,9 @@ Additional tables for cost tracking and payment history may be added when cost s
 - `GET /` - Root endpoint with API information
 - `GET /health` - Health check endpoint
 
+#### Maps & Address Management ✅ **IMPLEMENTED**
+- `GET /maps/autocomplete` - Get address autocomplete suggestions (Singapore only) ✅ **COMPLETE**
+
 ### Planned Implementation
 
 #### Group Management ✅ **IMPLEMENTED**
@@ -160,7 +170,7 @@ The codebase follows a domain-driven design approach with clear separation of co
 - **JWT Utils**: Token creation and validation utilities
 - **Base**: Shared database configuration and utilities
 
-Currently implemented: **`users` domain (CONSOLIDATED - includes authentication)**, `groups` domain (Phase 2 complete - group creation functionality), and **`trips` domain models (MVP approach)**. Each domain is self-contained with its own models, schemas, repository, services, routers, dependencies, and utilities. The **auth domain has been eliminated** - all authentication functionality consolidated into the users domain. The trips domain uses a simplified MVP approach where the trip creator is responsible for all costs (no cost splitting). Ready to implement trips business logic and API endpoints.
+Currently implemented: **`users` domain (CONSOLIDATED - includes authentication)**, **`groups` domain (Phase 2 complete - group creation functionality)**, **`maps` domain (COMPLETE - Google Places API integration)**, and **`trips` domain models (MVP approach)**. Each domain is self-contained with its own models, schemas, repository, services, routers, dependencies, and utilities. The **auth domain has been eliminated** - all authentication functionality consolidated into the users domain. The maps domain provides address autocomplete functionality using Google Places API v1 with Singapore region restriction. The trips domain uses a simplified MVP approach where the trip creator is responsible for all costs (no cost splitting). Ready to implement trips business logic and API endpoints.
 
 ## Key Implementation Details
 
@@ -263,6 +273,8 @@ alembic upgrade head
 - `JWT_SECRET_KEY`: Secret key for JWT token signing (change in production)
 - `JWT_ALGORITHM`: JWT signing algorithm (default: HS256)
 - `JWT_EXPIRE_MINUTES`: Token expiration time in minutes (default: 30)
+- `GOOGLE_MAPS_API_KEY`: Google Maps API key for Places API (required)
+- `GOOGLE_MAPS_REGION_CODE`: Country code for address bias (default: SG for Singapore)
 
 ### Docker Configuration
 - PostgreSQL 15 with health checks
@@ -344,6 +356,15 @@ alembic upgrade head
 - **Creator Responsibility**: The user who logs the trip is responsible for paying
 - **Cost Calculation**: Simple formula: `trip.total_distance * trip.group.cost_per_distance`
 - **Database Migration**: Trip table created with proper foreign key relationships
+
+#### Maps System (`src/maps/`) ✅ **NEW - COMPLETE**
+- **Google Places API Integration**: Address autocomplete using Google Places API v1
+- **Singapore Region Restriction**: Results limited to Singapore addresses only
+- **Address Suggestions**: Real-time autocomplete for partial addresses
+- **Session Token Support**: Billing optimization for Google Maps API
+- **Error Handling**: Comprehensive error handling for API failures
+- **Domain Structure**: Complete domain-driven implementation
+- **API Endpoint**: `GET /maps/autocomplete` for address suggestions
 
 ## Trips Domain Implementation Plan (In Progress)
 

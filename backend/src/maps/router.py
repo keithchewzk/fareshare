@@ -10,7 +10,7 @@ from src.maps.schemas import AddressAutocompleteResponse
 from src.maps.service import MapsService
 
 # Create router instance
-router = APIRouter(prefix="/maps", tags=["maps"])
+router = APIRouter(prefix="/maps", tags=["Maps"])
 
 
 @router.get(

@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import { LandingPage } from './components/LandingPage';
 import { AuthPage } from './components/AuthPage';
 import { Dashboard } from './components/Dashboard';
 import { GroupDetails } from './components/GroupDetails';
+import { userService } from './services/userService';
 
 interface User {
   id: string;
@@ -15,6 +16,27 @@ interface User {
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check for existing authentication on app load
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem('fareshare_token');
+        if (token) {
+          const userData = await userService.getCurrentUser();
+          setUser(userData);
+        }
+      } catch (error) {
+        // Token might be invalid, remove it
+        localStorage.removeItem('fareshare_token');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   const handleGetStarted = () => {
     navigate('/auth');
@@ -54,6 +76,18 @@ const AppContent: React.FC = () => {
       />
     );
   };
+
+  // Show loading while checking authentication
+  if (isLoading) {
+    return (
+      <div className="size-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="size-full">

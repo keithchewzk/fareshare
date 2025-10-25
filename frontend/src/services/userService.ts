@@ -101,6 +101,31 @@ class UserService {
       token: access_token,
     };
   }
+
+  /**
+   * Get current user profile using stored token
+   */
+  async getCurrentUser(): Promise<UserProfile> {
+    const token = localStorage.getItem('fareshare_token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(getApiUrl(API_ROUTES.users.me), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      // Token might be expired or invalid
+      throw new Error('Failed to get user profile');
+    }
+
+    return response.json() as Promise<UserProfile>;
+  }
 }
 
 export const userService = new UserService();

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button } from '../ui/button';
+import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { AddressInput } from '../ui/address-input';
 import { Calculator } from 'lucide-react';
@@ -21,6 +22,8 @@ interface AddTripDialogProps {
 }
 
 export function AddTripDialog({ open, onOpenChange, costPerDistance, distanceUnit }: AddTripDialogProps) {
+  const [tripName, setTripName] = useState('');
+  const [description, setDescription] = useState('');
   const [startAddress, setStartAddress] = useState('');
   const [endAddress, setEndAddress] = useState('');
   const [startPlaceId, setStartPlaceId] = useState<string | null>(null);
@@ -51,6 +54,8 @@ export function AddTripDialog({ open, onOpenChange, costPerDistance, distanceUni
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
+      setTripName('');
+      setDescription('');
       setStartAddress('');
       setEndAddress('');
       setStartPlaceId(null);
@@ -80,6 +85,29 @@ export function AddTripDialog({ open, onOpenChange, costPerDistance, distanceUni
               <p className="text-sm text-blue-800">
                 Cost per {distanceUnit || 'km'} for this group: <span className="font-medium">${Number(costPerDistance || 0).toFixed(2)}</span>
               </p>
+            </div>
+
+            {/* Trip Name */}
+            <div className="space-y-2">
+              <Label htmlFor="trip-name">Trip Name</Label>
+              <Input
+                id="trip-name"
+                placeholder="e.g., Weekend Beach Trip"
+                value={tripName}
+                onChange={(e) => setTripName(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description">Description (Optional)</Label>
+              <Input
+                id="description"
+                placeholder="e.g., Family outing to East Coast Park"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
             </div>
 
             <div className="space-y-2">
@@ -161,7 +189,7 @@ export function AddTripDialog({ open, onOpenChange, costPerDistance, distanceUni
             {/* Add Trip Button */}
             <Button
               type="button"
-              disabled={distance === null || calculatedCost === null}
+              disabled={!tripName.trim() || distance === null || calculatedCost === null}
             >
               Add Trip
             </Button>

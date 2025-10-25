@@ -6,7 +6,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
 from src.maps.dependencies import get_maps_service
-from src.maps.schemas import AddressAutocompleteResponse
+from src.maps.schemas import AddressSuggestions, CalculateDistance, DistanceCalculation
 from src.maps.service import MapsService
 
 # Create router instance
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/maps", tags=["Maps"])
 
 @router.get(
     "/autocomplete",
-    response_model=AddressAutocompleteResponse,
+    response_model=AddressSuggestions,
     summary="Get address suggestions",
     description="Get autocomplete suggestions for partial addresses using Google Places API",
 )
@@ -31,7 +31,7 @@ async def autocomplete_address(
         None, description="Session token for billing optimization", max_length=100
     ),
     maps_service: MapsService = Depends(get_maps_service),
-) -> AddressAutocompleteResponse:
+) -> AddressSuggestions:
     """
     Get address autocomplete suggestions
 
@@ -44,7 +44,7 @@ async def autocomplete_address(
         maps_service: Injected MapsService instance
 
     Returns:
-        AddressAutocompleteResponse with list of address suggestions
+        AddressSuggestions with list of address suggestions
 
     Raises:
         HTTPException: If Google Maps API call fails
@@ -52,3 +52,32 @@ async def autocomplete_address(
     return await maps_service.get_address_suggestions(
         query=query, session_token=session_token
     )
+
+
+@router.post(
+    "/calculate-distance",
+    response_model=DistanceCalculation,
+    summary="Calculate distance between waypoints",
+    description="Calculate total distance for a route using Google Place IDs",
+)
+async def calculate_distance(
+    request: CalculateDistance,
+    maps_service: MapsService = Depends(get_maps_service),
+) -> DistanceCalculation:
+    """
+    Calculate total distance for a route using ordered list of Google Place IDs
+
+    This endpoint takes an ordered list of Google Place IDs and calculates
+    the total distance of the route using Google Maps Distance Matrix API.
+
+    Args:
+        request: CalculateDistance with ordered list of place IDs
+        maps_service: Injected MapsService instance
+
+    Returns:
+        DistanceCalculation with total distance and status
+
+    Raises:
+        HTTPException: If Google Maps API call fails or place IDs are invalid
+    """
+    return await maps_service.calculate_route_distance(place_ids=request.place_ids)

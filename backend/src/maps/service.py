@@ -5,7 +5,12 @@ Maps service - Business logic layer
 from typing import Any, Dict, List, Optional
 
 from src.maps.google_client import GoogleMapsClient
-from src.maps.schemas import AddressAutocompleteResponse, AddressSuggestion, Location
+from src.maps.schemas import (
+    AddressSuggestion,
+    AddressSuggestions,
+    DistanceCalculation,
+    Location,
+)
 
 
 class MapsService:
@@ -21,7 +26,7 @@ class MapsService:
 
     async def get_address_suggestions(
         self, query: str, session_token: Optional[str] = None
-    ) -> AddressAutocompleteResponse:
+    ) -> AddressSuggestions:
         """
         Get address autocomplete suggestions and transform to our schema format
 
@@ -30,7 +35,7 @@ class MapsService:
             session_token: Optional session token for billing optimization
 
         Returns:
-            AddressAutocompleteResponse with transformed suggestions
+            AddressSuggestions with transformed suggestions
         """
         # Get raw response from Google Places API v1
         google_response = await self.google_client.autocomplete_address(
@@ -40,7 +45,7 @@ class MapsService:
         # Transform Google response to our schema format
         suggestions = self._transform_google_suggestions(google_response)
 
-        return AddressAutocompleteResponse(suggestions=suggestions, status="OK")
+        return AddressSuggestions(suggestions=suggestions, status="OK")
 
     def _transform_google_suggestions(
         self, google_response: Dict[str, Any]
@@ -85,3 +90,25 @@ class MapsService:
             suggestions.append(address_suggestion)
 
         return suggestions
+
+    async def calculate_route_distance(
+        self, place_ids: List[str]
+    ) -> DistanceCalculation:
+        """
+        Calculate total distance for a route using Google Place IDs
+
+        Args:
+            place_ids: Ordered list of Google Place IDs for the route
+
+        Returns:
+            DistanceCalculation with total distance and status
+        """
+        # TODO: Implement Google Maps Distance Matrix API integration
+        # For now, return a placeholder response
+
+        # Placeholder calculation - will implement with Google Maps API
+        placeholder_distance = len(place_ids) * 5.0  # 5km per waypoint as placeholder
+
+        return DistanceCalculation(
+            total_distance=placeholder_distance, distance_unit="km", status="OK"
+        )

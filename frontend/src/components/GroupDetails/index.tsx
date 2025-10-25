@@ -3,7 +3,7 @@ import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { ArrowLeft, Plus, Users, MapPin, MoreVertical, Trash2, LogOut, Copy, Check } from 'lucide-react';
 import { AddTripDialog } from './AddTripDialog';
-import { groupService, Group as BackendGroup, Membership } from '../../services/groupService';
+import { groupService, Group, Membership } from '../../services/groupService';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,12 +25,7 @@ interface User {
   name: string;
 }
 
-interface Group {
-  id: string;
-  name: string;
-  inviteCode: string;
-  members: string[];
-}
+// Using Group interface from groupService
 
 interface Trip {
   id: string;
@@ -51,7 +46,7 @@ interface GroupDetailsProps {
 }
 
 export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
-  const [group, setGroup] = useState<BackendGroup | null>(null);
+  const [group, setGroup] = useState<Group | null>(null);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [showAddTrip, setShowAddTrip] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -71,12 +66,16 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
     try {
       setLoading(true);
       setError(null);
+      console.log('Loading group data for groupId:', groupId);
 
       // Fetch group data and user membership in parallel
       const [fetchedGroup, userMembership] = await Promise.all([
         groupService.getGroup(groupId),
         groupService.getUserMembership(groupId)
       ]);
+
+      console.log('Fetched group:', fetchedGroup);
+      console.log('User membership:', userMembership);
 
       setGroup(fetchedGroup);
       setMembership(userMembership);
@@ -115,31 +114,8 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  const handleAddTrip = (tripData: {
-    startAddress: string;
-    endAddress: string;
-  }) => {
-    const newTrip: Trip = {
-      id: Date.now().toString(),
-      groupId,
-      userId: user.id,
-      startAddress: tripData.startAddress,
-      endAddress: tripData.endAddress,
-      distance: 0, // Will be calculated by backend later
-      cost: 0, // Will be calculated by backend later
-      date: Date.now(),
-      paid: false,
-    };
-
-    // Add to localStorage
-    const allTrips = JSON.parse(localStorage.getItem('fareshare_trips') || '[]');
-    allTrips.push(newTrip);
-    localStorage.setItem('fareshare_trips', JSON.stringify(allTrips));
-
-    // Update local state
-    setTrips([newTrip, ...trips]);
-    setShowAddTrip(false);
-  };
+  // TODO: Will be implemented when backend is ready
+  // const handleAddTrip = (tripData: { ... }) => { ... };
 
   const handleDeleteGroup = () => {
     setShowDeleteConfirm(true);
@@ -340,7 +316,8 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
       <AddTripDialog
         open={showAddTrip}
         onOpenChange={setShowAddTrip}
-        onAddTrip={handleAddTrip}
+        costPerDistance={group?.cost_per_distance || 0}
+        distanceUnit={group?.distance_unit || 'km'}
       />
 
       {/* Delete Group Confirmation Dialog */}

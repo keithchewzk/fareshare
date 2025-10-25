@@ -9,6 +9,9 @@ export interface Group {
   name: string;
   description?: string;
   invite_code: string;
+  cost_per_distance: number;
+  distance_unit: 'km' | 'mi';
+  created_at: string;
 }
 
 export interface CreateGroupRequest {

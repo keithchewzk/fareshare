@@ -52,11 +52,11 @@ class GoogleMapsClient:
         if session_token:
             request_body["sessionToken"] = session_token
 
-        # Headers for Places API v1 - only request id, location and displayName
+        # Headers for Places API v1 - only request id and displayName
         headers = {
             "Content-Type": "application/json",
             "X-Goog-Api-Key": self.api_key,
-            "X-Goog-FieldMask": "places.id,places.location,places.displayName",
+            "X-Goog-FieldMask": "places.id,places.displayName",
         }
 
         try:

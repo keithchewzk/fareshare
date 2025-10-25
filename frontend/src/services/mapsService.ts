@@ -4,15 +4,9 @@
 
 import { API_ROUTES, getApiUrl } from '../lib/routes';
 
-export interface Location {
-  latitude: number;
-  longitude: number;
-}
-
 export interface AddressSuggestion {
-  id: string;
+  place_id: string;
   display_name: string;
-  location: Location;
 }
 
 export interface AddressAutocompleteResponse {

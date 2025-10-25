@@ -21,9 +21,8 @@ class AddressSuggestion(BaseModel):
     Single address suggestion from Google Places Text Search API
     """
 
-    id: str
+    place_id: str
     display_name: str  # Full formatted address from Google Places
-    location: Location  # Geographic coordinates
 
 
 class AddressSuggestions(BaseModel):

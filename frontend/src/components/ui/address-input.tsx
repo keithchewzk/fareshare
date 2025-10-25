@@ -156,7 +156,7 @@ export function AddressInput({
         >
           {suggestions.map((suggestion, index) => (
             <div
-              key={suggestion.id}
+              key={suggestion.place_id}
               className={`px-3 py-2 cursor-pointer border-b last:border-b-0 hover:bg-gray-50 ${
                 index === selectedIndex ? 'bg-blue-50 border-blue-200' : ''
               }`}

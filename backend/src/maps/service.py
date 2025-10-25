@@ -9,7 +9,6 @@ from src.maps.schemas import (
     AddressSuggestion,
     AddressSuggestions,
     DistanceCalculation,
-    Location,
 )
 
 
@@ -72,19 +71,10 @@ class MapsService:
             display_name = place.get("displayName", {})
             display_name_text = display_name.get("text", "")
 
-            # Extract location coordinates
-            location_data = place.get("location", {})
-            latitude = location_data.get("latitude", 0.0)
-            longitude = location_data.get("longitude", 0.0)
-
-            # Create Location object
-            location = Location(latitude=latitude, longitude=longitude)
-
             # Create our AddressSuggestion object
             address_suggestion = AddressSuggestion(
-                id=place_id,
+                place_id=place_id,
                 display_name=display_name_text,
-                location=location,
             )
 
             suggestions.append(address_suggestion)

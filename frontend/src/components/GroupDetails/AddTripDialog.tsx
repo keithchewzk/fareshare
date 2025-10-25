@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '../ui/button';
-import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import { AddressInput } from '../ui/address-input';
 import { Calculator } from 'lucide-react';
 import {
   Dialog,
@@ -59,22 +59,22 @@ export function AddTripDialog({ open, onOpenChange, costPerDistance, distanceUni
 
             <div className="space-y-2">
               <Label htmlFor="start-address">Start Address</Label>
-              <Input
+              <AddressInput
                 id="start-address"
-                placeholder="e.g., 123 Main St, City, State"
+                placeholder="e.g., 123 Main St, Singapore"
                 value={startAddress}
-                onChange={(e) => setStartAddress(e.target.value)}
+                onChange={setStartAddress}
                 autoFocus
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="end-address">End Address</Label>
-              <Input
+              <AddressInput
                 id="end-address"
-                placeholder="e.g., 456 Oak Ave, City, State"
+                placeholder="e.g., 456 Oak Ave, Singapore"
                 value={endAddress}
-                onChange={(e) => setEndAddress(e.target.value)}
+                onChange={setEndAddress}
               />
             </div>
 

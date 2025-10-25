@@ -19,6 +19,9 @@ export const API_ROUTES = {
     membership: '/groups', // GET /groups/:id/membership - Get user's membership role
     leave: '/groups', // POST /groups/:id/leave - Leave group
   },
+  maps: {
+    autocomplete: '/maps/autocomplete', // GET /maps/autocomplete - Get address suggestions
+  },
 } as const;
 
 /**

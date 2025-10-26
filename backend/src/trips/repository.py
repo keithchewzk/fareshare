@@ -16,7 +16,7 @@ class TripRepository:
     def create_trip(
         self,
         group_id: int,
-        created_by: int,
+        user_id: int,
         name: str,
         description: str,
         stops: List[Dict[str, Any]],
@@ -41,7 +41,7 @@ class TripRepository:
         # Create trip (distance is always in km)
         trip = Trip(
             group_id=group_id,
-            created_by=created_by,
+            user_id=user_id,
             name=name,
             description=description,
             stops=stops,

@@ -24,5 +24,5 @@ class CreateTrip(BaseModel):
 class Trip(CreateTrip):
     """Schema for trip response data."""
     id: int
-    created_by: int
+    user_id: int
     created_at: datetime

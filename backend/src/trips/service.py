@@ -34,7 +34,7 @@ class TripService:
 
         trip = self.trip_repository.create_trip(
             group_id=trip_data.group_id,
-            created_by=user_id,
+            user_id=user_id,
             name=trip_data.name,
             description=trip_data.description,
             stops=self._serialize_stops(trip_data.stops),
@@ -46,7 +46,7 @@ class TripService:
         return Trip(
             id=trip.id,
             group_id=trip.group_id,
-            created_by=trip.created_by,
+            user_id=trip.user_id,
             name=trip.name,
             description=trip.description,
             stops=self._deserialize_stops(trip.stops),

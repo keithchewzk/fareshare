@@ -22,7 +22,7 @@ export interface CreateTripRequest {
 export interface Trip {
   id: number;
   group_id: number;
-  created_by: number;
+  user_id: number;
   name: string;
   description?: string;
   stops: Stop[];

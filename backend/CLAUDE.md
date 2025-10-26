@@ -4,7 +4,7 @@
 
 FareShare is a collaborative web application for tracking car usage within shared groups. The backend provides user authentication and will expand to include group management and trip tracking functionality.
 
-**Current Status**: Core authentication system implemented with JWT-based security. User registration and login functionality complete with production-ready bcrypt password hashing. **Groups domain completed** - Full group management functionality implemented with business logic, API endpoints, and invite code generation. **Trips domain completed** ✅ **NEW** - Full trip creation API with Google Maps distance calculation integration. **Maps domain completed** ✅ **NEW** - Complete Google Maps API integration for address autocomplete and distance calculation.
+**Current Status**: Core authentication system implemented with JWT-based security. User registration and login functionality complete with production-ready bcrypt password hashing. **Groups domain completed** - Full group management functionality implemented with business logic, API endpoints, and invite code generation. **Trips domain completed** ✅ **ENHANCED** - Full trip creation API with frontend-calculated values, structured Stop objects, and proper type safety. **Maps domain completed** ✅ **NEW** - Complete Google Maps API integration for address autocomplete and distance calculation.
 
 ## Technical Architecture
 
@@ -50,12 +50,12 @@ backend/
 │   │   ├── router.py      # Maps API endpoints (/maps/autocomplete)
 │   │   ├── dependencies.py # Maps dependency injection
 │   │   └── __init__.py    # Empty init file (avoid circular imports)
-│   └── trips/             # Trips domain (COMPLETE - Full implementation) ✅ **NEW**
-│       ├── models.py      # Trip model with creator-pays approach
-│       ├── schemas.py     # CreateTrip request schema
-│       ├── repository.py  # Trip database operations with group validation
-│       ├── service.py     # Trip business logic with mocked distance
-│       ├── router.py      # Trip API endpoints (POST /trips)
+│   └── trips/             # Trips domain (COMPLETE - Enhanced implementation) ✅ **ENHANCED**
+│       ├── models.py      # Trip model with Float distance and Decimal costs
+│       ├── schemas.py     # CreateTrip, Stop, and Trip response schemas
+│       ├── repository.py  # Trip database operations with new cost fields
+│       ├── service.py     # Trip business logic with frontend-calculated values
+│       ├── router.py      # Trip API endpoints (POST /trips with Trip response)
 │       ├── dependencies.py # Trip dependency injection
 │       └── __init__.py    # Empty init file (avoid circular imports)
 ├── alembic/               # Database migration tools
@@ -103,7 +103,7 @@ group_memberships (
 )
 ```
 
-#### Trips Table ✅ **UPDATED**
+#### Trips Table ✅ **ENHANCED**
 ```sql
 trips (
     id SERIAL PRIMARY KEY,
@@ -112,7 +112,9 @@ trips (
     name VARCHAR(100) NOT NULL,
     description VARCHAR(1000),
     stops JSONB NOT NULL,
-    total_distance NUMERIC(10,2) NOT NULL,
+    total_distance FLOAT NOT NULL,
+    cost_per_distance NUMERIC(10,2) NOT NULL,
+    total_cost NUMERIC(10,2) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 )
 ```
@@ -146,7 +148,7 @@ Additional tables for cost tracking and payment history may be added when cost s
 - `DELETE /groups/{group_id}` - Delete a group (owners only) ✅ **COMPLETE**
 
 #### Trip Management ✅ **IMPLEMENTED**
-- `POST /trips` - Create a new trip with mocked distance ✅ **COMPLETE**
+- `POST /trips` - Create a new trip with frontend-calculated values ✅ **ENHANCED**
 - `GET /trips` - Get user's trips ⏳ **PLANNED**
 - `GET /trips/{trip_id}` - Get trip details ⏳ **PLANNED**
 - `PUT /trips/{trip_id}` - Update trip (creator only) ⏳ **PLANNED**
@@ -169,7 +171,7 @@ The codebase follows a domain-driven design approach with clear separation of co
 - **JWT Utils**: Token creation and validation utilities
 - **Base**: Shared database configuration and utilities
 
-Currently implemented: **`users` domain (COMPLETE - includes authentication)**, **`groups` domain (COMPLETE - full group management)**, **`maps` domain (COMPLETE - Google Places and Routes API integration)** ✅ **NEW**, and **`trips` domain (COMPLETE - trip creation functionality)** ✅ **NEW**. Each domain is self-contained with its own models, schemas, repository, services, routers, dependencies, and utilities. The **auth domain has been eliminated** - all authentication functionality consolidated into the users domain. The maps domain provides address autocomplete and distance calculation functionality using Google Places API v1 and Routes API v2 with Singapore region bias. The trips domain uses a simplified MVP approach where the trip creator is responsible for all costs (no cost splitting), with mocked distance calculation that can be easily replaced with real Google Maps integration.
+Currently implemented: **`users` domain (COMPLETE - includes authentication)**, **`groups` domain (COMPLETE - full group management)**, **`maps` domain (COMPLETE - Google Places and Routes API integration)** ✅ **NEW**, and **`trips` domain (COMPLETE - enhanced trip creation functionality)** ✅ **ENHANCED**. Each domain is self-contained with its own models, schemas, repository, services, routers, dependencies, and utilities. The **auth domain has been eliminated** - all authentication functionality consolidated into the users domain. The maps domain provides address autocomplete and distance calculation functionality using Google Places API v1 and Routes API v2 with Singapore region bias. The trips domain uses a simplified MVP approach where the trip creator is responsible for all costs (no cost splitting), with frontend-calculated distance and cost values providing full type safety and structured data storage.
 
 ## Key Implementation Details
 
@@ -217,14 +219,16 @@ Currently implemented: **`users` domain (COMPLETE - includes authentication)**, 
 - **Field Masking**: Optimized API calls requesting only necessary fields
 - **Domain Structure**: Complete domain-driven implementation with service, client, and schema layers
 
-#### Trips System (`src/trips/`) ✅ **NEW - COMPLETE**
+#### Trips System (`src/trips/`) ✅ **ENHANCED - COMPLETE**
 - **Trip Creation**: `POST /trips` endpoint with group membership validation
-- **Creator-Pays Model**: Simplified MVP approach where trip creator is responsible for costs
-- **Mocked Distance**: Currently uses 50km mock distance (easily replaceable with real Google Maps integration)
-- **JSONB Route Storage**: Flexible storage for trip stops using PostgreSQL JSONB
+- **Frontend-Calculated Values**: Uses distance and cost values calculated by frontend
+- **Structured Stop Objects**: Pydantic `Stop` model with `place_id` and `display_name`
+- **Mixed Data Types**: Float for distance (measurements), Decimal for costs (financial precision)
+- **JSONB Route Storage**: Structured stops stored as `[{"place_id": "...", "display_name": "..."}]`
+- **Type-Safe Conversions**: Helper methods for Stop object ↔ dict serialization
+- **Pydantic Response Model**: `Trip` model inherits from `CreateTrip` with additional fields
 - **Group Integration**: Automatic validation that user is member of target group
 - **Repository Pattern**: Clean separation of database operations and business logic
-- **Database Relations**: Proper foreign key relationships with users and groups tables
 
 #### Database Setup
 - **Alembic integration**: Database migrations with users, groups, and trips tables created
@@ -379,14 +383,25 @@ alembic upgrade head
 - **Authentication**: Required (JWT token) ✅ **IMPLEMENTED**
 - **Authorization**: User must be a member of the target group ✅ **IMPLEMENTED**
 
-#### **Request Schema** ✅ **IMPLEMENTED**
+#### **Request Schema** ✅ **ENHANCED**
 ```python
+class Stop(BaseModel):
+    place_id: str
+    display_name: str
+
 class CreateTrip(BaseModel):
     group_id: int
     name: str  # e.g., "Weekend Beach Trip"
     description: Optional[str] = None
-    stops: List[Dict[str, Any]]  # Route waypoints stored as JSONB
-    # total_distance - currently mocked as 50km, ready for Google Maps integration
+    stops: List[Stop]  # Structured stop objects
+    total_distance: float  # Frontend-calculated distance (km)
+    cost_per_distance: Decimal  # Cost per km (financial precision)
+    total_cost: Decimal  # Total trip cost (financial precision)
+
+class Trip(CreateTrip):  # Response schema
+    id: int
+    created_by: int
+    created_at: datetime
 ```
 
 #### **Stops Data Structure**
@@ -404,18 +419,17 @@ stops = [
 ]
 ```
 
-#### **Business Logic Flow** ✅ **IMPLEMENTED**
+#### **Business Logic Flow** ✅ **ENHANCED**
 1. **Authentication**: Verify JWT token → get current user ✅ **IMPLEMENTED**
 2. **Authorization**: Check user is member of the specified group ✅ **IMPLEMENTED**
-3. **Validation**:
-   - Group exists and user has access ✅ **IMPLEMENTED**
-   - Stops data structure validation ✅ **IMPLEMENTED**
-4. **Distance Calculation**:
-   - Currently mocked as 50km ✅ **IMPLEMENTED**
-   - Ready for Google Maps Distance Matrix API integration
-5. **Cost Calculation**: `total_distance * group.cost_per_distance` (handled by frontend/future feature)
-6. **Database**: Create trip with calculated values ✅ **IMPLEMENTED**
-7. **Response**: Return created trip with distance and metadata ✅ **IMPLEMENTED**
+3. **Validation**: Pydantic validates all request data including Stop objects ✅ **IMPLEMENTED**
+4. **Data Processing**:
+   - Serialize Stop objects to dict format for JSONB storage ✅ **IMPLEMENTED**
+   - Use frontend-provided distance and cost values ✅ **IMPLEMENTED**
+5. **Database**: Create trip with all provided values ✅ **IMPLEMENTED**
+6. **Response**:
+   - Deserialize dict back to Stop objects ✅ **IMPLEMENTED**
+   - Return Trip Pydantic model with type safety ✅ **IMPLEMENTED**
 
 #### **Implementation Status** ✅ **ALL COMPLETE**
 1. **Google Maps Integration**: Available via separate maps domain ✅ **COMPLETE**

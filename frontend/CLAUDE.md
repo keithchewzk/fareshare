@@ -31,7 +31,8 @@ src/
 │   │   ├── card.tsx                  # Card components (Card, CardHeader, etc.)
 │   │   ├── tabs.tsx                  # Tabs navigation components
 │   │   ├── dialog.tsx                # Modal dialog components
-│   │   └── dropdown-menu.tsx         # Dropdown menu components
+│   │   ├── dropdown-menu.tsx         # Dropdown menu components
+│   │   └── address-input.tsx         # Google Maps address autocomplete component
 │   ├── LandingPage/                  # Landing page with complete 6-section layout
 │   │   └── index.tsx                 # Hero, Features, Use Cases, CTA, Footer
 │   ├── AuthPage/                     # Authentication system
@@ -48,7 +49,8 @@ src/
 │   └── routes.ts                    # API routes configuration
 ├── services/
 │   ├── userService.ts               # User registration and authentication API calls
-│   └── groupService.ts              # Group management API calls (NEW)
+│   ├── groupService.ts              # Group management API calls (NEW)
+│   └── mapsService.ts               # Google Maps API integration (NEW)
 ├── main.tsx                         # Application entry point with React root
 ├── App.tsx                           # Main app with React Router setup
 ├── App.css                           # Global app styles
@@ -210,27 +212,42 @@ interface Trip {
   - Invite code display with copy-to-clipboard functionality
   - Loading states and comprehensive error handling
 - **AddTripDialog:** `src/components/GroupDetails/AddTripDialog.tsx`
-  - Static trip creation form (UI prototype)
-  - Start/End address input fields
-  - Cost calculation display (non-functional)
-  - Distance calculation placeholder
-  - Prepared for backend Google Maps integration
+  - **ENHANCED**: Real Google Maps integration for distance calculation ✅ **NEW**
+  - Start/End address input with live autocomplete
+  - Real-time cost calculation with Google Maps distance API
+  - Proper error handling for Maps API failures
+  - Ready for backend trip creation integration
 
-#### 8. Application Entry Point
+#### 8. Google Maps Integration (Complete) ✅ **NEW**
+- **AddressInput Component:** `src/components/ui/address-input.tsx`
+  - Google Places API autocomplete integration
+  - Debounced search with loading states
+  - Keyboard navigation support (arrow keys, enter, escape)
+  - Place ID tracking for accurate distance calculations
+  - Singapore region restriction
+  - User-friendly error handling
+- **MapsService:** `src/services/mapsService.ts`
+  - Address autocomplete suggestions via Google Places API
+  - Distance calculation between waypoints
+  - Session token support for billing optimization
+  - Comprehensive error handling and fallbacks
+
+#### 9. Application Entry Point
 - **Main Entry:** `src/main.tsx` - React 19 application bootstrapping
   - Strict mode enabled for development
   - Root element validation and error handling
   - Modern createRoot API usage
 
-#### 9. Backend Integration (Complete)
+#### 10. Backend Integration (Complete)
 - **API Client Architecture:** Router & Services pattern
   - `lib/routes.ts` - Centralized API endpoint configuration
   - `services/userService.ts` - User registration and authentication business logic
   - `services/groupService.ts` - Complete group management API integration
+  - `services/mapsService.ts` - Google Maps API integration for address autocomplete and distance calculation ✅ **NEW**
   - Environment-based configuration with `VITE_BACKEND_API_URL`
 - **Authentication Flow:** ✅ **COMPLETE**
-  - User Registration: PUT /users → Create account in PostgreSQL database
-  - User Login: POST /users → JWT token + GET /users/me → User profile
+  - User Registration: POST /users → Create account in PostgreSQL database
+  - User Login: POST /users/login → JWT token + GET /users/me → User profile
   - Token Management: localStorage persistence with key `fareshare_token`
 - **Group Management Flow:** ✅ **COMPLETE**
   - Group Creation: POST /groups → Create group with backend API
@@ -242,7 +259,7 @@ interface Trip {
 - **Error Handling:** Comprehensive API error handling with user-friendly messages
 - **Loading States:** Visual feedback during API operations
 
-#### 10. Data Persistence
+#### 11. Data Persistence
 - **localStorage Integration:**
   - JWT tokens stored in `fareshare_token` (real authentication)
   - Trip data stored in `fareshare_trips` (mock data for UI)
@@ -264,11 +281,14 @@ interface Trip {
    - **Trip History:** View all trips for the group (mock localStorage data)
    - **Group Actions:** Delete group (owners) or leave group (members)
    - **Invite Code:** Copy group invite code to clipboard
-8. **Trip Management** - UI prototype for trip creation (static form, prepared for backend)
+8. **Trip Management** - Real Google Maps integration for trip creation ✅ **ENHANCED**:
+   - **Address Autocomplete:** Real-time address suggestions using Google Places API
+   - **Distance Calculation:** Automatic distance calculation between waypoints
+   - **Cost Calculation:** Real-time trip cost calculation based on distance
+   - **Trip Creation:** Ready for backend integration (UI complete)
 
 ### 📋 Ready for Enhancement
-- **Trip Backend Integration:** Connect AddTripDialog to backend Maps API and trip creation
-- **Google Maps Integration:** Real address autocomplete and distance calculation
+- **Trip Backend Integration:** Connect AddTripDialog to backend trip creation endpoint (Google Maps distance calculation already complete)
 - **Advanced trip features:** Trip editing, deletion, and payment status tracking
 - **Member management:** View group members, manage member permissions
 - **Token refresh and session management:** Enhanced authentication security
@@ -282,5 +302,6 @@ interface Trip {
 - **Router & Services Architecture** - Clean separation of API routes and business logic
 - **Environment Configuration** - Vite environment variables for API URL configuration
 - **JWT Authentication** - Industry-standard token-based authentication
-- **Consolidated API Endpoints** - All user operations under `/users` (PUT /users, POST /users, GET /users/me)
-- **Hybrid Approach** - Real authentication with mock group data (transitional)
+- **Consolidated API Endpoints** - All user operations under `/users` (POST /users, POST /users/login, GET /users/me)
+- **Google Maps Integration** - Real-time address autocomplete and distance calculation via Google Places API
+- **Hybrid Data Approach** - Real authentication and groups with mock trip data (transitional)

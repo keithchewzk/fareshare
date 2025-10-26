@@ -22,7 +22,7 @@ class AddressSuggestion(BaseModel):
     """
 
     place_id: str
-    display_name: str  # Full formatted address from Google Places
+    display_name: str
 
 
 class AddressSuggestions(BaseModel):

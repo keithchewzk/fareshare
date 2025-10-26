@@ -4,6 +4,7 @@ import { Card, CardContent } from '../ui/card';
 import { ArrowLeft, Plus, Users, MapPin, MoreVertical, Trash2, LogOut, Copy, Check } from 'lucide-react';
 import { AddTripDialog } from './AddTripDialog';
 import { groupService, Group, Membership } from '../../services/groupService';
+import { tripService, Trip as BackendTrip } from '../../services/tripService';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,20 +26,6 @@ interface User {
   name: string;
 }
 
-// Using Group interface from groupService
-
-interface Trip {
-  id: string;
-  groupId: string;
-  userId: string;
-  startAddress: string;
-  endAddress: string;
-  distance: number;
-  cost: number;
-  date: number;
-  paid: boolean;
-}
-
 interface GroupDetailsProps {
   user: User;
   groupId: string;
@@ -47,7 +34,7 @@ interface GroupDetailsProps {
 
 export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
   const [group, setGroup] = useState<Group | null>(null);
-  const [trips, setTrips] = useState<Trip[]>([]);
+  const [trips, setTrips] = useState<BackendTrip[]>([]);
   const [showAddTrip, setShowAddTrip] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
@@ -80,11 +67,8 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
       setGroup(fetchedGroup);
       setMembership(userMembership);
 
-      // Still load trips from localStorage for now (until trips API is implemented)
-      const allTrips = JSON.parse(localStorage.getItem('fareshare_trips') || '[]');
-      const groupTrips = allTrips.filter((t: Trip) => t.groupId === parseInt(groupId));
-      // Sort by date, newest first
-      groupTrips.sort((a: Trip, b: Trip) => b.date - a.date);
+      // Load trips from backend API
+      const groupTrips = await tripService.getTrips(parseInt(groupId));
       setTrips(groupTrips);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load group data');
@@ -95,15 +79,14 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
   };
 
 
-  const getUserName = (userId: string) => {
-    if (userId === user.id) return 'You';
-    const allUsers = JSON.parse(localStorage.getItem('fareshare_users') || '[]');
-    const foundUser = allUsers.find((u: any) => u.id === userId);
-    return foundUser?.name || 'Unknown User';
+  const getUserName = (userId: number) => {
+    if (userId.toString() === user.id) return 'You';
+    // TODO: Fetch user data from backend or cache user info
+    return 'Unknown User';
   };
 
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp);
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
     const now = new Date();
     const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
 
@@ -281,28 +264,36 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-sm text-muted-foreground">
-                          {getUserName(trip.userId)}
+                          {getUserName(trip.user_id)}
                         </span>
                         <span className="text-sm text-muted-foreground">•</span>
                         <span className="text-sm text-muted-foreground">
-                          {formatDate(trip.date)}
+                          {formatDate(trip.created_at)}
                         </span>
                       </div>
+                      <div className="flex items-start gap-2 mb-2">
+                        <h4 className="font-medium">{trip.name}</h4>
+                      </div>
+                      {trip.description && (
+                        <div className="text-sm text-muted-foreground mb-2">
+                          {trip.description}
+                        </div>
+                      )}
                       <div className="flex items-start gap-2 mb-1">
                         <MapPin className="size-4 mt-1 text-muted-foreground flex-shrink-0" />
-                        <span>{trip.startAddress}</span>
+                        <span>{trip.stops[0]?.display_name || 'Start location'}</span>
                       </div>
                       <div className="flex items-start gap-2 pl-6">
                         <span className="text-muted-foreground">→</span>
-                        <span>{trip.endAddress}</span>
+                        <span>{trip.stops[trip.stops.length - 1]?.display_name || 'End location'}</span>
                       </div>
                     </div>
                     <div className="text-right ml-4">
                       <div className="flex items-center gap-1 mb-1">
-                        <span>{trip.cost > 0 ? `$${trip.cost.toFixed(2)}` : 'Pending'}</span>
+                        <span>${Number(trip.total_cost).toFixed(2)}</span>
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {trip.distance > 0 ? `${trip.distance.toFixed(1)} km` : 'Calculating...'}
+                        {trip.total_distance.toFixed(1)} km
                       </div>
                     </div>
                   </div>
@@ -319,8 +310,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
         costPerDistance={group?.cost_per_distance || 0}
         groupId={parseInt(groupId)}
         onTripCreated={() => {
-          // TODO: Refresh trips from backend when trip API is implemented
-          // For now, we could reload the entire group data to show consistency
+          // Refresh trips from backend after successful creation
           loadGroupData();
         }}
       />

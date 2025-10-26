@@ -56,6 +56,32 @@ class TripService:
             created_at=trip.created_at,
         )
 
+    async def get_trips(self, user_id: int, group_id: int = None) -> List[Trip]:
+        """
+        Get trips for a user, optionally filtered by group.
+
+        - Returns trips from groups the user is a member of
+        - Optional group_id filter for specific group trips
+        - Results sorted by newest first
+        """
+        trips = self.trip_repository.get_trips(user_id, group_id)
+
+        return [
+            Trip(
+                id=trip.id,
+                group_id=trip.group_id,
+                user_id=trip.user_id,
+                name=trip.name,
+                description=trip.description,
+                stops=self._deserialize_stops(trip.stops),
+                total_distance=trip.total_distance,
+                cost_per_distance=trip.cost_per_distance,
+                total_cost=trip.total_cost,
+                created_at=trip.created_at,
+            )
+            for trip in trips
+        ]
+
     def _validate_group_membership(self, group_id: int, user_id: int) -> None:
         """
         Validate that user is a member of the specified group.

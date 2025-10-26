@@ -67,6 +67,34 @@ class TripService {
       throw new Error('Failed to create trip');
     }
   }
+
+  async getTrips(groupId?: number): Promise<Trip[]> {
+    try {
+      const url = new URL(getApiUrl(API_ROUTES.trips.list));
+      if (groupId) {
+        url.searchParams.append('group_id', groupId.toString());
+      }
+
+      const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: this.getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Failed to fetch trips: ${response.status}`);
+      }
+
+      const trips = await response.json();
+      return trips;
+    } catch (error) {
+      console.error('Trip fetching failed:', error);
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Failed to fetch trips');
+    }
+  }
 }
 
 export const tripService = new TripService();

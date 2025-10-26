@@ -56,13 +56,29 @@ class TripRepository:
 
         return trip
 
+    def get_trips(self, user_id: int, group_id: int = None) -> List[Trip]:
+        """
+        Get trips for a user, optionally filtered by group.
+        Only returns trips from groups the user is a member of.
+        """
+        query = (
+            self.db.query(Trip)
+            .join(GroupMembership, Trip.group_id == GroupMembership.group_id)
+            .filter(GroupMembership.user_id == user_id)
+        )
+
+        if group_id is not None:
+            query = query.filter(Trip.group_id == group_id)
+
+        trips = query.order_by(Trip.created_at.desc()).all()
+        return trips
+
     def is_user_in_group(self, user_id: int, group_id: int) -> bool:
         """Check if user is a member of the specified group."""
         membership = (
             self.db.query(GroupMembership)
             .filter(
-                GroupMembership.user_id == user_id,
-                GroupMembership.group_id == group_id
+                GroupMembership.user_id == user_id, GroupMembership.group_id == group_id
             )
             .first()
         )

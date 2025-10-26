@@ -24,6 +24,7 @@ class Trip(Base):
     total_distance = Column(Float, nullable=False)
     cost_per_distance = Column(Numeric(10, 2), nullable=False)
     total_cost = Column(Numeric(10, 2), nullable=False)
+    settled_at = Column(DateTime(timezone=True), nullable=True)
 
     group = relationship("Group", back_populates="trips")
     user = relationship("User", back_populates="trips")

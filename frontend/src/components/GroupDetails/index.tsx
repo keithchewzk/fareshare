@@ -200,10 +200,18 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
             <div>
               <h1 className="mb-2">{group.name}</h1>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Users className="size-4" />
-                  1 member {/* TODO: Get member count from backend */}
-                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-auto p-0 hover:bg-transparent text-muted-foreground hover:text-foreground"
+                  onClick={() => {
+                    console.log('Show group members clicked');
+                    // TODO: Implement member list modal/dialog
+                  }}
+                >
+                  <Users className="size-4 mr-1" />
+                  Members
+                </Button>
                 <Button
                   variant="ghost"
                   size="sm"

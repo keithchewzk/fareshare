@@ -23,6 +23,9 @@ export const API_ROUTES = {
     autocomplete: '/maps/autocomplete', // GET /maps/autocomplete - Get address suggestions
     calculateDistance: '/maps/calculate-distance', // POST /maps/calculate-distance - Calculate route distance
   },
+  trips: {
+    create: '/trips', // POST /trips - Create new trip
+  },
 } as const;
 
 /**

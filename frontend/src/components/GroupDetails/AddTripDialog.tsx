@@ -5,6 +5,7 @@ import { Label } from '../ui/label';
 import { AddressInput } from '../ui/address-input';
 import { Calculator } from 'lucide-react';
 import { mapsService } from '../../services/mapsService';
+import { tripService, CreateTripRequest } from '../../services/tripService';
 import {
   Dialog,
   DialogContent,
@@ -18,9 +19,11 @@ interface AddTripDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   costPerDistance?: number;
+  groupId: number;
+  onTripCreated: () => void;
 }
 
-export function AddTripDialog({ open, onOpenChange, costPerDistance }: AddTripDialogProps) {
+export function AddTripDialog({ open, onOpenChange, costPerDistance, groupId, onTripCreated }: AddTripDialogProps) {
   const [tripName, setTripName] = useState('');
   const [description, setDescription] = useState('');
   const [startAddress, setStartAddress] = useState('');
@@ -30,6 +33,8 @@ export function AddTripDialog({ open, onOpenChange, costPerDistance }: AddTripDi
   const [distance, setDistance] = useState<number | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [calculationError, setCalculationError] = useState<string | null>(null);
+  const [isCreatingTrip, setIsCreatingTrip] = useState(false);
+  const [creationError, setCreationError] = useState<string | null>(null);
 
   const handleCalculateDistance = async () => {
     if (!startPlaceId || !endPlaceId) {
@@ -51,6 +56,48 @@ export function AddTripDialog({ open, onOpenChange, costPerDistance }: AddTripDi
     }
   };
 
+  const handleAddTrip = async () => {
+    if (!tripName.trim() || distance === null || calculatedCost === null || !startPlaceId || !endPlaceId || !costPerDistance) {
+      return;
+    }
+
+    setIsCreatingTrip(true);
+    setCreationError(null);
+
+    try {
+      // Transform data to match backend CreateTrip schema
+      const tripData: CreateTripRequest = {
+        group_id: groupId,
+        name: tripName.trim(),
+        description: description.trim() || undefined,
+        stops: [
+          {
+            place_id: startPlaceId,
+            display_name: startAddress,
+          },
+          {
+            place_id: endPlaceId,
+            display_name: endAddress,
+          },
+        ],
+        total_distance: distance,
+        cost_per_distance: costPerDistance,
+        total_cost: calculatedCost,
+      };
+
+      await tripService.createTrip(tripData);
+
+      // Success: close dialog and notify parent
+      handleOpenChange(false);
+      onTripCreated();
+    } catch (error) {
+      console.error('Trip creation failed:', error);
+      setCreationError(error instanceof Error ? error.message : 'Failed to create trip');
+    } finally {
+      setIsCreatingTrip(false);
+    }
+  };
+
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       setTripName('');
@@ -62,6 +109,8 @@ export function AddTripDialog({ open, onOpenChange, costPerDistance }: AddTripDi
       setDistance(null);
       setCalculationError(null);
       setIsCalculating(false);
+      setCreationError(null);
+      setIsCreatingTrip(false);
     }
     onOpenChange(open);
   };
@@ -151,6 +200,13 @@ export function AddTripDialog({ open, onOpenChange, costPerDistance }: AddTripDi
               </div>
             )}
 
+            {/* Creation Error Display */}
+            {creationError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-800">{creationError}</p>
+              </div>
+            )}
+
             {/* Distance Display */}
             <div className="space-y-2">
               <Label>Distance</Label>
@@ -188,9 +244,10 @@ export function AddTripDialog({ open, onOpenChange, costPerDistance }: AddTripDi
             {/* Add Trip Button */}
             <Button
               type="button"
-              disabled={!tripName.trim() || distance === null || calculatedCost === null}
+              onClick={handleAddTrip}
+              disabled={!tripName.trim() || distance === null || calculatedCost === null || isCreatingTrip}
             >
-              Add Trip
+              {isCreatingTrip ? 'Creating Trip...' : 'Add Trip'}
             </Button>
           </DialogFooter>
         </form>

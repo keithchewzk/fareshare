@@ -317,6 +317,12 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
         open={showAddTrip}
         onOpenChange={setShowAddTrip}
         costPerDistance={group?.cost_per_distance || 0}
+        groupId={parseInt(groupId)}
+        onTripCreated={() => {
+          // TODO: Refresh trips from backend when trip API is implemented
+          // For now, we could reload the entire group data to show consistency
+          loadGroupData();
+        }}
       />
 
       {/* Delete Group Confirmation Dialog */}

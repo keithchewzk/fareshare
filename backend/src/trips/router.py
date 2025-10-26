@@ -30,3 +30,13 @@ async def create_trip(
     """Create a new trip using frontend-calculated values."""
     result = await trip_service.create_trip(trip_data, current_user.id)
     return result
+
+
+@router.post("/{trip_id}/settle", status_code=204)
+async def settle_trip(
+    trip_id: int,
+    current_user: User = Depends(get_current_user),
+    trip_service: TripService = Depends(get_trip_service),
+):
+    """Mark trip as settled by the creator."""
+    await trip_service.settle_trip(trip_id, current_user.id)

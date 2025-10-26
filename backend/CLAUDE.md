@@ -115,6 +115,7 @@ trips (
     total_distance FLOAT NOT NULL,
     cost_per_distance NUMERIC(10,2) NOT NULL,
     total_cost NUMERIC(10,2) NOT NULL,
+    settled_at TIMESTAMP WITH TIME ZONE NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 )
 ```
@@ -150,6 +151,7 @@ Additional tables for cost tracking and payment history may be added when cost s
 #### Trip Management ✅ **IMPLEMENTED**
 - `POST /trips` - Create a new trip with frontend-calculated values ✅ **ENHANCED**
 - `GET /trips` - Get user's trips with optional group filtering and user details ✅ **ENHANCED**
+- `POST /trips/{trip_id}/settle` - Mark trip as settled by creator (204 No Content) ✅ **NEW**
 - `GET /trips/{trip_id}` - Get trip details ⏳ **PLANNED**
 - `PUT /trips/{trip_id}` - Update trip (creator only) ⏳ **PLANNED**
 - `DELETE /trips/{trip_id}` - Delete trip (creator only) ⏳ **PLANNED**
@@ -222,6 +224,8 @@ Currently implemented: **`users` domain (COMPLETE - includes authentication)**, 
 #### Trips System (`src/trips/`) ✅ **ENHANCED - COMPLETE**
 - **Trip Creation**: `POST /trips` endpoint with group membership validation
 - **Trip Retrieval**: `GET /trips` endpoint with optional group filtering and membership security
+- **Trip Settlement**: `POST /trips/{id}/settle` endpoint for marking trips as settled ✅ **NEW**
+- **Settlement Tracking**: `settled_at` timestamp field for audit trail ✅ **NEW**
 - **User Data Inclusion**: `TripDetails` schema includes user first name, last name, and email ✅ **NEW**
 - **Single Query Performance**: JOIN with User table to get all data in one request ✅ **NEW**
 - **Frontend-Calculated Values**: Uses distance and cost values calculated by frontend
@@ -491,6 +495,35 @@ class TripDetails(Trip):
 4. **Optional Filtering**: Apply group_id filter if provided ✅ **IMPLEMENTED**
 5. **Data Mapping**: Convert to TripDetails with user information ✅ **IMPLEMENTED**
 6. **Response**: Return enriched trip list with creator details ✅ **IMPLEMENTED**
+
+### **POST /trips/{id}/settle Endpoint Implementation** ✅ **NEW**
+
+#### **Endpoint Design** ✅ **IMPLEMENTED**
+- **Method**: `POST /trips/{trip_id}/settle` (action-oriented endpoint)
+- **Purpose**: Mark trip as settled by creator with database timestamp
+- **Authentication**: Required (JWT token) ✅ **IMPLEMENTED**
+- **Authorization**: Only trip creator can settle their own trips ✅ **IMPLEMENTED**
+- **Response**: `204 No Content` (action completed successfully)
+
+#### **Business Logic Flow** ✅ **IMPLEMENTED**
+1. **Authentication**: Verify JWT token → get current user ✅ **IMPLEMENTED**
+2. **Authorization**: Verify trip exists and user is creator ✅ **IMPLEMENTED**
+3. **Validation**: Check trip not already settled (prevent double-settlement) ✅ **IMPLEMENTED**
+4. **Settlement**: Update `settled_at` with database timestamp ✅ **IMPLEMENTED**
+5. **Response**: Return 204 No Content (no response body) ✅ **IMPLEMENTED**
+
+#### **Key Features** ✅ **IMPLEMENTED**
+- **Creator-Only**: Only trip creator can settle (security via `WHERE user_id = ?`)
+- **Idempotent Protection**: Prevents double settlement (400 error if already settled)
+- **Database Timestamp**: Uses `func.now()` for server-side consistency
+- **Atomic Operation**: Single transaction with error handling
+- **No Unsettling**: Once settled, cannot be undone (permanent action)
+- **Minimal Response**: 204 status for clean action completion
+
+#### **Error Handling** ✅ **IMPLEMENTED**
+- **404**: Trip not found or user not the creator
+- **400**: Trip already settled (cannot settle twice)
+- **401**: Missing or invalid authentication token
 
 ## Next Steps
 

@@ -54,6 +54,7 @@ class TripService:
             cost_per_distance=trip.cost_per_distance,
             total_cost=trip.total_cost,
             created_at=trip.created_at,
+            settled_at=trip.settled_at,
         )
 
     async def get_trips(self, user_id: int, group_id: int = None) -> List[TripDetails]:
@@ -82,9 +83,24 @@ class TripService:
                 cost_per_distance=trip.cost_per_distance,
                 total_cost=trip.total_cost,
                 created_at=trip.created_at,
+                settled_at=trip.settled_at,
             )
             for trip, user in trip_user_pairs
         ]
+
+    async def settle_trip(self, trip_id: int, user_id: int) -> None:
+        """
+        Mark trip as settled by the creator.
+
+        Args:
+            trip_id: ID of the trip to settle
+            user_id: ID of the user attempting to settle (must be trip creator)
+
+        Raises:
+            HTTPException: If trip not found, not authorized, or already settled
+        """
+        # Settle the trip in repository
+        self.trip_repository.settle_trip(trip_id, user_id)
 
     def _validate_group_membership(self, group_id: int, user_id: int) -> None:
         """

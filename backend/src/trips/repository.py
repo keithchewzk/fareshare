@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
 from src.groups.models import Group, GroupMembership
 from src.trips.models import Trip
 from src.users.models import User
@@ -88,3 +89,40 @@ class TripRepository:
             .first()
         )
         return membership is not None
+
+    def settle_trip(self, trip_id: int, user_id: int) -> None:
+        """
+        Mark trip as settled with current timestamp.
+        Only trip creator can settle their own trip.
+
+        Args:
+            trip_id: ID of the trip to settle
+            user_id: ID of the user attempting to settle (must be trip creator)
+
+        Returns:
+            Updated trip with settlement timestamp
+
+        Raises:
+            HTTPException: If trip not found, not authorized, or already settled
+        """
+        trip = (
+            self.db.query(Trip)
+            .filter(Trip.id == trip_id, Trip.user_id == user_id)
+            .first()
+        )
+
+        if not trip:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Trip not found or not authorized to settle",
+            )
+
+        if trip.settled_at is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Trip already settled",
+            )
+
+        trip.settled_at = func.now()
+        self.db.commit()
+        return

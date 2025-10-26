@@ -30,6 +30,7 @@ class Trip(CreateTrip):
     id: int
     user_id: int
     created_at: datetime
+    settled_at: Optional[datetime] = None
 
 
 class TripDetails(Trip):

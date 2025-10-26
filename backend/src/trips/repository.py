@@ -20,7 +20,9 @@ class TripRepository:
         name: str,
         description: str,
         stops: List[Dict[str, Any]],
-        total_distance: Decimal,
+        total_distance: float,
+        cost_per_distance: Decimal,
+        total_cost: Decimal,
     ) -> Trip:
         """
         Create a new trip in the database.
@@ -44,6 +46,8 @@ class TripRepository:
             description=description,
             stops=stops,
             total_distance=total_distance,
+            cost_per_distance=cost_per_distance,
+            total_cost=total_cost,
         )
 
         self.db.add(trip)

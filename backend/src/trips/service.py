@@ -1,8 +1,9 @@
 from decimal import Decimal
+from typing import Dict, List
 
 from fastapi import HTTPException, status
 from src.trips.repository import TripRepository
-from src.trips.schemas import CreateTrip
+from src.trips.schemas import CreateTrip, Stop, Trip
 
 
 class TripService:
@@ -11,41 +12,49 @@ class TripService:
     def __init__(self, trip_repository: TripRepository):
         self.trip_repository = trip_repository
 
+    @staticmethod
+    def _serialize_stops(stops: List[Stop]) -> List[Dict[str, str]]:
+        """Convert Stop objects to dict format for JSONB storage."""
+        return [stop.model_dump() for stop in stops]
+
+    @staticmethod
+    def _deserialize_stops(stop_dicts: List[Dict[str, str]]) -> List[Stop]:
+        """Convert dict data back to Stop objects."""
+        return [Stop(**stop_dict) for stop_dict in stop_dicts]
+
     async def create_trip(self, trip_data: CreateTrip, user_id: int):
         """
-        Create a new trip with mocked distance.
+        Create a new trip using frontend-calculated values.
 
-        Step 1 implementation:
         - Validate user is member of the group
-        - Mock total_distance = 50km
-        - Repository handles group lookup and distance_unit inheritance atomically
+        - Use frontend-provided distance and cost values
+        - Convert Stop objects to dict format for JSONB storage
         """
-        # 1. Validate user is member of the group
         self._validate_group_membership(trip_data.group_id, user_id)
 
-        # 2. Mock distance for now
-        total_distance = Decimal("50.0")  # 50km mock
-
-        # 3. Create trip in database (repository handles group lookup atomically)
         trip = self.trip_repository.create_trip(
             group_id=trip_data.group_id,
             created_by=user_id,
             name=trip_data.name,
             description=trip_data.description,
-            stops=trip_data.stops,
-            total_distance=total_distance,
+            stops=self._serialize_stops(trip_data.stops),
+            total_distance=trip_data.total_distance,
+            cost_per_distance=trip_data.cost_per_distance,
+            total_cost=trip_data.total_cost,
         )
 
-        return {
-            "id": trip.id,
-            "group_id": trip.group_id,
-            "created_by": trip.created_by,
-            "name": trip.name,
-            "description": trip.description,
-            "total_distance": float(trip.total_distance),
-            "distance_unit": trip.distance_unit,
-            "created_at": trip.created_at.isoformat(),
-        }
+        return Trip(
+            id=trip.id,
+            group_id=trip.group_id,
+            created_by=trip.created_by,
+            name=trip.name,
+            description=trip.description,
+            stops=self._deserialize_stops(trip.stops),
+            total_distance=trip.total_distance,
+            cost_per_distance=trip.cost_per_distance,
+            total_cost=trip.total_cost,
+            created_at=trip.created_at,
+        )
 
     def _validate_group_membership(self, group_id: int, user_id: int) -> None:
         """
@@ -57,5 +66,5 @@ class TripService:
         if not self.trip_repository.is_user_in_group(user_id, group_id):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="You must be a member of this group to create trips"
+                detail="You must be a member of this group to create trips",
             )

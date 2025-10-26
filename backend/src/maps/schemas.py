@@ -7,15 +7,6 @@ from typing import List
 from pydantic import BaseModel, Field
 
 
-class Location(BaseModel):
-    """
-    Geographic location with latitude and longitude coordinates
-    """
-
-    latitude: float
-    longitude: float
-
-
 class AddressSuggestion(BaseModel):
     """
     Single address suggestion from Google Places Text Search API

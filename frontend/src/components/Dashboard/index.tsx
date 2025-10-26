@@ -43,14 +43,6 @@ export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
     }
   };
 
-  const getGroupStats = (groupId: number) => {
-    const trips = JSON.parse(localStorage.getItem('fareshare_trips') || '[]');
-    const groupTrips = trips.filter((t: any) => t.groupId === groupId);
-    return {
-      totalTrips: groupTrips.length,
-      unpaidTrips: groupTrips.filter((t: any) => !t.paid).length,
-    };
-  };
 
   const handleCreateGroup = () => {
     // Refresh the groups list after creation
@@ -129,40 +121,22 @@ export function Dashboard({ user, onLogout, onViewGroup }: DashboardProps) {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {groups.map((group) => {
-              const stats = getGroupStats(group.id);
-              return (
-                <Card
-                  key={group.id}
-                  className="cursor-pointer hover:border-primary transition-colors"
-                  onClick={() => onViewGroup(group.id)}
-                >
-                  <CardHeader>
-                    <CardTitle className="flex items-start justify-between">
-                      <span>{group.name}</span>
-                      <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Car className="size-5" />
-                      </div>
-                    </CardTitle>
-                    <CardDescription>
-                      {group.description || 'No description'}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Total Trips</span>
-                      <span>{stats.totalTrips}</span>
-                    </div>
-                    {stats.unpaidTrips > 0 && (
-                      <div className="flex justify-between text-sm mt-2">
-                        <span className="text-muted-foreground">Pending</span>
-                        <span className="text-destructive">{stats.unpaidTrips} unpaid</span>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {groups.map((group) => (
+              <Card
+                key={group.id}
+                className="cursor-pointer hover:border-primary transition-colors"
+                onClick={() => onViewGroup(group.id)}
+              >
+                <CardHeader>
+                  <CardTitle>
+                    {group.name}
+                  </CardTitle>
+                  <CardDescription>
+                    {group.description || 'No description'}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            ))}
           </div>
         )}
       </main>

@@ -108,7 +108,7 @@ group_memberships (
 trips (
     id SERIAL PRIMARY KEY,
     group_id INTEGER REFERENCES groups(id) ON DELETE CASCADE,
-    created_by INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
     description VARCHAR(1000),
     stops JSONB NOT NULL,
@@ -149,7 +149,7 @@ Additional tables for cost tracking and payment history may be added when cost s
 
 #### Trip Management ✅ **IMPLEMENTED**
 - `POST /trips` - Create a new trip with frontend-calculated values ✅ **ENHANCED**
-- `GET /trips` - Get user's trips ⏳ **PLANNED**
+- `GET /trips` - Get user's trips with optional group filtering ✅ **IMPLEMENTED**
 - `GET /trips/{trip_id}` - Get trip details ⏳ **PLANNED**
 - `PUT /trips/{trip_id}` - Update trip (creator only) ⏳ **PLANNED**
 - `DELETE /trips/{trip_id}` - Delete trip (creator only) ⏳ **PLANNED**
@@ -171,7 +171,7 @@ The codebase follows a domain-driven design approach with clear separation of co
 - **JWT Utils**: Token creation and validation utilities
 - **Base**: Shared database configuration and utilities
 
-Currently implemented: **`users` domain (COMPLETE - includes authentication)**, **`groups` domain (COMPLETE - full group management)**, **`maps` domain (COMPLETE - Google Places and Routes API integration)** ✅ **NEW**, and **`trips` domain (COMPLETE - enhanced trip creation functionality)** ✅ **ENHANCED**. Each domain is self-contained with its own models, schemas, repository, services, routers, dependencies, and utilities. The **auth domain has been eliminated** - all authentication functionality consolidated into the users domain. The maps domain provides address autocomplete and distance calculation functionality using Google Places API v1 and Routes API v2 with Singapore region bias. The trips domain uses a simplified MVP approach where the trip creator is responsible for all costs (no cost splitting), with frontend-calculated distance and cost values providing full type safety and structured data storage.
+Currently implemented: **`users` domain (COMPLETE - includes authentication)**, **`groups` domain (COMPLETE - full group management)**, **`maps` domain (COMPLETE - Google Places and Routes API integration)** ✅ **NEW**, and **`trips` domain (COMPLETE - trip creation and retrieval functionality)** ✅ **ENHANCED**. Each domain is self-contained with its own models, schemas, repository, services, routers, dependencies, and utilities. The **auth domain has been eliminated** - all authentication functionality consolidated into the users domain. The maps domain provides address autocomplete and distance calculation functionality using Google Places API v1 and Routes API v2 with Singapore region bias. The trips domain uses a simplified MVP approach where the trip creator is responsible for all costs (no cost splitting), with frontend-calculated distance and cost values providing full type safety and structured data storage.
 
 ## Key Implementation Details
 
@@ -221,6 +221,7 @@ Currently implemented: **`users` domain (COMPLETE - includes authentication)**, 
 
 #### Trips System (`src/trips/`) ✅ **ENHANCED - COMPLETE**
 - **Trip Creation**: `POST /trips` endpoint with group membership validation
+- **Trip Retrieval**: `GET /trips` endpoint with optional group filtering and membership security
 - **Frontend-Calculated Values**: Uses distance and cost values calculated by frontend
 - **Structured Stop Objects**: Pydantic `Stop` model with `place_id` and `display_name`
 - **Mixed Data Types**: Float for distance (measurements), Decimal for costs (financial precision)
@@ -228,6 +229,7 @@ Currently implemented: **`users` domain (COMPLETE - includes authentication)**, 
 - **Type-Safe Conversions**: Helper methods for Stop object ↔ dict serialization
 - **Pydantic Response Model**: `Trip` model inherits from `CreateTrip` with additional fields
 - **Group Integration**: Automatic validation that user is member of target group
+- **Security**: Users can only see trips from groups they're members of
 - **Repository Pattern**: Clean separation of database operations and business logic
 
 #### Database Setup

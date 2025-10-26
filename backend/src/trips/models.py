@@ -12,7 +12,7 @@ class Trip(Base):
     group_id = Column(
         Integer, ForeignKey("groups.id", ondelete="CASCADE"), nullable=False
     )
-    created_by = Column(
+    user_id = Column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     created_at = Column(
@@ -26,4 +26,4 @@ class Trip(Base):
     total_cost = Column(Numeric(10, 2), nullable=False)
 
     group = relationship("Group", back_populates="trips")
-    creator = relationship("User", back_populates="trips")
+    user = relationship("User", back_populates="trips")

@@ -1,12 +1,4 @@
-from sqlalchemy import (
-    CheckConstraint,
-    Column,
-    DateTime,
-    ForeignKey,
-    Integer,
-    Numeric,
-    String,
-)
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, Numeric, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -29,7 +21,9 @@ class Trip(Base):
     name = Column(String(100), nullable=False)
     description = Column(String(1000), nullable=True)
     stops = Column(JSONB, nullable=False)
-    total_distance = Column(Numeric(10, 2), nullable=False)
+    total_distance = Column(Float, nullable=False)
+    cost_per_distance = Column(Numeric(10, 2), nullable=False)
+    total_cost = Column(Numeric(10, 2), nullable=False)
 
     group = relationship("Group", back_populates="trips")
     creator = relationship("User", back_populates="trips")

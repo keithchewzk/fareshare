@@ -271,45 +271,45 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
             {trips.map((trip) => (
               <Card key={trip.id}>
                 <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-sm text-muted-foreground">
-                          {getUserName(trip)}
-                        </span>
-                        <span className="text-sm text-muted-foreground">•</span>
-                        <span className="text-sm text-muted-foreground">
-                          {formatDate(trip.created_at)}
-                        </span>
-                        {trip.settled_at && (
-                          <>
-                            <span className="text-sm text-muted-foreground">•</span>
-                            <Badge variant="secondary" className="gap-1">
-                              <CheckCircle2 className="size-3" />
-                              Settled
-                            </Badge>
-                          </>
-                        )}
-                      </div>
-                      <div className="flex items-start gap-2 mb-2">
-                        <h4 className="font-medium">{trip.name}</h4>
-                      </div>
-                      {trip.description && (
-                        <div className="text-sm text-muted-foreground mb-2">
-                          {trip.description}
+                  <div className="relative">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 pr-32">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-sm text-muted-foreground">
+                            {getUserName(trip)}
+                          </span>
+                          <span className="text-sm text-muted-foreground">•</span>
+                          <span className="text-sm text-muted-foreground">
+                            {formatDate(trip.created_at)}
+                          </span>
+                          {trip.settled_at && (
+                            <>
+                              <span className="text-sm text-muted-foreground">•</span>
+                              <Badge variant="secondary" className="gap-1">
+                                <CheckCircle2 className="size-3" />
+                                Settled
+                              </Badge>
+                            </>
+                          )}
                         </div>
-                      )}
-                      <div className="flex items-start gap-2 mb-1">
-                        <MapPin className="size-4 mt-1 text-muted-foreground flex-shrink-0" />
-                        <span>{trip.stops[0]?.display_name || 'Start location'}</span>
+                        <div className="flex items-start gap-2 mb-2">
+                          <h4 className="font-medium">{trip.name}</h4>
+                        </div>
+                        {trip.description && (
+                          <div className="text-sm text-muted-foreground mb-2">
+                            {trip.description}
+                          </div>
+                        )}
+                        <div className="flex items-start gap-2 mb-1">
+                          <MapPin className="size-4 mt-1 text-muted-foreground flex-shrink-0" />
+                          <span>{trip.stops[0]?.display_name || 'Start location'}</span>
+                        </div>
+                        <div className="flex items-start gap-2 pl-6">
+                          <span className="text-muted-foreground">→</span>
+                          <span>{trip.stops[trip.stops.length - 1]?.display_name || 'End location'}</span>
+                        </div>
                       </div>
-                      <div className="flex items-start gap-2 pl-6">
-                        <span className="text-muted-foreground">→</span>
-                        <span>{trip.stops[trip.stops.length - 1]?.display_name || 'End location'}</span>
-                      </div>
-                    </div>
-                    <div className="text-right ml-4 flex flex-col items-end gap-2">
-                      <div>
+                      <div className="text-right ml-4">
                         <div className="flex items-center gap-1 mb-1">
                           <span>${Number(trip.total_cost).toFixed(2)}</span>
                         </div>
@@ -317,17 +317,18 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
                           {trip.total_distance.toFixed(1)} km
                         </div>
                       </div>
-                      {!trip.settled_at && trip.user_id === user.id && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleMarkAsSettled(trip.id)}
-                        >
-                          <Check className="size-4 mr-2" />
-                          Mark as Settled
-                        </Button>
-                      )}
                     </div>
+                    {!trip.settled_at && trip.user_id === user.id && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleMarkAsSettled(trip.id)}
+                        className="absolute bottom-0 right-0"
+                      >
+                        <Check className="size-4 mr-2" />
+                        Mark as Settled
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>

@@ -8,7 +8,7 @@ import { GroupDetails } from './components/GroupDetails';
 import { userService } from './services/userService';
 
 interface User {
-  id: string;
+  id: number;
   email: string;
   name: string;
 }
@@ -25,7 +25,13 @@ const AppContent: React.FC = () => {
         const token = localStorage.getItem('fareshare_token');
         if (token) {
           const userData = await userService.getCurrentUser();
-          setUser(userData);
+          // Transform UserProfile to User format
+          const user: User = {
+            id: userData.id,
+            email: userData.email,
+            name: `${userData.first_name} ${userData.last_name || ''}`.trim(),
+          };
+          setUser(user);
         }
       } catch (error) {
         // Token might be invalid, remove it

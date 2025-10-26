@@ -7,7 +7,7 @@ import { JoinGroupDialog } from './JoinGroupDialog';
 import { groupService, Group } from '../../services/groupService';
 
 interface User {
-  id: string;
+  id: number;
   email: string;
   name: string;
 }

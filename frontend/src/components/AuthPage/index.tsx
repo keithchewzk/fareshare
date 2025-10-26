@@ -8,7 +8,7 @@ import { ArrowLeft, Car } from 'lucide-react';
 import { userService } from '../../services/userService';
 
 interface AuthPageProps {
-  onLogin: (user: { id: string; email: string; name: string }) => void;
+  onLogin: (user: { id: number; email: string; name: string }) => void;
   onBack: () => void;
 }
 
@@ -46,7 +46,7 @@ export function AuthPage({ onLogin, onBack }: AuthPageProps) {
 
       // Create user object in the format expected by the parent
       const userForParent = {
-        id: user.id.toString(),
+        id: user.id,
         email: user.email,
         name: `${user.first_name} ${user.last_name || ''}`.trim(),
       };

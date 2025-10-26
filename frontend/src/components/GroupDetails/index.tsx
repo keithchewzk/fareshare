@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
-import { ArrowLeft, Plus, Users, MapPin, MoreVertical, Trash2, LogOut, Copy, Check } from 'lucide-react';
+import { Badge } from '../ui/badge';
+import { ArrowLeft, Plus, Users, MapPin, MoreVertical, Trash2, LogOut, Copy, Check, CheckCircle2 } from 'lucide-react';
 import { AddTripDialog } from './AddTripDialog';
 import { groupService, Group, Membership } from '../../services/groupService';
 import { tripService, TripDetails } from '../../services/tripService';
@@ -21,7 +22,7 @@ import {
 } from '../ui/dialog';
 
 interface User {
-  id: string;
+  id: number;
   email: string;
   name: string;
 }
@@ -80,7 +81,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
 
 
   const getUserName = (trip: TripDetails) => {
-    if (trip.user_id.toString() === user.id) return 'You';
+    if (trip.user_id === user.id) return 'You';
     return `${trip.user_first_name} ${trip.user_last_name}`.trim();
   };
 
@@ -147,6 +148,17 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
 
   const handleCancelLeave = () => {
     setShowLeaveConfirm(false);
+  };
+
+  const handleMarkAsSettled = async (tripId: number) => {
+    try {
+      await tripService.settleTrip(tripId);
+      // Refresh trips to show updated settlement status
+      loadGroupData();
+    } catch (error) {
+      console.error('Failed to settle trip:', error);
+      // TODO: Show error message to user
+    }
   };
 
   if (loading) {
@@ -269,6 +281,15 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
                         <span className="text-sm text-muted-foreground">
                           {formatDate(trip.created_at)}
                         </span>
+                        {trip.settled_at && (
+                          <>
+                            <span className="text-sm text-muted-foreground">•</span>
+                            <Badge variant="secondary" className="gap-1">
+                              <CheckCircle2 className="size-3" />
+                              Settled
+                            </Badge>
+                          </>
+                        )}
                       </div>
                       <div className="flex items-start gap-2 mb-2">
                         <h4 className="font-medium">{trip.name}</h4>
@@ -287,13 +308,25 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
                         <span>{trip.stops[trip.stops.length - 1]?.display_name || 'End location'}</span>
                       </div>
                     </div>
-                    <div className="text-right ml-4">
-                      <div className="flex items-center gap-1 mb-1">
-                        <span>${Number(trip.total_cost).toFixed(2)}</span>
+                    <div className="text-right ml-4 flex flex-col items-end gap-2">
+                      <div>
+                        <div className="flex items-center gap-1 mb-1">
+                          <span>${Number(trip.total_cost).toFixed(2)}</span>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {trip.total_distance.toFixed(1)} km
+                        </div>
                       </div>
-                      <div className="text-sm text-muted-foreground">
-                        {trip.total_distance.toFixed(1)} km
-                      </div>
+                      {!trip.settled_at && trip.user_id === user.id && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleMarkAsSettled(trip.id)}
+                        >
+                          <Check className="size-4 mr-2" />
+                          Mark as Settled
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>

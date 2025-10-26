@@ -26,6 +26,7 @@ export const API_ROUTES = {
   trips: {
     create: '/trips', // POST /trips - Create new trip
     list: '/trips', // GET /trips - Get trips (with optional group_id query)
+    settle: '/trips', // POST /trips/:id/settle - Mark trip as settled
   },
 } as const;
 

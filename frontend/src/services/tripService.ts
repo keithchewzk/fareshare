@@ -46,6 +46,7 @@ export interface TripDetails {
   cost_per_distance: number;
   total_cost: number;
   created_at: string;
+  settled_at: string | null;
 }
 
 class TripService {
@@ -109,6 +110,26 @@ class TripService {
         throw error;
       }
       throw new Error('Failed to fetch trips');
+    }
+  }
+
+  async settleTrip(tripId: number): Promise<void> {
+    try {
+      const response = await fetch(getApiUrl(`${API_ROUTES.trips.settle}/${tripId}/settle`), {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Failed to settle trip: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Trip settlement failed:', error);
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Failed to settle trip');
     }
   }
 }

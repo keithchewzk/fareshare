@@ -4,7 +4,7 @@ import { Card, CardContent } from '../ui/card';
 import { ArrowLeft, Plus, Users, MapPin, MoreVertical, Trash2, LogOut, Copy, Check } from 'lucide-react';
 import { AddTripDialog } from './AddTripDialog';
 import { groupService, Group, Membership } from '../../services/groupService';
-import { tripService, Trip as BackendTrip } from '../../services/tripService';
+import { tripService, TripDetails } from '../../services/tripService';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,7 +34,7 @@ interface GroupDetailsProps {
 
 export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
   const [group, setGroup] = useState<Group | null>(null);
-  const [trips, setTrips] = useState<BackendTrip[]>([]);
+  const [trips, setTrips] = useState<TripDetails[]>([]);
   const [showAddTrip, setShowAddTrip] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
@@ -79,10 +79,9 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
   };
 
 
-  const getUserName = (userId: number) => {
-    if (userId.toString() === user.id) return 'You';
-    // TODO: Fetch user data from backend or cache user info
-    return 'Unknown User';
+  const getUserName = (trip: TripDetails) => {
+    if (trip.user_id.toString() === user.id) return 'You';
+    return `${trip.user_first_name} ${trip.user_last_name}`.trim();
   };
 
   const formatDate = (dateString: string) => {
@@ -264,7 +263,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-sm text-muted-foreground">
-                          {getUserName(trip.user_id)}
+                          {getUserName(trip)}
                         </span>
                         <span className="text-sm text-muted-foreground">•</span>
                         <span className="text-sm text-muted-foreground">

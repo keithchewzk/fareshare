@@ -32,6 +32,22 @@ export interface Trip {
   created_at: string;
 }
 
+export interface TripDetails {
+  id: number;
+  group_id: number;
+  user_id: number;
+  user_first_name: string;
+  user_last_name: string;
+  user_email: string;
+  name: string;
+  description?: string;
+  stops: Stop[];
+  total_distance: number;
+  cost_per_distance: number;
+  total_cost: number;
+  created_at: string;
+}
+
 class TripService {
   private getAuthHeaders() {
     const token = localStorage.getItem('fareshare_token');
@@ -68,7 +84,7 @@ class TripService {
     }
   }
 
-  async getTrips(groupId?: number): Promise<Trip[]> {
+  async getTrips(groupId?: number): Promise<TripDetails[]> {
     try {
       const url = new URL(getApiUrl(API_ROUTES.trips.list));
       if (groupId) {

@@ -5,6 +5,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from src.groups.models import Group, GroupMembership
 from src.trips.models import Trip
+from src.users.models import User
 
 
 class TripRepository:
@@ -56,13 +57,17 @@ class TripRepository:
 
         return trip
 
-    def get_trips(self, user_id: int, group_id: int = None) -> List[Trip]:
+    def get_trips(self, user_id: int, group_id: int = None) -> List[tuple]:
         """
-        Get trips for a user, optionally filtered by group.
+        Get trips with user data for a user, optionally filtered by group.
         Only returns trips from groups the user is a member of.
+
+        Returns:
+            List of tuples: (Trip, User) containing trip and user data
         """
         query = (
-            self.db.query(Trip)
+            self.db.query(Trip, User)
+            .join(User, Trip.user_id == User.id)
             .join(GroupMembership, Trip.group_id == GroupMembership.group_id)
             .filter(GroupMembership.user_id == user_id)
         )
@@ -70,8 +75,8 @@ class TripRepository:
         if group_id is not None:
             query = query.filter(Trip.group_id == group_id)
 
-        trips = query.order_by(Trip.created_at.desc()).all()
-        return trips
+        trip_user_pairs = query.order_by(Trip.created_at.desc()).all()
+        return trip_user_pairs
 
     def is_user_in_group(self, user_id: int, group_id: int) -> bool:
         """Check if user is a member of the specified group."""

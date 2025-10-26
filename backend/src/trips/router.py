@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query
 from src.trips.dependencies import get_trip_service
-from src.trips.schemas import CreateTrip, Trip
+from src.trips.schemas import CreateTrip, Trip, TripDetails
 from src.trips.service import TripService
 from src.users.dependencies import get_current_user
 from src.users.models import User
@@ -10,7 +10,7 @@ from src.users.models import User
 router = APIRouter(prefix="/trips", tags=["Trips"])
 
 
-@router.get("/", response_model=List[Trip])
+@router.get("/", response_model=List[TripDetails])
 async def get_trips(
     group_id: Optional[int] = Query(None, description="Filter trips by group ID"),
     current_user: User = Depends(get_current_user),

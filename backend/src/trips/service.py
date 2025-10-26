@@ -3,7 +3,7 @@ from typing import Dict, List
 
 from fastapi import HTTPException, status
 from src.trips.repository import TripRepository
-from src.trips.schemas import CreateTrip, Stop, Trip
+from src.trips.schemas import CreateTrip, Stop, Trip, TripDetails
 
 
 class TripService:
@@ -56,21 +56,25 @@ class TripService:
             created_at=trip.created_at,
         )
 
-    async def get_trips(self, user_id: int, group_id: int = None) -> List[Trip]:
+    async def get_trips(self, user_id: int, group_id: int = None) -> List[TripDetails]:
         """
-        Get trips for a user, optionally filtered by group.
+        Get trips with user details for a user, optionally filtered by group.
 
         - Returns trips from groups the user is a member of
+        - Includes user information (name, email) for each trip
         - Optional group_id filter for specific group trips
         - Results sorted by newest first
         """
-        trips = self.trip_repository.get_trips(user_id, group_id)
+        trip_user_pairs = self.trip_repository.get_trips(user_id, group_id)
 
         return [
-            Trip(
+            TripDetails(
                 id=trip.id,
                 group_id=trip.group_id,
                 user_id=trip.user_id,
+                user_first_name=user.first_name,
+                user_last_name=user.last_name or "",
+                user_email=user.email,
                 name=trip.name,
                 description=trip.description,
                 stops=self._deserialize_stops(trip.stops),
@@ -79,7 +83,7 @@ class TripService:
                 total_cost=trip.total_cost,
                 created_at=trip.created_at,
             )
-            for trip in trips
+            for trip, user in trip_user_pairs
         ]
 
     def _validate_group_membership(self, group_id: int, user_id: int) -> None:

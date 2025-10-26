@@ -20,6 +20,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../ui/dialog';
+import {
+  Sheet,
+  SheetContent,
+} from '../ui/sheet';
 
 interface User {
   id: number;
@@ -39,6 +43,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
   const [showAddTrip, setShowAddTrip] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [showMembersSheet, setShowMembersSheet] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -204,10 +209,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
                   variant="ghost"
                   size="sm"
                   className="h-auto p-0 hover:bg-transparent text-muted-foreground hover:text-foreground"
-                  onClick={() => {
-                    console.log('Show group members clicked');
-                    // TODO: Implement member list modal/dialog
-                  }}
+                  onClick={() => setShowMembersSheet(true)}
                 >
                   <Users className="size-4 mr-1" />
                   Members
@@ -409,6 +411,14 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Members Sheet */}
+      <Sheet open={showMembersSheet} onOpenChange={setShowMembersSheet}>
+        <SheetContent>
+          <h2 className="text-lg font-semibold mb-6">Group Members</h2>
+          <p className="text-muted-foreground">Member list will be implemented here.</p>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

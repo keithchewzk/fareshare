@@ -149,7 +149,7 @@ Additional tables for cost tracking and payment history may be added when cost s
 
 #### Trip Management ✅ **IMPLEMENTED**
 - `POST /trips` - Create a new trip with frontend-calculated values ✅ **ENHANCED**
-- `GET /trips` - Get user's trips with optional group filtering ✅ **IMPLEMENTED**
+- `GET /trips` - Get user's trips with optional group filtering and user details ✅ **ENHANCED**
 - `GET /trips/{trip_id}` - Get trip details ⏳ **PLANNED**
 - `PUT /trips/{trip_id}` - Update trip (creator only) ⏳ **PLANNED**
 - `DELETE /trips/{trip_id}` - Delete trip (creator only) ⏳ **PLANNED**
@@ -222,12 +222,14 @@ Currently implemented: **`users` domain (COMPLETE - includes authentication)**, 
 #### Trips System (`src/trips/`) ✅ **ENHANCED - COMPLETE**
 - **Trip Creation**: `POST /trips` endpoint with group membership validation
 - **Trip Retrieval**: `GET /trips` endpoint with optional group filtering and membership security
+- **User Data Inclusion**: `TripDetails` schema includes user first name, last name, and email ✅ **NEW**
+- **Single Query Performance**: JOIN with User table to get all data in one request ✅ **NEW**
 - **Frontend-Calculated Values**: Uses distance and cost values calculated by frontend
 - **Structured Stop Objects**: Pydantic `Stop` model with `place_id` and `display_name`
 - **Mixed Data Types**: Float for distance (measurements), Decimal for costs (financial precision)
 - **JSONB Route Storage**: Structured stops stored as `[{"place_id": "...", "display_name": "..."}]`
 - **Type-Safe Conversions**: Helper methods for Stop object ↔ dict serialization
-- **Pydantic Response Model**: `Trip` model inherits from `CreateTrip` with additional fields
+- **Dual Response Models**: `Trip` for basic responses, `TripDetails` for enriched GET responses ✅ **NEW**
 - **Group Integration**: Automatic validation that user is member of target group
 - **Security**: Users can only see trips from groups they're members of
 - **Repository Pattern**: Clean separation of database operations and business logic
@@ -400,10 +402,15 @@ class CreateTrip(BaseModel):
     cost_per_distance: Decimal  # Cost per km (financial precision)
     total_cost: Decimal  # Total trip cost (financial precision)
 
-class Trip(CreateTrip):  # Response schema
+class Trip(CreateTrip):  # Basic response schema
     id: int
-    created_by: int
+    user_id: int
     created_at: datetime
+
+class TripDetails(Trip):  # Enriched response schema for GET endpoints
+    user_first_name: str
+    user_last_name: str
+    user_email: str
 ```
 
 #### **Stops Data Structure**
@@ -453,13 +460,44 @@ stops = [
 - `httpx` for Google Maps API calls (available via maps domain) ✅ **COMPLETE**
 - `GOOGLE_MAPS_API_KEY` environment variable ✅ **COMPLETE**
 
+### **GET /trips Endpoint Implementation** ✅ **ENHANCED - NEW**
+
+#### **Endpoint Design** ✅ **IMPLEMENTED**
+- **Method**: `GET /trips` with optional `group_id` query parameter
+- **Purpose**: Retrieve trips with user details for authenticated user
+- **Authentication**: Required (JWT token) ✅ **IMPLEMENTED**
+- **Authorization**: Users only see trips from groups they're members of ✅ **IMPLEMENTED**
+
+#### **Response Schema** ✅ **NEW**
+```python
+class TripDetails(Trip):
+    """Enriched trip response with user information for display."""
+    user_first_name: str  # Trip creator's first name
+    user_last_name: str   # Trip creator's last name
+    user_email: str       # Trip creator's email (for disambiguation)
+```
+
+#### **Key Features** ✅ **IMPLEMENTED**
+- **Single Query Performance**: JOIN with User table eliminates N+1 queries
+- **Group Filtering**: Optional `group_id` parameter for specific group trips
+- **User Data Inclusion**: Creator's name and email for proper display
+- **Security**: Membership validation ensures users only see authorized trips
+- **Sorting**: Results ordered by newest first (`created_at DESC`)
+
+#### **Business Logic Flow** ✅ **IMPLEMENTED**
+1. **Authentication**: Verify JWT token → get current user ✅ **IMPLEMENTED**
+2. **Repository Query**: JOIN Trip + User + GroupMembership tables ✅ **IMPLEMENTED**
+3. **Authorization**: Filter to groups where user is member ✅ **IMPLEMENTED**
+4. **Optional Filtering**: Apply group_id filter if provided ✅ **IMPLEMENTED**
+5. **Data Mapping**: Convert to TripDetails with user information ✅ **IMPLEMENTED**
+6. **Response**: Return enriched trip list with creator details ✅ **IMPLEMENTED**
+
 ## Next Steps
 
-1. **Integrate Google Maps Distance Calculation**: Replace mocked 50km distance with real Google Maps API calls
-2. **Add Additional Trip Endpoints**: GET /trips, GET /trips/{id}, PUT /trips/{id}, DELETE /trips/{id}
-3. **Enhanced Frontend Integration**: Connect frontend trip creation with backend POST /trips endpoint
-4. **Testing**: Add comprehensive test suite for trips functionality
-5. **Deployment**: Prepare for Railway deployment with production environment configuration
+1. **Add Individual Trip Endpoints**: GET /trips/{id}, PUT /trips/{id}, DELETE /trips/{id}
+2. **Testing**: Add comprehensive test suite for trips functionality
+3. **Enhanced Trip Features**: Trip editing, payment status tracking
+4. **Deployment**: Prepare for Railway deployment with production environment configuration
 
 ## Groups Domain - Implementation Complete ✅
 

@@ -123,16 +123,20 @@ interface Membership {
   joined_at: string;
 }
 
-interface Trip {
-  id: string;
-  groupId: string;
-  userId: string;
-  startAddress: string;
-  endAddress: string;
-  distance: number;
-  cost: number;
-  date: number;
-  paid: boolean;
+interface TripDetails {
+  id: number;
+  group_id: number;
+  user_id: number;
+  user_first_name: string;
+  user_last_name: string;
+  user_email: string;
+  name: string;
+  description?: string;
+  stops: Stop[];
+  total_distance: number;
+  cost_per_distance: number;
+  total_cost: number;
+  created_at: string;
 }
 ```
 
@@ -259,8 +263,9 @@ interface Trip {
   - Membership Roles: GET /groups/{id}/membership → Owner vs Member permissions
 - **Trip Management Flow:** ✅ **COMPLETE** ✅ **NEW**
   - Trip Creation: POST /trips → Create trip with frontend-calculated values
-  - Trip Retrieval: GET /trips?group_id={id} → Load trips for specific group
+  - Trip Retrieval: GET /trips?group_id={id} → Load trips for specific group with user details
   - Group-filtered trips: Only show trips from groups user is member of
+  - User Data Display: Shows creator's first/last name and email for each trip ✅ **ENHANCED**
   - Real-time trip display with structured stop data and cost information
 - **Error Handling:** Comprehensive API error handling with user-friendly messages
 - **Loading States:** Visual feedback during API operations
@@ -293,6 +298,7 @@ interface Trip {
    - **Cost Calculation:** Real-time trip cost calculation based on distance
    - **Trip Creation:** Full backend integration with database persistence ✅ **NEW**
    - **Trip Display:** Real-time trip display with structured stop data and cost information ✅ **NEW**
+   - **User Information:** Shows trip creator's actual name instead of "Unknown User" ✅ **ENHANCED**
 
 ### 📋 Ready for Enhancement
 - **Advanced trip features:** Trip editing, deletion, and payment status tracking

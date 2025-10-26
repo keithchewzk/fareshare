@@ -94,6 +94,7 @@ export function AddTripDialog({ open, onOpenChange, costPerDistance }: AddTripDi
                 placeholder="e.g., Weekend Beach Trip"
                 value={tripName}
                 onChange={(e) => setTripName(e.target.value)}
+                autoFocus
                 required
               />
             </div>
@@ -117,7 +118,6 @@ export function AddTripDialog({ open, onOpenChange, costPerDistance }: AddTripDi
                 value={startAddress}
                 onChange={setStartAddress}
                 onPlaceIdChange={setStartPlaceId}
-                autoFocus
               />
             </div>
 

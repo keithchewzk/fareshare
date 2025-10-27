@@ -21,7 +21,7 @@ async def get_trips(
     return trips
 
 
-@router.post("/", response_model=Trip)
+@router.post("", response_model=Trip)
 async def create_trip(
     trip_data: CreateTrip,
     current_user: User = Depends(get_current_user),

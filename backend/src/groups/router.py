@@ -27,7 +27,7 @@ async def get_group_details(
     return group_service.get_group_details(current_user.id, group_id)
 
 
-@router.post("/", response_model=Group, status_code=201)
+@router.post("", response_model=Group, status_code=201)
 async def create_group(
     group_data: CreateGroup,
     current_user: User = Depends(get_current_user),

@@ -10,7 +10,7 @@ from src.users.models import User
 router = APIRouter(prefix="/trips", tags=["Trips"])
 
 
-@router.get("/", response_model=List[TripDetails])
+@router.get("", response_model=List[TripDetails])
 async def get_trips(
     group_id: Optional[int] = Query(None, description="Filter trips by group ID"),
     current_user: User = Depends(get_current_user),

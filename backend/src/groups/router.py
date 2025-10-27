@@ -8,7 +8,7 @@ from src.users.models import User
 router = APIRouter(prefix="/groups", tags=["Groups"])
 
 
-@router.get("/", response_model=list[GroupListItem])
+@router.get("", response_model=list[GroupListItem])
 async def get_user_groups(
     current_user: User = Depends(get_current_user),
     group_service: GroupService = Depends(get_group_service),

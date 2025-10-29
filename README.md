@@ -54,20 +54,11 @@
 
 #### Frontend
 
-- [React 19](https://react.dev/)
-- [Vite](https://vitejs.dev/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [shadcn/ui](https://ui.shadcn.com/)
-- [React Router DOM](https://reactrouter.com/en/main)
+[![React][React.js]][React-url] [![Vite][Vite.js]][Vite-url] [![TypeScript][TypeScript.js]][TypeScript-url]
 
-#### Backend
+#### Backend 
 
-- [FastAPI](https://fastapi.tiangolo.com/)
-- [Python](https://www.python.org/)
-- [PostgreSQL](https://www.postgresql.org/)
-- [SQLAlchemy](https://www.sqlalchemy.org/)
-- [Google Maps API](https://developers.google.com/maps)
+[![Python][Python.js]][Python-url] [![FastAPI][FastAPI.js]][FastAPI-url] [![Pydantic][Pydantic.js]][Pydantic-url] [![SQLAlchemy][SQLAlchemy.js]][SQLAlchemy-url] [![Google Maps API][GoogleMaps.js]][GoogleMaps-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -173,6 +164,22 @@ Once you’re logged in, you can:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
+[React-url]: https://reactjs.org/
+[Vite.js]: https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white
+[Vite-url]: https://vitejs.dev/
+[TypeScript.js]: https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white
+[TypeScript-url]: https://www.typescriptlang.org/
+[Python.js]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
+[Python-url]: https://www.python.org/
+[FastAPI.js]: https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi
+[FastAPI-url]: https://fastapi.tiangolo.com/
+[Pydantic.js]: https://img.shields.io/badge/Pydantic-E92063?style=for-the-badge&logo=pydantic&logoColor=white
+[Pydantic-url]: https://pydantic.dev/
+[SQLAlchemy.js]: https://img.shields.io/badge/SQLAlchemy-184E77?style=for-the-badge&logo=sqlalchemy&logoColor=white
+[SQLAlchemy-url]: https://www.sqlalchemy.org/
+[GoogleMaps.js]: https://img.shields.io/badge/Google_Maps-4285F4?style=for-the-badge&logo=googlemaps&logoColor=white
+[GoogleMaps-url]: https://developers.google.com/maps
 [LinkedIn.badge]: https://img.shields.io/badge/-LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white
 [LinkedIn.url]: https://www.linkedin.com/in/keithchewzikai
 [GitHub.badge]: https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white

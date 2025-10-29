@@ -43,7 +43,7 @@ class CreateGroup(BaseModel):
 class MemberDetails(BaseModel):
     id: int
     first_name: str
-    last_name: str
+    last_name: Optional[str]
     role: Literal["owner", "member"]
 
 

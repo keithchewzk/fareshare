@@ -15,7 +15,7 @@ from src.users.models import User
 router = APIRouter(prefix="/groups", tags=["Groups"])
 
 
-@router.get("/", response_model=list[GroupListItem])
+@router.get("", response_model=list[GroupListItem])
 async def get_user_groups(
     current_user: User = Depends(get_current_user),
     group_service: GroupService = Depends(get_group_service),
@@ -44,7 +44,7 @@ async def get_group_members(
     return group_service.get_group_members(group_id)
 
 
-@router.post("/", response_model=Group, status_code=201)
+@router.post("", response_model=Group, status_code=201)
 async def create_group(
     group_data: CreateGroup,
     current_user: User = Depends(get_current_user),

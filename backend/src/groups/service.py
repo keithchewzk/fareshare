@@ -64,7 +64,7 @@ class GroupService:
             MemberDetails(
                 id=member.id,
                 first_name=member.first_name,
-                last_name=member.last_name,
+                last_name=member.last_name if member.last_name else None,
                 role=member.role,
             )
             for member in members

@@ -1,14 +1,21 @@
 from fastapi import APIRouter, Depends
 from src.groups.dependencies import get_group_service
-from src.users.dependencies import get_current_user
-from src.groups.schemas import CreateGroup, Group, GroupListItem, JoinGroup, Membership
+from src.groups.schemas import (
+    CreateGroup,
+    Group,
+    GroupListItem,
+    JoinGroup,
+    MemberDetails,
+    Membership,
+)
 from src.groups.service import GroupService
+from src.users.dependencies import get_current_user
 from src.users.models import User
 
 router = APIRouter(prefix="/groups", tags=["Groups"])
 
 
-@router.get("", response_model=list[GroupListItem])
+@router.get("/", response_model=list[GroupListItem])
 async def get_user_groups(
     current_user: User = Depends(get_current_user),
     group_service: GroupService = Depends(get_group_service),
@@ -27,7 +34,17 @@ async def get_group_details(
     return group_service.get_group_details(current_user.id, group_id)
 
 
-@router.post("", response_model=Group, status_code=201)
+@router.get("/{group_id}/members", response_model=list[MemberDetails])
+async def get_group_members(
+    group_id: int,
+    _current_user: User = Depends(get_current_user),
+    group_service: GroupService = Depends(get_group_service),
+):
+    """Get details of members in a group."""
+    return group_service.get_group_members(group_id)
+
+
+@router.post("/", response_model=Group, status_code=201)
 async def create_group(
     group_data: CreateGroup,
     current_user: User = Depends(get_current_user),

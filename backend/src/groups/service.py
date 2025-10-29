@@ -2,7 +2,13 @@ import random
 
 from fastapi import HTTPException
 from src.groups.repository import GroupRepository
-from src.groups.schemas import CreateGroup, Group, GroupListItem, Membership
+from src.groups.schemas import (
+    CreateGroup,
+    Group,
+    GroupListItem,
+    MemberDetails,
+    Membership,
+)
 
 
 class GroupService:
@@ -41,6 +47,28 @@ class GroupService:
             )
 
         return Group.model_validate(group)
+
+    def get_group_members(self, group_id: int) -> list[MemberDetails]:
+        """
+        Get details of users in a group (a.k.a members)
+
+        Validates that the user is a member of the group before returning details.
+        Only group members can view details of all members in the group.
+
+        Raises:
+            HTTPException 404: Group not found
+            HTTPException 403: User not a member of the group
+        """
+        members = self.group_repository.get_group_members(group_id)
+        return [
+            MemberDetails(
+                id=member.id,
+                first_name=member.first_name,
+                last_name=member.last_name,
+                role=member.role,
+            )
+            for member in members
+        ]
 
     def create_group(self, user_id: int, group_data: CreateGroup) -> Group:
         """

@@ -3,6 +3,7 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 from src.groups.models import Group, GroupMembership
+from src.users.models import User
 
 
 class GroupRepository:
@@ -90,7 +91,9 @@ class GroupRepository:
         self.db.refresh(membership)
         return membership
 
-    def get_user_membership(self, user_id: int, group_id: int) -> Optional[GroupMembership]:
+    def get_user_membership(
+        self, user_id: int, group_id: int
+    ) -> Optional[GroupMembership]:
         """Get user's membership record for a specific group"""
         return (
             self.db.query(GroupMembership)
@@ -150,3 +153,24 @@ class GroupRepository:
         except Exception:
             self.db.rollback()
             raise
+
+    def get_group_members(self, group_id: int) -> list[tuple]:
+        """
+        Get all members of a group with their user details and roles.
+        Returns list of tuples: (user_id, first_name, last_name, role)
+        Ordered by role (owners first) then alphabetically by first name.
+        """
+        results = (
+            self.db.query(
+                User.id,
+                User.first_name,
+                User.last_name,
+                GroupMembership.role,
+            )
+            .join(GroupMembership, GroupMembership.user_id == User.id)
+            .filter(GroupMembership.group_id == group_id)
+            .order_by(GroupMembership.role.desc(), User.first_name.asc())
+            .all()
+        )
+
+        return results

@@ -40,6 +40,13 @@ class CreateGroup(BaseModel):
     cost_per_distance: Decimal = Field(..., gt=0, description="Cost per km")
 
 
+class MemberDetails(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    role: Literal["owner", "member"]
+
+
 class JoinGroup(BaseModel):
     """Schema for joining a group via invite code"""
 

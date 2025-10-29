@@ -1,106 +1,176 @@
 # FareShare
 
-**Collaborative car usage tracking made simple**
+<div align="center">
+  <a href="https://github.com/keithchewzk/fareshare">
+    <img src="frontend/public/fareshare.svg" alt="Logo" width="120" height="120">
+  </a>
 
-FareShare is a web application that helps groups of people fairly track and split car-related expenses. Whether you're sharing a family car, carpooling with colleagues, or managing a shared vehicle with roommates, FareShare makes it easy to log trips and keep track of who owes what.
+<h3 align="center">FareShare</h3>
 
-## 🎯 Project Vision
+<p align="center">
+  Collaborative car usage tracking made simple — track, split, and settle shared vehicle expenses fairly with your group.
+</p>
+</div>
 
-Make car sharing transparent and fair by automatically tracking trip costs and splitting expenses among group members. No more awkward conversations about gas money or forgotten receipts – just simple, automated expense tracking.
+<details>
+<summary>Table of Contents</summary>
+<ol>
+<li><a href="#about-the-project">About The Project</a>
+  <ul>
+    <li><a href="#core-features">Core Features</a></li>
+    <li><a href="#built-with">Built With</a></li>
+  </ul>
+</li>
+<li><a href="#getting-started">Getting Started</a>
+  <ul>
+    <li><a href="#prerequisites">Prerequisites</a></li>
+    <li><a href="#environment-setup">Environment Setup</a></li>
+    <li><a href="#running-the-project">Running The Project</a></li>
+  </ul>
+</li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#roadmap">Roadmap</a></li>
+<li><a href="#contact">Contact</a></li>
+</ol>
+</details>
 
-## 👥 Who Is This For?
+## About The Project
 
-- **Families** sharing household vehicles
-- **Roommates** with shared cars
-- **Colleagues** carpooling to work
-- **Friends** sharing road trip costs
-- **Small businesses** tracking company vehicle usage
+**FareShare** is a web application designed to simplify and automate shared car expense tracking. Whether you’re managing a family vehicle, carpooling with colleagues, or sharing a car with friends, FareShare keeps everyone’s trips, costs, and settlements transparent and fair.
 
-## ✨ What You Can Do
+### Core Features
 
-### Create & Join Groups
-- **Create a group** for your shared car (e.g., "Family Honda", "Office Carpool")
-- **Get a unique invite code** to share with others
-- **Join existing groups** using invite codes from friends or family
+- **User Accounts & Authentication:** Secure login and registration system with session persistence.
+- **Group Management:** Create, join, and manage car-sharing groups with unique invite codes.
+- **Trip Logging:** Record start and end locations, automatically calculate distance using Google Maps API, and assign trip costs.
+- **Expense Splitting:** View and settle shared costs automatically between group members.
+- **Trip Settlement System:** Integrated settlement tracking to mark and confirm payments.
+- **Google Maps Integration:** Dynamic address autocomplete, route visualization, and accurate cost estimation.
+- **Responsive UI:** Built with modern, minimal UI using Tailwind CSS and shadcn/ui.
 
-### Track Your Trips
-- **Log trips easily** with start and end addresses
-- **Automatic cost calculation** based on distance and group rates
-- **View all group trips** in one convenient dashboard
-- **Mark trips as paid** to keep track of settlements
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### Stay Organized
-- **See all your groups** in one place
-- **Track trip history** for each group
-- **Monitor payment status** for fair cost sharing
+### Built With
 
-## 🚀 Current Status
+#### Frontend
 
-FareShare is in **MVP development** with core features being built and tested. The focus is on validating the essential trip logging and group management functionality.
+- [React 19](https://react.dev/)
+- [Vite](https://vitejs.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [shadcn/ui](https://ui.shadcn.com/)
+- [React Router DOM](https://reactrouter.com/en/main)
 
-**What's Working:**
-- User registration and authentication
-- Group creation with invite codes
-- Secure trip logging within groups
+#### Backend
 
-**Coming Soon:**
-- Group joining via invite codes
-- Trip cost calculation and splitting
-- Payment tracking and notifications
+- [FastAPI](https://fastapi.tiangolo.com/)
+- [Python](https://www.python.org/)
+- [PostgreSQL](https://www.postgresql.org/)
+- [SQLAlchemy](https://www.sqlalchemy.org/)
+- [Google Maps API](https://developers.google.com/maps)
 
-## 🛠 Getting Started
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### For Users
-1. **Sign up** with your email and create a password
-2. **Create your first group** (e.g., "Family Car", "Work Carpool")
-3. **Share the invite code** with group members
-4. **Start logging trips** and let FareShare handle the math!
+## Getting Started
 
-### Example Use Cases
+This section explains how to set up and run both the frontend and backend locally for development or testing.
 
-**Family Scenario:**
-- Mom creates "Family Honda" group
-- Shares invite code with Dad and teenage kids
-- Everyone logs their trips (grocery runs, soccer practice, etc.)
-- Monthly review shows who drove how much and fair cost splitting
+### Prerequisites
 
-**Roommate Scenario:**
-- Create "Apartment Car" group for shared vehicle
-- Track trips to work, errands, weekend activities
-- Automatically calculate each person's share of gas and maintenance costs
+Before running FareShare locally, ensure you have installed:
 
-**Carpool Scenario:**
-- Set up "Office Commute" group
-- Track daily commutes and occasional detours
-- Fair splitting of gas costs based on actual usage
+- **Node.js** and **npm** (for the frontend)
+- **Python 3.11+** and **pip**
+- **PostgreSQL**
+- **Google Maps API key**
 
-## 🔄 Development Roadmap
+### Environment Setup
 
-### Phase 1: Core Features ✅
-- User registration and secure authentication
-- Group creation with unique invite codes
-- Basic trip logging infrastructure
+Create environment files for both the frontend and backend with your keys and local configuration.
 
-### Phase 2: Group Management 🔄
-- Join groups using invite codes
-- Member management and permissions
-- Group dashboards and trip history
+**Frontend `.env`:**
 
-### Phase 3: Smart Calculations 📋
-- Automatic distance calculation via Google Maps
-- Dynamic cost splitting based on group settings
-- Payment tracking and settlement features
+```env
+VITE_API_URL=http://localhost:8000
+```
 
-### Phase 4: Enhanced Experience 📋
-- Mobile-responsive design
-- Trip categories and tags
-- Export and reporting features
-- Email notifications for group activities
+**Backend `.env`:**
 
-## 🤝 Contributing
+```env
+DATABASE_URL=postgresql+psycopg2://postgres:password@localhost:5432/fareshare
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+SECRET_KEY=your_secret_key
+```
 
-FareShare is in active development. The technical implementation details and development setup can be found in `/backend/CLAUDE.md` for developers interested in contributing.
+### Running The Project
 
-## 📧 Questions or Feedback?
+#### Option 1: Manual Setup
 
-This project is designed to solve real problems around fair car sharing. If you have suggestions, use cases, or feedback about the user experience, we'd love to hear from you!
+**Backend**
+
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+
+**Frontend**
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Access the app at: `http://localhost:5173`
+
+#### Option 2: Docker Compose (coming soon)
+
+A Docker Compose setup will be added to streamline development and deployment.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Usage
+
+Once you’re logged in, you can:
+
+1. **Create or join a group** using an invite code.
+2. **Log trips** with start and end points — costs are calculated automatically.
+3. **View all trips** in your group dashboard.
+4. **Settle balances** transparently between members.
+
+### Typical User Flow
+
+1. User signs up and creates a group (e.g., “Office Carpool”).
+2. Other members join using the group’s invite code.
+3. Members log each trip they take.
+4. The system calculates distances, costs, and fair shares automatically.
+5. Settlement dashboard shows who owes what.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Roadmap
+
+- [x] User authentication
+- [x] Group creation and management
+- [x] Trip logging and automatic cost calculation
+- [x] Settlement tracking system
+- [x] Google Maps integration
+- [ ] React Query integration
+- [ ] Decompose FE components into smaller sub-components for better code readability and fewer re-renders
+- [ ] Removal of group members by group owners
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Contact
+
+[![LinkedIn][LinkedIn.badge]][LinkedIn.url] [![GitHub][GitHub.badge]][GitHub.url] [![Email][Email.badge]][Email.url]
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+[LinkedIn.badge]: https://img.shields.io/badge/-LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white
+[LinkedIn.url]: https://www.linkedin.com/in/keithchewzikai
+[GitHub.badge]: https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white
+[GitHub.url]: https://github.com/keithchewzk
+[Email.badge]: https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white
+[Email.url]: mailto:keithchewzk@gmail.com

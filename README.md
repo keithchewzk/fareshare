@@ -155,6 +155,7 @@ Once you’re logged in, you can:
 - [ ] React Query integration
 - [ ] Decompose FE components into smaller sub-components for better code readability and fewer re-renders
 - [ ] Removal of group members by group owners
+- [ ] Refresh token capability for authentication
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

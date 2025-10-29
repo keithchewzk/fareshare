@@ -73,7 +73,12 @@
 
 ## Getting Started
 
-This section explains how to set up and run both the frontend and backend locally for development or testing.
+FareShare is currently **deployed on [Railway](https://railway.app)** and accessible live at:
+
+👉 **[https://fareshare.up.railway.app/](https://fareshare.up.railway.app/)**
+
+You can try out the app directly from your browser — no setup required.  
+For local development, follow the steps below to run the project manually.
 
 ### Prerequisites
 

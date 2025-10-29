@@ -144,6 +144,7 @@ Additional tables for cost tracking and payment history may be added when cost s
 - `POST /groups` - Create a new group ✅ **COMPLETE**
 - `GET /groups` - Get user's groups ✅ **COMPLETE**
 - `GET /groups/{group_id}` - Get group details ✅ **COMPLETE**
+- `GET /groups/{group_id}/members` - Get all members in a group with user details ✅ **COMPLETE**
 - `POST /groups/join` - Join a group via invite code ✅ **COMPLETE**
 - `POST /groups/{group_id}/leave` - Leave a group (members only) ✅ **COMPLETE**
 - `DELETE /groups/{group_id}` - Delete a group (owners only) ✅ **COMPLETE**
@@ -599,7 +600,7 @@ src/groups/
 - `POST /groups` - Create group (user becomes owner)
 - `GET /groups` - Get user's groups (any role)
 - `GET /groups/{id}` - Get group details (members only) ✅ **COMPLETE**
-- `GET /groups/{id}/members` - Get group members (members only)
+- `GET /groups/{id}/members` - Get all members with user details (id, first_name, last_name, role) ✅ **COMPLETE**
 - `DELETE /groups/{id}` - Delete group (owners only) ✅ **COMPLETE**
 
 #### **Membership Management**
@@ -694,6 +695,28 @@ Response:
 ]
 ```
 
+#### **Get Group Members** ✅ **NEW**
+```http
+GET /groups/1/members
+Authorization: Bearer <token>
+
+Response:
+[
+    {
+        "id": 1,
+        "first_name": "John",
+        "last_name": "Smith",
+        "role": "owner"
+    },
+    {
+        "id": 2,
+        "first_name": "Jane",
+        "last_name": "Doe",
+        "role": "member"
+    }
+]
+```
+
 #### **Leave Group** ✅ **NEW**
 ```http
 POST /groups/1/leave
@@ -730,10 +753,11 @@ Response:
 1. ✅ Group creation endpoint (POST /groups)
 2. ✅ Get user's groups endpoint (GET /groups)
 3. ✅ Get group details endpoint (GET /groups/{group_id})
-4. ✅ Join group endpoint (POST /groups/join)
-5. ✅ Leave group endpoint (POST /groups/{group_id}/leave)
-6. ✅ Delete group endpoint (DELETE /groups/{group_id})
-7. ✅ Role-based route protection (owners vs members)
+4. ✅ Get group members endpoint (GET /groups/{group_id}/members) - Returns list of members with user details
+5. ✅ Join group endpoint (POST /groups/join)
+6. ✅ Leave group endpoint (POST /groups/{group_id}/leave)
+7. ✅ Delete group endpoint (DELETE /groups/{group_id})
+8. ✅ Role-based route protection (owners vs members)
 
 #### **Phase 4: Testing & Validation**
 1. Test all endpoints via Swagger UI

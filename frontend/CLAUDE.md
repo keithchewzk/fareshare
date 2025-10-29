@@ -13,7 +13,7 @@ FareShare is a collaborative web application for tracking car usage within share
 - **Development:** ESLint for code quality
 - **Utilities:** clsx, tailwind-merge, class-variance-authority
 - **Navigation:** React Router DOM 7.9.4 for client-side routing
-- **Additional Dependencies:** @radix-ui/react-slot, @radix-ui/react-tabs, @radix-ui/react-label, @radix-ui/react-dialog, @radix-ui/react-dropdown-menu
+- **Additional Dependencies:** @radix-ui/react-slot, @radix-ui/react-tabs, @radix-ui/react-label, @radix-ui/react-dialog, @radix-ui/react-dropdown-menu (sheet component built on top of dialog)
 
 ## Code Organization
 
@@ -32,6 +32,8 @@ src/
 │   │   ├── tabs.tsx                  # Tabs navigation components
 │   │   ├── dialog.tsx                # Modal dialog components
 │   │   ├── dropdown-menu.tsx         # Dropdown menu components
+│   │   ├── sheet.tsx                 # Side sheet/drawer components
+│   │   ├── badge.tsx                 # Badge component with variants
 │   │   └── address-input.tsx         # Google Maps address autocomplete component
 │   ├── LandingPage/                  # Landing page with complete 6-section layout
 │   │   └── index.tsx                 # Hero, Features, Use Cases, CTA, Footer
@@ -84,10 +86,10 @@ import { JoinGroupDialog } from "./JoinGroupDialog";
 - Context comes from their parent directory location
 - Avoids repetitive naming like `DashboardCreateGroupDialog`
 
-
 ## Application Architecture
 
 ### Routing & Navigation
+
 - **React Router DOM** - Client-side routing with BrowserRouter
 - **Route Structure:**
   - `/` - Landing page with conversion funnel
@@ -96,11 +98,13 @@ import { JoinGroupDialog } from "./JoinGroupDialog";
   - `/groups/:groupId` - Group detail page with trip management (protected)
 
 ### State Management
+
 - **Local State** - useState for component-level state
 - **localStorage Persistence** - Trip data stored locally (groups use backend)
 - **Backend State Management** - Groups and memberships managed via API calls
 
 ### Data Models
+
 ```typescript
 interface User {
   id: string;
@@ -114,13 +118,20 @@ interface Group {
   description?: string;
   invite_code: string;
   cost_per_distance: number;
-  distance_unit: 'km' | 'mi';
+  distance_unit: "km" | "mi";
   created_at: string;
 }
 
 interface Membership {
-  role: 'owner' | 'member';
+  role: "owner" | "member";
   joined_at: string;
+}
+
+interface MemberDetails {
+  id: number;
+  first_name: string;
+  last_name: string;
+  role: "owner" | "member";
 }
 
 interface TripDetails {
@@ -145,6 +156,7 @@ interface TripDetails {
 ### ✅ Completed Features
 
 #### 1. Project Foundation
+
 - **Project Setup:** Vite + React + TypeScript configuration
 - **Styling System:** Tailwind CSS 3.4.x + shadcn/ui setup
 - **Configuration Files:**
@@ -157,6 +169,7 @@ interface TripDetails {
   - `components.json` - shadcn/ui CLI configuration
 
 #### 2. UI Component Library
+
 - **Base Components:** Complete shadcn/ui implementation
   - `src/lib/utils.ts` - Utility functions (cn helper)
   - `src/components/ui/button.tsx` - Button with variants
@@ -165,8 +178,11 @@ interface TripDetails {
   - `src/components/ui/card.tsx` - Card components
   - `src/components/ui/tabs.tsx` - Tab navigation
   - `src/components/ui/dialog.tsx` - Modal dialogs
+  - `src/components/ui/sheet.tsx` - Side sheet/drawer components
+  - `src/components/ui/badge.tsx` - Badge component with variants
 
 #### 3. Landing Page (Complete)
+
 - **Full 6-Section Layout:** `src/components/LandingPage/index.tsx`
   - Header - Sticky navigation with CTA
   - Hero - Main value proposition
@@ -178,6 +194,7 @@ interface TripDetails {
 - **Conversion Funnel** - Awareness → Interest → Consideration → Action
 
 #### 4. Authentication System (Complete - Real Backend Integration)
+
 - **AuthPage Component:** `src/components/AuthPage/index.tsx`
   - Tabbed interface (Login/Signup)
   - Real API integration for registration and login
@@ -187,6 +204,7 @@ interface TripDetails {
   - React Router integration
 
 #### 5. Dashboard System (Complete)
+
 - **Main Dashboard:** `src/components/Dashboard/index.tsx`
   - User header with logout functionality
   - Action buttons (Create Group, Join Group)
@@ -195,6 +213,7 @@ interface TripDetails {
   - Responsive layout (mobile/tablet/desktop)
 
 #### 6. Group Management (Complete - Real Backend Integration)
+
 - **CreateGroupDialog:** `src/components/Dashboard/CreateGroupDialog.tsx`
   - Group name, description, cost settings
   - Real backend API integration
@@ -207,10 +226,12 @@ interface TripDetails {
   - Form validation and reset
 
 #### 7. Group Details & Trip Management (Complete - Full Backend Integration)
+
 - **GroupDetails:** `src/components/GroupDetails/index.tsx`
   - Complete group detail page with role-based permissions
   - Real backend integration for group data loading
   - **Trip history display with real backend data** ✅ **ENHANCED**
+  - **Members list with side sheet display** ✅ **NEW**
   - Owner vs Member role distinction with different actions
   - Group management actions: Delete (owners), Leave (members)
   - Invite code display with copy-to-clipboard functionality
@@ -223,6 +244,7 @@ interface TripDetails {
   - Proper error handling for Maps API failures
 
 #### 8. Google Maps Integration (Complete) ✅ **NEW**
+
 - **AddressInput Component:** `src/components/ui/address-input.tsx`
   - Google Places API autocomplete integration
   - Debounced search with loading states
@@ -236,7 +258,27 @@ interface TripDetails {
   - Session token support for billing optimization
   - Comprehensive error handling and fallbacks
 
-#### 9. Trip Settlement System (Complete) ✅ **NEW**
+#### 9. Member Management System (Complete) ✅ **NEW**
+
+- **Members Side Sheet:** Visual member list with user details
+  - **Members Button:** Clickable button in group header to open members sheet
+  - **Real-time Member Loading:** Fetches members from backend when sheet opens
+  - **Avatar Display:** Circular avatars with user initials (e.g., "KC" for Keith Chew)
+  - **Member Information:** Shows first name, last name, and role
+  - **Role Badges:** Visual distinction between owners (primary badge) and members (secondary badge)
+  - **Automatic Sorting:** Members sorted by role (owners first) then alphabetically
+  - **Loading States:** Visual feedback while fetching member data
+  - **Error Handling:** User-friendly error messages for failed requests
+- **Backend Integration:** `GET /groups/{id}/members` endpoint integration
+- **Type Safety:** Proper TypeScript interfaces with `MemberDetails` type
+- **UI Components:**
+  - `src/components/ui/sheet.tsx` - Side drawer component for member list
+  - `src/components/ui/badge.tsx` - Role badge component
+  - Member list integrated into `src/components/GroupDetails/index.tsx`
+- **Service Layer:** `groupService.getGroupMembers()` method
+
+#### 10. Trip Settlement System (Complete) ✅ **NEW**
+
 - **Settlement Status Display:** Visual indication of trip payment status
   - **Settled Badge:** Green badge with checkmark icon for settled trips
   - **Settlement Timestamp:** Backend `settled_at` field tracking when trips were settled
@@ -250,13 +292,15 @@ interface TripDetails {
   - `src/components/ui/badge.tsx` - Reusable badge component with variants
   - Settlement logic integrated into `src/components/GroupDetails/index.tsx`
 
-#### 10. Application Entry Point
+#### 11. Application Entry Point
+
 - **Main Entry:** `src/main.tsx` - React 19 application bootstrapping
   - Strict mode enabled for development
   - Root element validation and error handling
   - Modern createRoot API usage
 
-#### 11. Backend Integration (Complete)
+#### 12. Backend Integration (Complete)
+
 - **API Client Architecture:** Router & Services pattern
   - `lib/routes.ts` - Centralized API endpoint configuration
   - `services/userService.ts` - User registration and authentication business logic
@@ -272,6 +316,7 @@ interface TripDetails {
   - Group Creation: POST /groups → Create group with backend API
   - Group Listing: GET /groups → Load user's groups from backend
   - Group Details: GET /groups/{id} → Load specific group data
+  - Group Members: GET /groups/{id}/members → Fetch all members with user details ✅ **NEW**
   - Group Joining: POST /groups/join → Join via invite code
   - Group Actions: DELETE /groups/{id}, POST /groups/{id}/leave
   - Membership Roles: GET /groups/{id}/membership → Owner vs Member permissions
@@ -286,7 +331,8 @@ interface TripDetails {
 - **Error Handling:** Comprehensive API error handling with user-friendly messages
 - **Loading States:** Visual feedback during API operations
 
-#### 12. Type System Improvements ✅ **NEW**
+#### 13. Type System Improvements ✅ **NEW**
+
 - **User ID Type Consistency:** Standardized user ID handling across frontend
   - **Interface Updates:** Changed all `User` interfaces from `id: string` to `id: number`
   - **Comparison Simplification:** Removed `.toString()` conversions in user ID comparisons
@@ -298,7 +344,8 @@ interface TripDetails {
     - `src/components/GroupDetails/index.tsx` - User interface and ID comparisons
     - `src/components/AuthPage/index.tsx` - onLogin callback interface
 
-#### 13. Data Persistence
+#### 14. Data Persistence
+
 - **localStorage Integration:**
   - JWT tokens stored in `fareshare_token` (real authentication)
 - **Backend Persistence:**
@@ -308,6 +355,7 @@ interface TripDetails {
   - Role-based permissions managed by backend
 
 ### ✅ Application Flow
+
 1. **Landing Page** - User discovers FareShare
 2. **Authentication** - Real backend integration:
    - **Registration:** User creates account → Stored in PostgreSQL database
@@ -318,6 +366,7 @@ interface TripDetails {
 6. **Group Management** - User views group details with role-based permissions (real backend functionality)
 7. **Group Details** - User navigates to detailed group view:
    - **Trip History:** View all trips for the group (real backend data) ✅ **ENHANCED**
+   - **Members List:** View all group members with avatars and roles ✅ **NEW**
    - **Group Actions:** Delete group (owners) or leave group (members)
    - **Invite Code:** Copy group invite code to clipboard
 8. **Trip Management** - Complete backend integration ✅ **COMPLETE**:
@@ -330,13 +379,15 @@ interface TripDetails {
    - **Trip Settlement:** Mark trips as settled functionality with creator permissions ✅ **NEW**
 
 ### 📋 Ready for Enhancement
+
 - **Advanced trip features:** Trip editing, deletion, and payment history tracking
-- **Member management:** View group members, manage member permissions
+- **Advanced member management:** Kick members, transfer ownership, role management
 - **Token refresh and session management:** Enhanced authentication security
 - **Mobile app considerations:** Responsive design improvements
 - **Real-time updates:** WebSocket integration for live group updates
 
 ### Technical Decisions
+
 - **Tailwind CSS 3.x** - Chosen over 4.x for stability with shadcn/ui
 - **Manual component installation** - Used due to CLI network issues
 - **Index File Pattern** - Consistent component organization

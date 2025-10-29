@@ -4,7 +4,7 @@ import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { ArrowLeft, Plus, Users, MapPin, MoreVertical, Trash2, LogOut, Copy, Check, CheckCircle2 } from 'lucide-react';
 import { AddTripDialog } from './AddTripDialog';
-import { groupService, Group, Membership } from '../../services/groupService';
+import { groupService, Group, Membership, MemberDetails } from '../../services/groupService';
 import { tripService, TripDetails } from '../../services/tripService';
 import {
   DropdownMenu,
@@ -48,6 +48,9 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [membership, setMembership] = useState<Membership | null>(null);
+  const [members, setMembers] = useState<MemberDetails[]>([]);
+  const [loadingMembers, setLoadingMembers] = useState(false);
+  const [membersError, setMembersError] = useState<string | null>(null);
 
   const isOwner = membership?.role === 'owner';
 
@@ -102,8 +105,6 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  // TODO: Will be implemented when backend is ready
-  // const handleAddTrip = (tripData: { ... }) => { ... };
 
   const handleDeleteGroup = () => {
     setShowDeleteConfirm(true);
@@ -166,6 +167,31 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
     }
   };
 
+  const loadMembers = async () => {
+    try {
+      setLoadingMembers(true);
+      setMembersError(null);
+      const groupMembers = await groupService.getGroupMembers(groupId);
+      setMembers(groupMembers);
+    } catch (error) {
+      console.error('Failed to load members:', error);
+      setMembersError(error instanceof Error ? error.message : 'Failed to load members');
+    } finally {
+      setLoadingMembers(false);
+    }
+  };
+
+  const handleOpenMembersSheet = () => {
+    setShowMembersSheet(true);
+    loadMembers();
+  };
+
+  const getInitials = (member: MemberDetails) => {
+    const firstInitial = member.first_name.charAt(0).toUpperCase();
+    const lastInitial = member.last_name ? member.last_name.charAt(0).toUpperCase() : '';
+    return firstInitial + lastInitial;
+  };
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
@@ -209,7 +235,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
                   variant="ghost"
                   size="sm"
                   className="h-auto p-0 hover:bg-transparent text-muted-foreground hover:text-foreground"
-                  onClick={() => setShowMembersSheet(true)}
+                  onClick={handleOpenMembersSheet}
                 >
                   <Users className="size-4 mr-1" />
                   Members
@@ -416,7 +442,41 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
       <Sheet open={showMembersSheet} onOpenChange={setShowMembersSheet}>
         <SheetContent>
           <h2 className="text-lg font-semibold mb-6">Group Members</h2>
-          <p className="text-muted-foreground">Member list will be implemented here.</p>
+          {loadingMembers ? (
+            <div className="flex items-center justify-center py-8">
+              <p className="text-muted-foreground">Loading members...</p>
+            </div>
+          ) : membersError ? (
+            <div className="flex items-center justify-center py-8">
+              <p className="text-destructive">{membersError}</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {members.map((member) => (
+                <div
+                  key={member.id}
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                >
+                  {/* Avatar Circle */}
+                  <div className="flex items-center justify-center size-10 rounded-full bg-primary text-primary-foreground font-medium flex-shrink-0">
+                    {getInitials(member)}
+                  </div>
+
+                  {/* Name */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">
+                      {member.first_name} {member.last_name}
+                    </p>
+                  </div>
+
+                  {/* Role Badge */}
+                  <Badge variant={member.role === 'owner' ? 'default' : 'secondary'}>
+                    {member.role}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          )}
         </SheetContent>
       </Sheet>
     </div>

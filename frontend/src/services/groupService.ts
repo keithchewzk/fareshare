@@ -28,6 +28,13 @@ export interface Membership {
   joined_at: string;
 }
 
+export interface MemberDetails {
+  id: number;
+  first_name: string;
+  last_name: string;
+  role: 'owner' | 'member';
+}
+
 class GroupService {
   /**
    * Get user's groups
@@ -213,6 +220,32 @@ class GroupService {
 
     // POST requests typically return no content (204)
     return;
+  }
+
+  /**
+   * Get all members of a group
+   */
+  async getGroupMembers(groupId: string): Promise<MemberDetails[]> {
+    const token = localStorage.getItem('fareshare_token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(getApiUrl(`${API_ROUTES.groups.members}/${groupId}/members`), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.detail || 'Failed to fetch group members';
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
   }
 }
 

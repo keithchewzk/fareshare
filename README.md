@@ -58,8 +58,7 @@
 
 #### Backend 
 
-<!-- Application Tools Badges -->
-[![Python][Python.js]][Python-url] [![FastAPI][FastAPI.js]][FastAPI-url] [![React][React.js]][React-url] [![TypeScript][TypeScript.js]][TypeScript-url] [![Docker][Docker.js]][Docker-url] [![PostgreSQL][PostgreSQL.js]][PostgreSQL-url] [![Google Maps API][GoogleMaps.js]][GoogleMaps-url]
+[![Python][Python.js]][Python-url] [![FastAPI][FastAPI.js]][FastAPI-url] [![Docker][Docker.js]][Docker-url] [![PostgreSQL][PostgreSQL.js]][PostgreSQL-url] [![Google Maps API][GoogleMaps.js]][GoogleMaps-url]
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

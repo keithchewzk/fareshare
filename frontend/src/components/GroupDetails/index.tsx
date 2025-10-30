@@ -21,7 +21,7 @@ import {
   MemberDetails,
 } from "../../services/groupService";
 import { tripService, TripDetails } from "../../services/tripService";
-import { TripCard } from "./TripCard"; // 👈 add this import near the top
+import { TripCard } from "./TripCard";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,34 +69,29 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
 
   useEffect(() => {
     loadGroupData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupId]);
 
   const loadGroupData = async () => {
     try {
       setLoading(true);
       setError(null);
-      console.log("Loading group data for groupId:", groupId);
 
-      // Fetch group data and user membership in parallel
       const [fetchedGroup, userMembership] = await Promise.all([
         groupService.getGroup(groupId),
         groupService.getUserMembership(groupId),
       ]);
 
-      console.log("Fetched group:", fetchedGroup);
-      console.log("User membership:", userMembership);
-
       setGroup(fetchedGroup);
       setMembership(userMembership);
 
-      // Load trips from backend API
       const groupTrips = await tripService.getTrips(parseInt(groupId));
       setTrips(groupTrips);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to load group data"
       );
-      console.error("Failed to load group:", err);
+      console.error("loadGroupData error:", err);
     } finally {
       setLoading(false);
     }
@@ -125,25 +120,32 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
     });
   };
 
-  const handleDeleteGroup = () => {
-    setShowDeleteConfirm(true);
-  };
+  const handleDeleteGroup = () => setShowDeleteConfirm(true);
+  const handleCancelDelete = () => setShowDeleteConfirm(false);
 
   const handleConfirmDelete = async () => {
     try {
       await groupService.deleteGroup(groupId);
       setShowDeleteConfirm(false);
-      // Navigate back to dashboard after successful deletion
       onBack();
     } catch (error) {
       console.error("Failed to delete group:", error);
-      // TODO: Show error message to user
       setShowDeleteConfirm(false);
     }
   };
 
-  const handleCancelDelete = () => {
-    setShowDeleteConfirm(false);
+  const handleLeaveGroup = () => setShowLeaveConfirm(true);
+  const handleCancelLeave = () => setShowLeaveConfirm(false);
+
+  const handleConfirmLeave = async () => {
+    try {
+      await groupService.leaveGroup(groupId);
+      setShowLeaveConfirm(false);
+      onBack();
+    } catch (error) {
+      console.error("Failed to leave group:", error);
+      setShowLeaveConfirm(false);
+    }
   };
 
   const copyInviteCode = () => {
@@ -154,35 +156,29 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
     }
   };
 
-  const handleLeaveGroup = () => {
-    setShowLeaveConfirm(true);
-  };
-
-  const handleConfirmLeave = async () => {
-    try {
-      await groupService.leaveGroup(groupId);
-      setShowLeaveConfirm(false);
-      // Navigate back to dashboard after successful leave
-      onBack();
-    } catch (error) {
-      console.error("Failed to leave group:", error);
-      // TODO: Show error message to user
-      setShowLeaveConfirm(false);
-    }
-  };
-
-  const handleCancelLeave = () => {
-    setShowLeaveConfirm(false);
-  };
-
+  /**
+   * Updated handler: attempt to get the updated trip from the API.
+   * If the API returns nothing (204 / empty body), we set settled_at locally
+   * so UI reflects the settled state immediately.
+   */
   const handleMarkAsSettled = async (tripId: number) => {
     try {
-      await tripService.settleTrip(tripId);
-      // Refresh trips to show updated settlement status
-      loadGroupData();
+      const updatedTrip = await tripService.settleTrip(tripId).catch((err) => {
+        console.error("tripService.settleTrip error:", err);
+        return null;
+      });
+
+      // If API returns the updated trip use it, otherwise set settled_at optimistically.
+      const settlementPatch =
+        updatedTrip && updatedTrip.settled_at
+          ? updatedTrip
+          : { settled_at: new Date().toISOString() };
+
+      setTrips((prev) =>
+        prev.map((t) => (t.id === tripId ? { ...t, ...settlementPatch } : t))
+      );
     } catch (error) {
       console.error("Failed to settle trip:", error);
-      // TODO: Show error message to user
     }
   };
 
@@ -193,10 +189,10 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
       const groupMembers = await groupService.getGroupMembers(groupId);
       setMembers(groupMembers);
     } catch (error) {
-      console.error("Failed to load members:", error);
       setMembersError(
         error instanceof Error ? error.message : "Failed to load members"
       );
+      console.error("loadMembers error:", error);
     } finally {
       setLoadingMembers(false);
     }
@@ -317,7 +313,6 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        {/* Trip History Section */}
         <div className="mb-4">
           <h2>Trip History</h2>
         </div>
@@ -352,13 +347,10 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
         onOpenChange={setShowAddTrip}
         costPerDistance={group?.cost_per_distance || 0}
         groupId={parseInt(groupId)}
-        onTripCreated={() => {
-          // Refresh trips from backend after successful creation
-          loadGroupData();
-        }}
+        onTripCreated={loadGroupData}
       />
 
-      {/* Delete Group Confirmation Dialog */}
+      {/* Delete Group Confirmation */}
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent>
           <DialogHeader>
@@ -368,13 +360,6 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
               undone.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p>• All trip information will be permanently lost</p>
-              <p>• All members of the group will be automatically removed</p>
-              <p>• This action cannot be reversed</p>
-            </div>
-          </div>
           <DialogFooter>
             <Button variant="outline" onClick={handleCancelDelete}>
               Cancel
@@ -386,7 +371,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Leave Group Confirmation Dialog */}
+      {/* Leave Group Confirmation */}
       <Dialog open={showLeaveConfirm} onOpenChange={setShowLeaveConfirm}>
         <DialogContent>
           <DialogHeader>
@@ -395,13 +380,6 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
               Are you sure you want to leave this group?
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p>• You will no longer have access to group information</p>
-              <p>• You will need a new invite code to rejoin</p>
-              <p>• Your trip history in this group will remain</p>
-            </div>
-          </div>
           <DialogFooter>
             <Button variant="outline" onClick={handleCancelLeave}>
               Cancel
@@ -432,19 +410,14 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
                   key={member.id}
                   className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
                 >
-                  {/* Avatar Circle */}
                   <div className="flex items-center justify-center size-10 rounded-full bg-primary text-primary-foreground font-medium flex-shrink-0">
                     {getInitials(member)}
                   </div>
-
-                  {/* Name */}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">
                       {member.first_name} {member.last_name}
                     </p>
                   </div>
-
-                  {/* Role Badge */}
                   <Badge
                     variant={member.role === "owner" ? "default" : "secondary"}
                   >

@@ -20,14 +20,16 @@ export function TripCard({
   formatDate,
   onMarkAsSettled,
 }: TripCardProps) {
-  const [isSettled, setIsSettled] = useState(!!trip.settled_at);
   const [loading, setLoading] = useState(false);
 
+  const isSettled = !!trip.settled_at;
+
   const handleClick = async () => {
+    if (isSettled) return;
+
     setLoading(true);
     try {
       await onMarkAsSettled(trip.id);
-      setIsSettled(true); // update immediately without reloading all
     } catch (err) {
       console.error("Error marking trip as settled:", err);
     } finally {

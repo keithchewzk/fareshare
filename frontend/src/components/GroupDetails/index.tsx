@@ -1,17 +1,34 @@
-import { useState, useEffect } from 'react';
-import { Button } from '../ui/button';
-import { Card, CardContent } from '../ui/card';
-import { Badge } from '../ui/badge';
-import { ArrowLeft, Plus, Users, MapPin, MoreVertical, Trash2, LogOut, Copy, Check, CheckCircle2 } from 'lucide-react';
-import { AddTripDialog } from './AddTripDialog';
-import { groupService, Group, Membership, MemberDetails } from '../../services/groupService';
-import { tripService, TripDetails } from '../../services/tripService';
+import { useState, useEffect } from "react";
+import { Button } from "../ui/button";
+import { Card, CardContent } from "../ui/card";
+import { Badge } from "../ui/badge";
+import {
+  ArrowLeft,
+  Plus,
+  Users,
+  MapPin,
+  MoreVertical,
+  Trash2,
+  LogOut,
+  Copy,
+  Check,
+  CheckCircle2,
+} from "lucide-react";
+import { AddTripDialog } from "./AddTripDialog";
+import {
+  groupService,
+  Group,
+  Membership,
+  MemberDetails,
+} from "../../services/groupService";
+import { tripService, TripDetails } from "../../services/tripService";
+import { TripCard } from "./TripCard"; // 👈 add this import near the top
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+} from "../ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -19,11 +36,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
-import {
-  Sheet,
-  SheetContent,
-} from '../ui/sheet';
+} from "../ui/dialog";
+import { Sheet, SheetContent } from "../ui/sheet";
 
 interface User {
   id: number;
@@ -52,7 +66,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [membersError, setMembersError] = useState<string | null>(null);
 
-  const isOwner = membership?.role === 'owner';
+  const isOwner = membership?.role === "owner";
 
   useEffect(() => {
     loadGroupData();
@@ -62,16 +76,16 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
     try {
       setLoading(true);
       setError(null);
-      console.log('Loading group data for groupId:', groupId);
+      console.log("Loading group data for groupId:", groupId);
 
       // Fetch group data and user membership in parallel
       const [fetchedGroup, userMembership] = await Promise.all([
         groupService.getGroup(groupId),
-        groupService.getUserMembership(groupId)
+        groupService.getUserMembership(groupId),
       ]);
 
-      console.log('Fetched group:', fetchedGroup);
-      console.log('User membership:', userMembership);
+      console.log("Fetched group:", fetchedGroup);
+      console.log("User membership:", userMembership);
 
       setGroup(fetchedGroup);
       setMembership(userMembership);
@@ -80,31 +94,37 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
       const groupTrips = await tripService.getTrips(parseInt(groupId));
       setTrips(groupTrips);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load group data');
-      console.error('Failed to load group:', err);
+      setError(
+        err instanceof Error ? err.message : "Failed to load group data"
+      );
+      console.error("Failed to load group:", err);
     } finally {
       setLoading(false);
     }
   };
 
-
   const getUserName = (trip: TripDetails) => {
-    if (trip.user_id === user.id) return 'You';
+    if (trip.user_id === user.id) return "You";
     return `${trip.user_first_name} ${trip.user_last_name}`.trim();
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    const diffDays = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+    );
 
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
     if (diffDays < 7) return `${diffDays} days ago`;
 
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
   };
-
 
   const handleDeleteGroup = () => {
     setShowDeleteConfirm(true);
@@ -117,7 +137,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
       // Navigate back to dashboard after successful deletion
       onBack();
     } catch (error) {
-      console.error('Failed to delete group:', error);
+      console.error("Failed to delete group:", error);
       // TODO: Show error message to user
       setShowDeleteConfirm(false);
     }
@@ -146,7 +166,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
       // Navigate back to dashboard after successful leave
       onBack();
     } catch (error) {
-      console.error('Failed to leave group:', error);
+      console.error("Failed to leave group:", error);
       // TODO: Show error message to user
       setShowLeaveConfirm(false);
     }
@@ -162,7 +182,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
       // Refresh trips to show updated settlement status
       loadGroupData();
     } catch (error) {
-      console.error('Failed to settle trip:', error);
+      console.error("Failed to settle trip:", error);
       // TODO: Show error message to user
     }
   };
@@ -174,8 +194,10 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
       const groupMembers = await groupService.getGroupMembers(groupId);
       setMembers(groupMembers);
     } catch (error) {
-      console.error('Failed to load members:', error);
-      setMembersError(error instanceof Error ? error.message : 'Failed to load members');
+      console.error("Failed to load members:", error);
+      setMembersError(
+        error instanceof Error ? error.message : "Failed to load members"
+      );
     } finally {
       setLoadingMembers(false);
     }
@@ -188,12 +210,18 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
 
   const getInitials = (member: MemberDetails) => {
     const firstInitial = member.first_name.charAt(0).toUpperCase();
-    const lastInitial = member.last_name ? member.last_name.charAt(0).toUpperCase() : '';
+    const lastInitial = member.last_name
+      ? member.last_name.charAt(0).toUpperCase()
+      : "";
     return firstInitial + lastInitial;
   };
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
   }
 
   if (error) {
@@ -268,7 +296,10 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   {isOwner ? (
-                    <DropdownMenuItem onClick={handleDeleteGroup} className="text-destructive">
+                    <DropdownMenuItem
+                      onClick={handleDeleteGroup}
+                      className="text-destructive"
+                    >
                       <Trash2 className="size-4 mr-2" />
                       Delete Group
                     </DropdownMenuItem>
@@ -291,7 +322,6 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
         <div className="mb-4">
           <h2>Trip History</h2>
         </div>
-
         {trips.length === 0 ? (
           <Card className="p-12 text-center">
             <div className="inline-flex items-center justify-center size-16 rounded-full bg-muted mb-4">
@@ -305,69 +335,14 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
         ) : (
           <div className="space-y-4">
             {trips.map((trip) => (
-              <Card key={trip.id}>
-                <CardContent className="p-6">
-                  <div className="relative">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 pr-32">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-sm text-muted-foreground">
-                            {getUserName(trip)}
-                          </span>
-                          <span className="text-sm text-muted-foreground">•</span>
-                          <span className="text-sm text-muted-foreground">
-                            {formatDate(trip.created_at)}
-                          </span>
-                          {trip.settled_at && (
-                            <>
-                              <span className="text-sm text-muted-foreground">•</span>
-                              <Badge variant="secondary" className="gap-1">
-                                <CheckCircle2 className="size-3" />
-                                Settled
-                              </Badge>
-                            </>
-                          )}
-                        </div>
-                        <div className="flex items-start gap-2 mb-2">
-                          <h4 className="font-medium">{trip.name}</h4>
-                        </div>
-                        {trip.description && (
-                          <div className="text-sm text-muted-foreground mb-2">
-                            {trip.description}
-                          </div>
-                        )}
-                        <div className="flex items-start gap-2 mb-1">
-                          <MapPin className="size-4 mt-1 text-muted-foreground flex-shrink-0" />
-                          <span>{trip.stops[0]?.display_name || 'Start location'}</span>
-                        </div>
-                        <div className="flex items-start gap-2 pl-6">
-                          <span className="text-muted-foreground">→</span>
-                          <span>{trip.stops[trip.stops.length - 1]?.display_name || 'End location'}</span>
-                        </div>
-                      </div>
-                      <div className="text-right ml-4">
-                        <div className="flex items-center gap-1 mb-1">
-                          <span>${Number(trip.total_cost).toFixed(2)}</span>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {trip.total_distance.toFixed(1)} km
-                        </div>
-                      </div>
-                    </div>
-                    {!trip.settled_at && trip.user_id === user.id && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleMarkAsSettled(trip.id)}
-                        className="absolute bottom-0 right-0"
-                      >
-                        <Check className="size-4 mr-2" />
-                        Mark as Settled
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <TripCard
+                key={trip.id}
+                trip={trip}
+                currentUserId={user.id}
+                getUserName={getUserName}
+                formatDate={formatDate}
+                onMarkAsSettled={handleMarkAsSettled}
+              />
             ))}
           </div>
         )}
@@ -390,7 +365,8 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
           <DialogHeader>
             <DialogTitle>Delete Group</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this group? This action cannot be undone.
+              Are you sure you want to delete this group? This action cannot be
+              undone.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -470,7 +446,9 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
                   </div>
 
                   {/* Role Badge */}
-                  <Badge variant={member.role === 'owner' ? 'default' : 'secondary'}>
+                  <Badge
+                    variant={member.role === "owner" ? "default" : "secondary"}
+                  >
                     {member.role}
                   </Badge>
                 </div>

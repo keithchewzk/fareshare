@@ -8,7 +8,7 @@
 <h3 align="center">FareShare</h3>
 
 <p align="center">
-  Collaborative car usage tracking made simple — track, split, and settle shared vehicle expenses fairly with your group.
+  Collaborative car usage tracking made simple. Track, split, and settle shared vehicle expenses fairly with your group.
 </p>
 </div>
 

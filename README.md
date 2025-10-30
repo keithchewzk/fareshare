@@ -58,7 +58,9 @@
 
 #### Backend 
 
-[![Python][Python.js]][Python-url] [![FastAPI][FastAPI.js]][FastAPI-url] [![Pydantic][Pydantic.js]][Pydantic-url] [![SQLAlchemy][SQLAlchemy.js]][SQLAlchemy-url] [![Google Maps API][GoogleMaps.js]][GoogleMaps-url]
+<!-- Application Tools Badges -->
+[![Python][Python.js]][Python-url] [![FastAPI][FastAPI.js]][FastAPI-url] [![React][React.js]][React-url] [![TypeScript][TypeScript.js]][TypeScript-url] [![Docker][Docker.js]][Docker-url] [![PostgreSQL][PostgreSQL.js]][PostgreSQL-url] [![Google Maps API][GoogleMaps.js]][GoogleMaps-url]
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -165,6 +167,9 @@ Once you’re logged in, you can:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+
+[GoogleMaps.js]: https://img.shields.io/badge/Google_Maps-4285F4?style=for-the-badge&logo=googlemaps&logoColor=white
+[GoogleMaps-url]: https://developers.google.com/maps
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
 [React-url]: https://reactjs.org/
 [Vite.js]: https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white
@@ -175,10 +180,10 @@ Once you’re logged in, you can:
 [Python-url]: https://www.python.org/
 [FastAPI.js]: https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi
 [FastAPI-url]: https://fastapi.tiangolo.com/
-[Pydantic.js]: https://img.shields.io/badge/Pydantic-E92063?style=for-the-badge&logo=pydantic&logoColor=white
-[Pydantic-url]: https://pydantic.dev/
-[SQLAlchemy.js]: https://img.shields.io/badge/SQLAlchemy-184E77?style=for-the-badge&logo=sqlalchemy&logoColor=white
-[SQLAlchemy-url]: https://www.sqlalchemy.org/
+[Docker.js]: https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white
+[Docker-url]: https://www.docker.com/
+[PostgreSQL.js]: https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white
+[PostgreSQL-url]: https://www.postgresql.org/
 [GoogleMaps.js]: https://img.shields.io/badge/Google_Maps-4285F4?style=for-the-badge&logo=googlemaps&logoColor=white
 [GoogleMaps-url]: https://developers.google.com/maps
 [LinkedIn.badge]: https://img.shields.io/badge/-LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white

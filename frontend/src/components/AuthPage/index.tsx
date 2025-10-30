@@ -1,11 +1,17 @@
-import { useState } from 'react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { ArrowLeft, Car } from 'lucide-react';
-import { userService } from '../../services/userService';
+import { useState } from "react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { ArrowLeft, Car } from "lucide-react";
+import { userService } from "../../services/userService";
 
 interface AuthPageProps {
   onLogin: (user: { id: number; email: string; name: string }) => void;
@@ -13,22 +19,22 @@ interface AuthPageProps {
 }
 
 export function AuthPage({ onLogin, onBack }: AuthPageProps) {
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-  const [signupFirstName, setSignupFirstName] = useState('');
-  const [signupLastName, setSignupLastName] = useState('');
-  const [signupEmail, setSignupEmail] = useState('');
-  const [signupPassword, setSignupPassword] = useState('');
-  const [error, setError] = useState('');
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [signupFirstName, setSignupFirstName] = useState("");
+  const [signupLastName, setSignupLastName] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     // Client-side validation
     if (!loginEmail || !loginPassword) {
-      setError('Please fill in all fields');
+      setError("Please fill in all fields");
       return;
     }
 
@@ -42,19 +48,19 @@ export function AuthPage({ onLogin, onBack }: AuthPageProps) {
       });
 
       // Store token in localStorage for future requests
-      localStorage.setItem('fareshare_token', token);
+      localStorage.setItem("fareshare_token", token);
 
       // Create user object in the format expected by the parent
       const userForParent = {
         id: user.id,
         email: user.email,
-        name: `${user.first_name} ${user.last_name || ''}`.trim(),
+        name: `${user.first_name} ${user.last_name || ""}`.trim(),
       };
 
       // Call parent's onLogin callback to set user and navigate to dashboard
       onLogin(userForParent);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Login failed');
+      setError(error instanceof Error ? error.message : "Login failed");
     } finally {
       setIsLoading(false);
     }
@@ -62,41 +68,51 @@ export function AuthPage({ onLogin, onBack }: AuthPageProps) {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     // Client-side validation
     if (!signupFirstName || !signupEmail || !signupPassword) {
-      setError('Please fill in first name, email, and password');
+      setError("Please fill in first name, email, and password");
       return;
     }
 
     if (signupPassword.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError("Password must be at least 6 characters");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // Call the backend API to register the user
-      const newUser = await userService.register({
+      // Register the user first
+      await userService.register({
         email: signupEmail,
         password: signupPassword,
         first_name: signupFirstName,
         last_name: signupLastName || undefined,
       });
 
-      // Create user object in the format expected by the parent
-      const user = {
-        id: newUser.id.toString(),
-        email: newUser.email,
-        name: `${newUser.first_name} ${newUser.last_name || ''}`.trim(),
+      // Immediately log them in using the same credentials
+      const { user, token } = await userService.login({
+        email: signupEmail,
+        password: signupPassword,
+      });
+
+      // Store the token for authenticated requests
+      localStorage.setItem("fareshare_token", token);
+
+      // Create user object for parent
+      const userForParent = {
+        id: user.id,
+        email: user.email,
+        name: `${user.first_name} ${user.last_name || ""}`.trim(),
       };
 
-      // Call parent's onLogin callback to set user and navigate to dashboard
-      onLogin(user);
+      // Notify parent (navigates to dashboard)
+      onLogin(userForParent);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Registration failed');
+      console.error("Signup or auto-login failed:", error);
+      setError(error instanceof Error ? error.message : "Registration failed");
     } finally {
       setIsLoading(false);
     }
@@ -105,11 +121,7 @@ export function AuthPage({ onLogin, onBack }: AuthPageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Button
-          variant="ghost"
-          onClick={onBack}
-          className="mb-4"
-        >
+        <Button variant="ghost" onClick={onBack} className="mb-4">
           <ArrowLeft className="size-4 mr-2" />
           Back
         </Button>
@@ -155,11 +167,9 @@ export function AuthPage({ onLogin, onBack }: AuthPageProps) {
                       onChange={(e) => setLoginPassword(e.target.value)}
                     />
                   </div>
-                  {error && (
-                    <p className="text-destructive text-sm">{error}</p>
-                  )}
+                  {error && <p className="text-destructive text-sm">{error}</p>}
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'Logging In...' : 'Log In'}
+                    {isLoading ? "Logging In..." : "Log In"}
                   </Button>
                 </form>
               </CardContent>
@@ -220,11 +230,9 @@ export function AuthPage({ onLogin, onBack }: AuthPageProps) {
                       Must be at least 6 characters
                     </p>
                   </div>
-                  {error && (
-                    <p className="text-destructive text-sm">{error}</p>
-                  )}
+                  {error && <p className="text-destructive text-sm">{error}</p>}
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'Creating Account...' : 'Create Account'}
+                    {isLoading ? "Creating Account..." : "Create Account"}
                   </Button>
                 </form>
               </CardContent>

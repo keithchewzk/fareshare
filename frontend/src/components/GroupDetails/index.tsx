@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
-import { Card, CardContent } from "../ui/card";
+import { Card } from "../ui/card";
 import { Badge } from "../ui/badge";
 import {
   ArrowLeft,
@@ -12,7 +12,6 @@ import {
   LogOut,
   Copy,
   Check,
-  CheckCircle2,
 } from "lucide-react";
 import { AddTripDialog } from "./AddTripDialog";
 import {

@@ -21,12 +21,10 @@ export function TripCard({
   onMarkAsSettled,
 }: TripCardProps) {
   const [loading, setLoading] = useState(false);
-
   const isSettled = !!trip.settled_at;
 
   const handleClick = async () => {
     if (isSettled) return;
-
     setLoading(true);
     try {
       await onMarkAsSettled(trip.id);
@@ -39,74 +37,79 @@ export function TripCard({
 
   return (
     <Card>
-      <CardContent className="p-6">
-        <div className="relative">
-          <div className="flex items-start justify-between">
-            <div className="flex-1 pr-32">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-sm text-muted-foreground">
-                  {getUserName(trip)}
-                </span>
-                <span className="text-sm text-muted-foreground">•</span>
-                <span className="text-sm text-muted-foreground">
-                  {formatDate(trip.created_at)}
-                </span>
-                {isSettled && (
-                  <>
-                    <span className="text-sm text-muted-foreground">•</span>
-                    <Badge variant="secondary" className="gap-1">
-                      <CheckCircle2 className="size-3" />
-                      Settled
-                    </Badge>
-                  </>
-                )}
-              </div>
-
-              <div className="flex items-start gap-2 mb-2">
-                <h4 className="font-medium">{trip.name}</h4>
-              </div>
-
-              {trip.description && (
-                <div className="text-sm text-muted-foreground mb-2">
-                  {trip.description}
-                </div>
-              )}
-
-              <div className="flex items-start gap-2 mb-1">
-                <MapPin className="size-4 mt-1 text-muted-foreground flex-shrink-0" />
-                <span>{trip.stops[0]?.display_name || "Start location"}</span>
-              </div>
-              <div className="flex items-start gap-2 pl-6">
-                <span className="text-muted-foreground">→</span>
-                <span>
-                  {trip.stops[trip.stops.length - 1]?.display_name ||
-                    "End location"}
-                </span>
-              </div>
+      <CardContent className="p-6 relative">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          {/* Left content */}
+          <div className="flex-1 min-w-0 pr-4">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <span className="text-sm text-muted-foreground">
+                {getUserName(trip)}
+              </span>
+              <span className="text-sm text-muted-foreground">•</span>
+              <span className="text-sm text-muted-foreground">
+                {formatDate(trip.created_at)}
+              </span>
             </div>
 
-            <div className="text-right ml-4">
-              <div className="flex items-center gap-1 mb-1">
-                <span>${Number(trip.total_cost).toFixed(2)}</span>
+            <div className="flex flex-col gap-2 mb-2">
+              <h4 className="font-medium truncate">{trip.name}</h4>
+            </div>
+
+            {trip.description && (
+              <div className="text-sm text-muted-foreground mb-2 truncate">
+                {trip.description}
               </div>
-              <div className="text-sm text-muted-foreground">
-                {trip.total_distance.toFixed(1)} km
-              </div>
+            )}
+
+            <div className="flex items-start gap-2 mb-1">
+              <MapPin className="size-4 mt-1 text-muted-foreground flex-shrink-0" />
+              <span className="truncate">
+                {trip.stops[0]?.display_name || "Start location"}
+              </span>
+            </div>
+            <div className="flex items-start gap-2 pl-6">
+              <span className="text-muted-foreground">→</span>
+              <span className="truncate">
+                {trip.stops[trip.stops.length - 1]?.display_name ||
+                  "End location"}
+              </span>
             </div>
           </div>
 
-          {!isSettled && trip.user_id === currentUserId && (
+          {/* Right content (cost & distance) */}
+          <div className="mt-4 md:mt-0 md:ml-4 flex-shrink-0 text-right">
+            <div className="flex flex-col items-end">
+              <span className="font-medium">
+                ${Number(trip.total_cost).toFixed(2)}
+              </span>
+              <span className="text-sm text-muted-foreground">
+                {trip.total_distance.toFixed(1)} km
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Settled Badge / Mark as Settled Button */}
+        <div className="absolute bottom-4 right-4">
+          {isSettled ? (
+            <Badge
+              variant="secondary"
+              className="flex items-center gap-1 text-sm py-1 px-3"
+            >
+              <CheckCircle2 className="size-4" />
+              Settled
+            </Badge>
+          ) : trip.user_id === currentUserId ? (
             <Button
               size="sm"
               variant="outline"
               onClick={handleClick}
               disabled={loading}
-              className="absolute bottom-0 right-0"
             >
               <Check className="size-4 mr-2" />
               {loading ? "Settling..." : "Mark as Settled"}
             </Button>
-          )}
+          ) : null}
         </div>
       </CardContent>
     </Card>

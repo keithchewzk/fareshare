@@ -68,23 +68,13 @@ FareShare is currently **deployed on [Railway](https://railway.app)** and access
 
 👉 **[https://fareshare.up.railway.app/](https://fareshare.up.railway.app/)**
 
-You can try out the app directly from your browser — no setup required.  
-For local development, follow the steps below to run the project manually.
-
-### Prerequisites
-
-Before running FareShare locally, ensure you have installed:
-
-- **Node.js** and **npm** (for the frontend)
-- **Python 3.11+** and **pip**
-- **PostgreSQL**
-- **Google Maps API key**
+You can try out the app directly from your browser with no setup required.
 
 ### Environment Setup
 
 Create environment files for both the frontend and backend with your keys and local configuration.
 
-**Frontend `.env`:**
+**Frontend `.env.development`:**
 
 ```env
 VITE_BACKEND_API_URL=http://localhost:8000
@@ -101,9 +91,12 @@ SECRET_KEY=your_secret_key
 GOOGLE_MAPS_REGION_CODE=SG
 ```
 
-### Running The Project with Docker Compose
+### Running FareShare with Docker Compose
 
-From the root of the project, run:
+For local development, use **Docker Compose**. With Docker, all dependencies (Node.js, Python, PostgreSQL, etc.) are handled automatically.
+
+1. Make sure [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) are installed on your system.
+2. From the root of the project, run:
 
 ```bash
 docker compose -f docker-compose.dev.yml up -d --build
@@ -111,7 +104,7 @@ docker compose -f docker-compose.dev.yml up -d --build
 
 Access the app at: `http://localhost:3000`
 
-Access the backend FastAPI documentation at `http://localhost:8000/docs`
+Access the API documentation at `http://localhost:8000/docs`
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -179,3 +172,7 @@ Once you’re logged in, you can:
 [GitHub.url]: https://github.com/keithchewzk
 [Email.badge]: https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white
 [Email.url]: mailto:keithchewzk@gmail.com
+
+```
+
+```

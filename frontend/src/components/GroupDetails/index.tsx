@@ -156,11 +156,6 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
     }
   };
 
-  /**
-   * Updated handler: attempt to get the updated trip from the API.
-   * If the API returns nothing (204 / empty body), we set settled_at locally
-   * so UI reflects the settled state immediately.
-   */
   const handleMarkAsSettled = async (tripId: number) => {
     try {
       const updatedTrip = await tripService.settleTrip(tripId).catch((err) => {
@@ -168,7 +163,6 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
         return null;
       });
 
-      // If API returns the updated trip use it, otherwise set settled_at optimistically.
       const settlementPatch =
         updatedTrip && updatedTrip.settled_at
           ? updatedTrip
@@ -222,7 +216,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center px-4">
           <p className="text-destructive mb-4">{error}</p>
           <Button onClick={onBack}>Back to Dashboard</Button>
         </div>
@@ -233,7 +227,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
   if (!group) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center px-4">
           <p className="mb-4">Group not found</p>
           <Button onClick={onBack}>Back to Dashboard</Button>
         </div>
@@ -242,18 +236,18 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Header */}
       <header className="border-b sticky top-0 bg-background z-10">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Button variant="ghost" onClick={onBack} className="mb-4">
             <ArrowLeft className="size-4 mr-2" />
             Back to Dashboard
           </Button>
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="mb-2">{group.name}</h1>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="min-w-0">
+              <h1 className="mb-2 truncate">{group.name}</h1>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -269,7 +263,9 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
                   onClick={copyInviteCode}
                   className="h-auto p-0 hover:bg-transparent"
                 >
-                  <span className="mr-2">Code: {group.invite_code}</span>
+                  <span className="mr-2 truncate max-w-[100px] sm:max-w-none">
+                    Code: {group.invite_code}
+                  </span>
                   {copiedCode ? (
                     <Check className="size-4 text-green-600" />
                   ) : (
@@ -278,7 +274,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
                 </Button>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <Button onClick={() => setShowAddTrip(true)}>
                 <Plus className="size-4 mr-2" />
                 Add Trip
@@ -312,12 +308,12 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-4">
           <h2>Trip History</h2>
         </div>
         {trips.length === 0 ? (
-          <Card className="p-12 text-center">
+          <Card className="p-12 text-center w-full max-w-full">
             <div className="inline-flex items-center justify-center size-16 rounded-full bg-muted mb-4">
               <MapPin className="size-8 text-muted-foreground" />
             </div>
@@ -327,7 +323,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
             </p>
           </Card>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 w-full max-w-full">
             {trips.map((trip) => (
               <TripCard
                 key={trip.id}
@@ -336,6 +332,7 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
                 getUserName={getUserName}
                 formatDate={formatDate}
                 onMarkAsSettled={handleMarkAsSettled}
+                className="w-full max-w-full"
               />
             ))}
           </div>
@@ -404,11 +401,11 @@ export function GroupDetails({ user, groupId, onBack }: GroupDetailsProps) {
               <p className="text-destructive">{membersError}</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 w-full max-w-full">
               {members.map((member) => (
                 <div
                   key={member.id}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors min-w-0"
                 >
                   <div className="flex items-center justify-center size-10 rounded-full bg-primary text-primary-foreground font-medium flex-shrink-0">
                     {getInitials(member)}

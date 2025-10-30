@@ -87,42 +87,31 @@ Create environment files for both the frontend and backend with your keys and lo
 **Frontend `.env`:**
 
 ```env
-VITE_API_URL=http://localhost:8000
+VITE_BACKEND_API_URL=http://localhost:8000
 ```
 
 **Backend `.env`:**
 
 ```env
-DATABASE_URL=postgresql+psycopg2://postgres:password@localhost:5432/fareshare
+DATABASE_URL=postgresql://fareshare_user:fareshare_password@localhost:5432/fareshare
+HOST=0.0.0.0
+PORT=8000
 GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 SECRET_KEY=your_secret_key
+GOOGLE_MAPS_REGION_CODE=SG
 ```
 
-### Running The Project
+### Running The Project with Docker Compose
 
-#### Option 1: Manual Setup
-
-**Backend**
+From the root of the project, run:
 
 ```bash
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
+docker compose -f docker-compose.dev.yml up -d --build
 ```
 
-**Frontend**
+Access the app at: `http://localhost:3000`
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Access the app at: `http://localhost:5173`
-
-#### Option 2: Docker Compose (coming soon)
-
-A Docker Compose setup will be added to streamline development and deployment.
+Access the backend FastAPI documentation at `http://localhost:8000/docs`
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

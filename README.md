@@ -60,7 +60,6 @@
 
 [![Python][Python.js]][Python-url] [![FastAPI][FastAPI.js]][FastAPI-url] [![Docker][Docker.js]][Docker-url] [![PostgreSQL][PostgreSQL.js]][PostgreSQL-url] [![Google Maps API][GoogleMaps.js]][GoogleMaps-url]
 
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Getting Started
@@ -153,10 +152,11 @@ Once you’re logged in, you can:
 - [x] Trip logging and automatic cost calculation
 - [x] Settlement tracking system
 - [x] Google Maps integration
-- [ ] React Query integration
-- [ ] Decompose FE components into smaller sub-components for better code readability and fewer re-renders
+- [ ] Change of group's cost per km pricing by group owners
 - [ ] Removal of group members by group owners
+- [ ] Calculate total distance of multiple waypoints at one go
 - [ ] Refresh token capability for authentication
+- [ ] React Query integration (if and when required)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -165,7 +165,6 @@ Once you’re logged in, you can:
 [![LinkedIn][LinkedIn.badge]][LinkedIn.url] [![GitHub][GitHub.badge]][GitHub.url] [![Email][Email.badge]][Email.url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 [GoogleMaps.js]: https://img.shields.io/badge/Google_Maps-4285F4?style=for-the-badge&logo=googlemaps&logoColor=white
 [GoogleMaps-url]: https://developers.google.com/maps

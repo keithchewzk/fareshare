@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { AddressInput } from "../ui/address-input";
-import { Calculator } from "lucide-react";
+import { Calculator, Plus, X } from "lucide-react"; // Import Plus and X icons
 import { mapsService } from "../../services/mapsService";
 import { tripService, CreateTripRequest } from "../../services/tripService";
 import {
@@ -15,6 +15,13 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 
+// Define the Stop type
+interface Stop {
+  id: number; // For React list key and easy removal
+  display_name: string;
+  place_id: string | null;
+}
+
 interface AddTripDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -22,6 +29,11 @@ interface AddTripDialogProps {
   groupId: number;
   onTripCreated: () => void;
 }
+
+const initialStops: Stop[] = [
+  { id: 1, display_name: "", place_id: null }, // Start Address
+  { id: 2, display_name: "", place_id: null }, // End Address
+];
 
 export function AddTripDialog({
   open,
@@ -32,10 +44,7 @@ export function AddTripDialog({
 }: AddTripDialogProps) {
   const [tripName, setTripName] = useState("");
   const [description, setDescription] = useState("");
-  const [startAddress, setStartAddress] = useState("");
-  const [endAddress, setEndAddress] = useState("");
-  const [startPlaceId, setStartPlaceId] = useState<string | null>(null);
-  const [endPlaceId, setEndPlaceId] = useState<string | null>(null);
+  const [stops, setStops] = useState<Stop[]>(initialStops);
   const [distance, setDistance] = useState<number | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [calculationError, setCalculationError] = useState<string | null>(null);
@@ -45,21 +54,65 @@ export function AddTripDialog({
   const calculatedCost =
     distance !== null && costPerDistance ? distance * costPerDistance : null;
 
+  const handleStopChange = (
+    id: number,
+    field: "display_name" | "place_id",
+    value: string | null
+  ) => {
+    setStops((prevStops) =>
+      prevStops.map((stop) =>
+        stop.id === id
+          ? { ...stop, [field]: value === null ? null : value }
+          : stop
+      )
+    );
+    setDistance(null);
+  };
+
+  const handleAddStop = (index: number) => {
+    const newStop: Stop = {
+      id: Date.now(), // Use a unique ID (timestamp is simple)
+      display_name: "",
+      place_id: null,
+    };
+    setStops((prevStops) => {
+      const newStops = [...prevStops];
+      newStops.splice(index, 0, newStop);
+      return newStops;
+    });
+    setDistance(null);
+  };
+
+  const handleRemoveStop = (id: number) => {
+    setStops((prevStops) => prevStops.filter((stop) => stop.id !== id));
+    setDistance(null);
+  };
+
   const handleCalculateDistance = async () => {
-    if (!startPlaceId || !endPlaceId) {
+    const placeIds = stops
+      .map((stop) => stop.place_id)
+      .filter((id): id is string => id !== null);
+
+    if (placeIds.length < 2) {
       setCalculationError(
-        "Please select addresses from the dropdown suggestions"
+        "Please select a start and end address from the dropdown suggestions"
       );
       return;
     }
+
+    const hasUnselectedStop = stops.some((stop) => stop.place_id === null);
+    if (hasUnselectedStop) {
+      setCalculationError(
+        "Please ensure all addresses are selected from the dropdown suggestions"
+      );
+      return;
+    }
+
     setIsCalculating(true);
     setCalculationError(null);
 
     try {
-      const calculatedDistance = await mapsService.calculateDistance([
-        startPlaceId,
-        endPlaceId,
-      ]);
+      const calculatedDistance = await mapsService.calculateDistance(placeIds);
       setDistance(calculatedDistance);
     } catch (error) {
       console.error("Distance calculation failed:", error);
@@ -72,28 +125,34 @@ export function AddTripDialog({
   };
 
   const handleAddTrip = async () => {
+    const placeIdsValid = stops.every((stop) => stop.place_id !== null);
+
     if (
       !tripName.trim() ||
       distance === null ||
       calculatedCost === null ||
-      !startPlaceId ||
-      !endPlaceId ||
+      !placeIdsValid ||
       !costPerDistance
     ) {
+      setCreationError(
+        "Please ensure all required fields are filled and the cost is calculated."
+      );
       return;
     }
     setIsCreatingTrip(true);
     setCreationError(null);
 
     try {
+      const tripStops = stops.map((stop) => ({
+        place_id: stop.place_id as string, // We checked for null above
+        display_name: stop.display_name,
+      }));
+
       const tripData: CreateTripRequest = {
         group_id: groupId,
         name: tripName.trim(),
         description: description.trim() || undefined,
-        stops: [
-          { place_id: startPlaceId, display_name: startAddress },
-          { place_id: endPlaceId, display_name: endAddress },
-        ],
+        stops: tripStops,
         total_distance: distance,
         cost_per_distance: costPerDistance,
         total_cost: calculatedCost,
@@ -117,10 +176,7 @@ export function AddTripDialog({
     if (!open) {
       setTripName("");
       setDescription("");
-      setStartAddress("");
-      setEndAddress("");
-      setStartPlaceId(null);
-      setEndPlaceId(null);
+      setStops(initialStops); // Reset to initial two stops
       setDistance(null);
       setCalculationError(null);
       setIsCalculating(false);
@@ -129,6 +185,10 @@ export function AddTripDialog({
     }
     onOpenChange(open);
   };
+
+  // Determine if calculation is globally disabled
+  const isCalculationDisabled =
+    stops.some((stop) => !stop.place_id) || isCalculating || stops.length < 2;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -178,26 +238,71 @@ export function AddTripDialog({
 
           {/* Addresses */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="start-address">Start Address</Label>
-            <AddressInput
-              id="start-address"
-              placeholder="e.g., 123 Main St, Singapore"
-              value={startAddress}
-              onChange={setStartAddress}
-              onPlaceIdChange={setStartPlaceId}
-              className="max-w-full"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="end-address">End Address</Label>
-            <AddressInput
-              id="end-address"
-              placeholder="e.g., 456 Oak Ave, Singapore"
-              value={endAddress}
-              onChange={setEndAddress}
-              onPlaceIdChange={setEndPlaceId}
-              className="max-w-full"
-            />
+            <Label>Trip Stops</Label>
+            {stops.map((stop, index) => {
+              const isStart = index === 0;
+              const isEnd = index === stops.length - 1;
+              const isIntermediate = !isStart && !isEnd;
+
+              return (
+                <div key={stop.id} className="flex items-center gap-2">
+                  <div className="flex-1 flex flex-col gap-1">
+                    <Label className="text-sm font-normal">
+                      {isStart
+                        ? "Start Address"
+                        : isEnd
+                        ? "End Address"
+                        : `Stop ${index}`}
+                    </Label>
+                    <AddressInput
+                      id={`stop-address-${stop.id}`}
+                      placeholder={
+                        isStart
+                          ? "Start address"
+                          : isEnd
+                          ? "End address"
+                          : `Stop ${index} address`
+                      }
+                      value={stop.display_name}
+                      onChange={(value) =>
+                        handleStopChange(stop.id, "display_name", value)
+                      }
+                      onPlaceIdChange={(value) =>
+                        handleStopChange(stop.id, "place_id", value)
+                      }
+                      className="max-w-full"
+                    />
+                  </div>
+                  {/* Remove button for intermediate stops */}
+                  {isIntermediate && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveStop(stop.id)}
+                      className="mt-6 flex-shrink-0" // Align with the input
+                      title={`Remove stop ${index}`}
+                    >
+                      <X className="size-4 text-red-500" />
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
+
+            {/* Add Stop Button - placed before the last stop (End Address) */}
+            <div className="flex justify-end pt-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => handleAddStop(stops.length - 1)}
+                className="w-full justify-start text-blue-600 border-blue-300 hover:bg-blue-50"
+              >
+                <Plus className="size-4 mr-2" />
+                Add Intermediate Stop
+              </Button>
+            </div>
           </div>
 
           {/* Calculate */}
@@ -205,8 +310,8 @@ export function AddTripDialog({
             type="button"
             variant="outline"
             onClick={handleCalculateDistance}
-            disabled={!startPlaceId || !endPlaceId || isCalculating}
-            className="max-w-full"
+            disabled={isCalculationDisabled}
+            className="max-w-full mt-2"
           >
             <Calculator className="size-4 mr-2" />
             {isCalculating ? "Calculating..." : "Calculate Cost"}

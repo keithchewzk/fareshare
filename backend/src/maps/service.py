@@ -88,54 +88,12 @@ class MapsService:
             DistanceCalculation with total distance and status
         """
         try:
-            google_response = await self.google_client.calculate_route_distance(
+            total_distance = await self.google_client.calculate_route_distance(
                 place_ids
             )
-
-            total_distance = self._calculate_total_distance_from_matrix(google_response)
 
             return DistanceCalculation(total_distance=total_distance)
 
         except Exception as e:
             return DistanceCalculation(total_distance=0.0)
-
-    def _calculate_total_distance_from_matrix(
-        self, google_response: List[Dict[str, Any]]
-    ) -> float:
-        """
-        Calculate total distance from Google Routes Distance Matrix response
-
-        Args:
-            google_response: Raw response from Google Routes Distance Matrix API v2
-                            Returns a list of route elements with structure:
-                            [
-                              {
-                                "originIndex": 0,
-                                "destinationIndex": 0,
-                                "status": {},
-                                "distanceMeters": 1234,
-                                "condition": "ROUTE_EXISTS"
-                              }
-                            ]
-
-        Returns:
-            Total distance in kilometers
-        """
-        total_distance_meters = 0.0
-
-        for element in google_response:
-            condition = element.get("condition")
-            distance_meters = element.get("distanceMeters")
-
-            if distance_meters is None:
-                raise ValueError(
-                    f"Missing distance meters in response: {distance_meters}"
-                )
-            if condition is not None and condition != "ROUTE_EXISTS":
-                raise ValueError(
-                    f"Route calculation failed with condition: {condition}"
-                )
-
-            total_distance_meters += float(distance_meters)
-
-        return total_distance_meters / 1000.0
+        

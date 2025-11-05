@@ -35,6 +35,12 @@ export function TripCard({
     }
   };
 
+  const startStop = trip.stops[0];
+  const endStop = trip.stops[trip.stops.length - 1];
+
+  const intermediateStops = trip.stops.slice(1, trip.stops.length - 1);
+  const hasIntermediateStops = intermediateStops.length > 0;
+
   return (
     <Card>
       <CardContent className="p-6 relative">
@@ -61,19 +67,61 @@ export function TripCard({
               </div>
             )}
 
+            {/* --- Addresses Section --- */}
+
+            {/* 1. Start Address */}
             <div className="flex items-start gap-2 mb-1">
               <MapPin className="size-4 mt-1 text-muted-foreground flex-shrink-0" />
-              <span className="truncate">
-                {trip.stops[0]?.display_name || "Start location"}
+              <span className="truncate font-medium">
+                {startStop?.display_name || "Start location"}
               </span>
             </div>
-            <div className="flex items-start gap-2 pl-6">
-              <span className="text-muted-foreground">→</span>
-              <span className="truncate">
-                {trip.stops[trip.stops.length - 1]?.display_name ||
-                  "End location"}
+
+            {/* Connector for the first segment (only show if there are stops after start) */}
+            {trip.stops.length > 1 && (
+              <div className="flex items-start gap-2 pl-6">
+                <span className="text-muted-foreground text-xl leading-none">
+                  ↓
+                </span>
+              </div>
+            )}
+
+            {/* 2. Intermediate Stops */}
+            {hasIntermediateStops && (
+              <div className="flex flex-col gap-1">
+                {intermediateStops.map((stop, index) => (
+                  <div key={index} className="pl-6 ml-1.5 py-1">
+                    <div className="flex items-start gap-2">
+                      <span className="text-muted-foreground flex-shrink-0 text-xs mt-1">
+                        •
+                      </span>
+                      <span className="truncate text-sm">
+                        {stop.display_name}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Connector for the final segment (only show if there are stops before end) */}
+            {hasIntermediateStops && (
+              <div className="flex items-start gap-2 pl-6">
+                <span className="text-muted-foreground text-xl leading-none">
+                  ↓
+                </span>
+              </div>
+            )}
+
+            {/* 3. End Address */}
+            <div className="flex items-start gap-2 pt-1">
+              <MapPin className="size-4 mt-1 text-muted-foreground flex-shrink-0" />
+              <span className="truncate font-medium">
+                {endStop?.display_name || "End location"}
               </span>
             </div>
+
+            {/* --- End Addresses Section --- */}
           </div>
 
           {/* Right content (cost & distance) */}

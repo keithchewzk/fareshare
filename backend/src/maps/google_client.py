@@ -91,57 +91,49 @@ class GoogleMapsClient:
                 detail=f"Unexpected error calling Google Places API: {str(e)}",
             )
 
-    async def calculate_route_distance(self, place_ids: List[str]) -> Dict[str, Any]:
+    async def calculate_route_distance(self, place_ids: List[str]) -> float:
         """
-        Calculate total distance for a route using Google Routes Distance Matrix API v2
+        Calculate total distance for a multi-stop route using Google Routes API v2 (computeRoutes).
 
         Args:
-            place_ids: Ordered list of Google Place IDs for the route
+            place_ids: Ordered list of Google Place IDs for the route (Start, Stop1, ..., End).
 
         Returns:
-            Raw response from Google Routes Distance Matrix API v2
+            Extracted distance metres response from Google Routes API v2, converted to km.
 
         Raises:
-            HTTPException: If API call fails
+            HTTPException: If API call fails or minimum stops are not met.
         """
         if len(place_ids) < 2:
             raise HTTPException(
                 status_code=400, detail="Minimum 2 place IDs required for distance calculation"
             )
 
-        url = f"{self.routes_base_url}/distanceMatrix/v2:computeRouteMatrix"
+        url = f"{self.routes_base_url}/directions/v2:computeRoutes"
 
-        # For route calculation, we need to create origins and destinations
-        # For a simple route, we'll calculate distance from each point to the next
-        origins = []
-        destinations = []
+        origin_id = place_ids[0]
+        destination_id = place_ids[-1]
+        intermediate_ids = place_ids[1:-1]
 
-        # Create origin-destination pairs for sequential route calculation
-        for i in range(len(place_ids) - 1):
-            origins.append({
-                "waypoint": {
-                    "placeId": place_ids[i]
-                },
-                "routeModifiers": {"avoid_ferries": True}
-            })
-            destinations.append({
-                "waypoint": {
-                    "placeId": place_ids[i + 1]
-                }
-            })
 
         request_body = {
-            "origins": origins,
-            "destinations": destinations,
+            "origin": {
+                "placeId": origin_id
+            },
+            "destination": {
+                "placeId": destination_id
+            },
+            "intermediates": [{"placeId": id} for id in intermediate_ids],
             "travelMode": "DRIVE",
-            "routingPreference": "TRAFFIC_AWARE"
+            "routingPreference": "TRAFFIC_AWARE",
+            "languageCode": "en-US",
+            "units": "METRIC"
         }
 
-        # Headers for Routes API v2 - only request distance
         headers = {
             "Content-Type": "application/json",
             "X-Goog-Api-Key": self.api_key,
-            "X-Goog-FieldMask": "originIndex,destinationIndex,distanceMeters,status",
+            "X-Goog-FieldMask": "routes.distanceMeters",
         }
 
         try:
@@ -151,8 +143,10 @@ class GoogleMapsClient:
                 )
                 response.raise_for_status()
 
-                data = response.json()
-                return data
+                data = response.json() # e.g. {'routes': [{'distanceMeters': 59767}]}
+                distance_metres = data["routes"][0]["distanceMeters"]
+                distance_km = distance_metres / 1000
+                return distance_km
 
         except httpx.HTTPError as e:
             if hasattr(e, "response") and e.response is not None:

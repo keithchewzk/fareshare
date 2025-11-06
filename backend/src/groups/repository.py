@@ -121,6 +121,28 @@ class GroupRepository:
         except Exception:
             self.db.rollback()
             raise
+        
+    def update_distance_cost(self, user_id: int, group_id: int, cost_per_distance: Decimal) -> Group:
+        # Check if user is owner of the exisitng group
+        group = (
+            self.db.query(Group)
+            .join(Group.memberships)
+            .filter(
+                Group.id == group_id,
+                GroupMembership.user_id == user_id,
+                GroupMembership.role == "owner",
+            )
+            .first()
+        )
+        if not group:
+            raise ValueError("Group not found or user is not the owner")
+
+        group.cost_per_distance = cost_per_distance
+        self.db.commit()
+        self.db.refresh(group)
+        return group
+
+        
 
     def delete_group(self, group_id: int, owner_user_id: int) -> bool:
         """

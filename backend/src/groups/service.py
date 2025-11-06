@@ -1,6 +1,7 @@
 import random
 
 from fastapi import HTTPException
+from decimal import Decimal
 from src.groups.repository import GroupRepository
 from src.groups.schemas import (
     CreateGroup,
@@ -128,7 +129,7 @@ class GroupService:
             )
 
         self.group_repository.add_user_to_group(user_id, group.id)
-        return group
+        return Group.model_validate(group)
 
     def leave_group(self, user_id: int, group_id: int) -> None:
         """
@@ -164,6 +165,26 @@ class GroupService:
                 status_code=500,
                 detail="Failed to leave group. Please try again.",
             )
+        
+    def get_distance_cost(self, group_id: int) -> Decimal:
+        """
+        Retrieves the cost per distance of a group
+        """
+        group = self.group_repository.get_group_by_id(group_id)
+        if not group:
+            raise HTTPException(status_code=404, detail="Group not found")
+        
+        return group.cost_per_distance
+        
+    def update_distance_cost(self, user_id: int, group_id: int, cost_per_distance: Decimal) -> Group:
+        """
+        Updates the cost per distance of a group
+
+        Validates that the group exists and the user is the owner before update.
+        """
+        group = self.group_repository.update_distance_cost(user_id=user_id, group_id=group_id, cost_per_distance=cost_per_distance)
+        return Group.model_validate(group)
+        
 
     def delete_group(self, user_id: int, group_id: int) -> None:
         """

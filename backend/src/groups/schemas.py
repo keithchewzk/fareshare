@@ -63,3 +63,6 @@ class Membership(BaseModel):
 
     class Config:
         from_attributes = True
+
+class DistanceCost(BaseModel):
+    cost_per_distance: Decimal = Field(..., gt=0, description="Cost per km") 

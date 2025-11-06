@@ -7,6 +7,7 @@ from src.groups.schemas import (
     JoinGroup,
     MemberDetails,
     Membership,
+    DistanceCost
 )
 from src.groups.service import GroupService
 from src.users.dependencies import get_current_user
@@ -82,6 +83,30 @@ async def get_user_membership(
 ):
     """Get the current user's membership information for a specific group."""
     return group_service.get_user_membership(current_user.id, group_id)
+
+@router.get("/{group_id}/distance-cost", response_model=DistanceCost)
+async def get_distance_cost(
+    group_id: int,
+    _current_user: User = Depends(get_current_user),
+    group_service: GroupService = Depends(get_group_service),
+):
+    """Retrieves the current cost per distance (km) for a specific group."""
+    cost_per_distance = group_service.get_distance_cost(group_id=group_id)
+    return DistanceCost(cost_per_distance=cost_per_distance)
+
+
+@router.patch("/{group_id}/distance-cost", response_model=Group)
+async def update_distance_cost(
+    group_id: int,
+    distance_cost_data: DistanceCost,
+    current_user: User = Depends(get_current_user),
+    group_service: GroupService = Depends(get_group_service),
+):
+    """Update the current cost per distance (km) for a specific group. Only Owners can do this."""
+    cost_per_distance = distance_cost_data.cost_per_distance
+    return group_service.update_distance_cost(user_id=current_user.id, group_id=group_id, cost_per_distance=cost_per_distance)
+
+
 
 
 @router.delete("/{group_id}", status_code=204)
